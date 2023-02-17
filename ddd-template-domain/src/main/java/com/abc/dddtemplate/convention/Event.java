@@ -44,7 +44,13 @@ public class Event {
         this.nextTryTime = calculateNextTryTime(now);
     }
 
+    @Transient
+    private Object payload = null;
+
     public Object restorePayload() {
+        if(this.payload != null){
+            return this.payload;
+        }
         Class dataClass = null;
         try {
             dataClass = Class.forName(dataType);
@@ -52,14 +58,18 @@ public class Event {
             e.printStackTrace();
             log.error("事件解析错误", e);
         }
-        return JSON.parseObject(data, dataClass);
+        this.payload = JSON.parseObject(data, dataClass);
+        return this.payload;
     }
 
     public void loadPayload(Object payload) {
+        this.payload = payload;
         this.data = JSON.toJSONString(payload);
         this.dataType = payload.getClass().getName();
-        this.eventType = payload.getClass().getAnnotation(DomainEvent.class).value();
-        this.tryTimes = payload.getClass().getAnnotation(DomainEvent.class).retryTimes();
+        DomainEvent domainEvent = payload.getClass().getAnnotation(DomainEvent.class);
+        this.eventType = domainEvent.value();
+        this.tryTimes = domainEvent.retryTimes();
+        this.expireAt = DateUtils.addSeconds(this.createAt, domainEvent.expireAfter());
     }
 
 
@@ -87,19 +97,27 @@ public class Event {
     }
 
     private Date calculateNextTryTime(Date now) {
-        if (this.triedTimes <= 0) {
-            return DateUtils.addSeconds(now, 10);
-        } else if (this.triedTimes <= 3) {
-            return DateUtils.addSeconds(now, 10);
-        } else if (this.triedTimes <= 6) {
-            return DateUtils.addSeconds(now, 30);
-        } else if (this.triedTimes <= 10) {
-            return DateUtils.addSeconds(now, 60);
-        } else if (this.triedTimes <= 20) {
-            return DateUtils.addMinutes(now, 5);
-        } else {
-            return DateUtils.addMinutes(now, 10);
+        DomainEvent domainEvent = restorePayload().getClass().getAnnotation(DomainEvent.class);
+        if (Objects.isNull(restorePayload()) || Objects.isNull(domainEvent) || domainEvent.retryIntervals().length == 0) {
+            if (this.triedTimes <= 3) {
+                return DateUtils.addSeconds(now, 10);
+            } else if (this.triedTimes <= 6) {
+                return DateUtils.addSeconds(now, 30);
+            } else if (this.triedTimes <= 10) {
+                return DateUtils.addSeconds(now, 60);
+            } else if (this.triedTimes <= 20) {
+                return DateUtils.addMinutes(now, 5);
+            } else {
+                return DateUtils.addMinutes(now, 10);
+            }
         }
+        int index = this.triedTimes - 1;
+        if (index >= domainEvent.retryIntervals().length) {
+            index = domainEvent.retryIntervals().length - 1;
+        } else if (index < 0) {
+            index = 0;
+        }
+        return DateUtils.addSeconds(now, domainEvent.retryIntervals()[index]);
     }
 
     public void comfirmedDelivered() {

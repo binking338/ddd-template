@@ -29,4 +29,16 @@ public @interface DomainEvent {
      * @return
      */
     int retryTimes() default 15;
+
+    /**
+     * 重试时间间隔，单位秒
+     * @return
+     */
+    int[] retryIntervals() default {};
+
+    /**
+     * 过期时长，单位秒，默认一天
+     * @return
+     */
+    int expireAfter() default 86400;
 }

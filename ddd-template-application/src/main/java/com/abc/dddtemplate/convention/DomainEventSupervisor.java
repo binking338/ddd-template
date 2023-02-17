@@ -1,6 +1,7 @@
 package com.abc.dddtemplate.convention;
 
 import com.abc.dddtemplate.share.annotation.DomainEvent;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
@@ -17,6 +18,7 @@ import java.util.function.Function;
  * 领域事件控制器
  */
 @Service
+@Slf4j
 public class DomainEventSupervisor {
 
     public DomainEventSupervisor(
@@ -24,7 +26,6 @@ public class DomainEventSupervisor {
             ApplicationEventPublisher applicationEventPublisher,
             @Autowired(required = false) List<DomainEventSubscriber<?>> subscribers) {
         setEventPersistanceHandler(event -> eventRepository.saveAndFlush(event));
-        setEventRetrieveHandler(id -> eventRepository.findById(id).orElse(null));
         this.applicationEventPublisher = applicationEventPublisher;
         setSubscribers(subscribers);
         DomainEventPublisher.Factory.setFactoryMethord(entity -> new DefaultDomainEventPublisher(entity));
@@ -33,8 +34,7 @@ public class DomainEventSupervisor {
 
     private final ApplicationEventPublisher applicationEventPublisher;
 
-    private Consumer<Event> eventPersistanceHandler = null;
-    private Function<Long, Event> eventRetrieveHandler = null;
+    private Function<Event, Event> eventPersistanceHandler = null;
     private Map<Class<?>, List<DomainEventSubscriber<?>>> subscribersMap = new HashMap<>();
     private static DomainEventSupervisor instance;
     private static final ThreadLocal<List<Event>> threadLocalDispatchedIntergrationEvents = new ThreadLocal<>();
@@ -45,13 +45,13 @@ public class DomainEventSupervisor {
         if (CollectionUtils.isNotEmpty(domainEventPublishers)) {
             List<DefaultDomainEventPublisher> clonedPublishers = new ArrayList<>(domainEventPublishers);
             for (DefaultDomainEventPublisher publisher : clonedPublishers) {
-                List<Object> events = publisher.fireAttachedEvents(instance::dispatchOnce);
-                if(CollectionUtils.isNotEmpty(events)) {
+                List<Object> events = publisher.fireAttachedEvents(instance::dispatchRawImmediately);
+                if (CollectionUtils.isNotEmpty(events)) {
                     publishedEvents.addAll(events);
                 }
             }
         }
-        if(CollectionUtils.isNotEmpty(publishedEvents)) {
+        if (CollectionUtils.isNotEmpty(publishedEvents)) {
             return Collections.unmodifiableList(publishedEvents);
         } else {
             return Collections.emptyList();
@@ -59,10 +59,10 @@ public class DomainEventSupervisor {
     }
 
     @EventListener
-    public void onTriggerDomainEventFireEvent(UnitOfWork.TriggerDomainEventFireEvent event) {
+    private void onDomainEventFireEvent(UnitOfWork.DomainEventFireEvent event) {
         fireAttachedEvents();
         List<Event> intergrationEvents = threadLocalDispatchedIntergrationEvents.get();
-        if(CollectionUtils.isNotEmpty(intergrationEvents)) {
+        if (CollectionUtils.isNotEmpty(intergrationEvents)) {
             threadLocalDispatchedIntergrationEvents.get().clear();
             UnitOfWork.TransactionCommittedEvent transactionCommittedEvent =
                     new UnitOfWork.TransactionCommittedEvent(this, intergrationEvents);
@@ -76,7 +76,7 @@ public class DomainEventSupervisor {
      * @param event
      * @param <T>
      */
-    public <T> void dispatchOnce(T event) {
+    public <T> void dispatchRawImmediately(T event) {
         if (Objects.isNull(event)) {
             throw new NullPointerException("param event is null");
         }
@@ -87,13 +87,43 @@ public class DomainEventSupervisor {
         }
     }
 
+    /**
+     * 立即发送传入的 领域事件
+     * @param events
+     * @return
+     */
+    public int dispatchImmediately(List<Event> events) {
+        List<Event> retryEvents = new ArrayList<>(10);
+        int failedCount = 0;
+        for (Event event : events) {
+            try {
+                Date now = new Date();
+                if (!event.tryDelivery(now)) {
+                    eventPersistanceHandler.apply(event);
+                    continue;
+                } else {
+                    event = eventPersistanceHandler.apply(event);
+                    retryEvents.add(event);
+                }
+            } catch (Exception ex) {
+                // 数据库并发异常
+                failedCount ++;
+                log.error("集成事件补偿发送-持久化失败", ex);
+            }
+        }
+
+        UnitOfWork.TransactionCommittedEvent transactionCommittedEvent = new UnitOfWork.TransactionCommittedEvent(this, retryEvents);
+        applicationEventPublisher.publishEvent(transactionCommittedEvent);
+        return failedCount;
+    }
+
     private void dispatch2RemoteSubscriber(Object event) {
         Date now = new Date();
         Event intergrationEvent = new Event();
         intergrationEvent.init(now, Duration.ofDays(1), 100);
         intergrationEvent.loadPayload(event);
 
-        eventPersistanceHandler.accept(intergrationEvent);
+        eventPersistanceHandler.apply(intergrationEvent);
 
         List<Event> dispatchedEvents = threadLocalDispatchedIntergrationEvents.get();
         if (dispatchedEvents == null) {
@@ -114,12 +144,8 @@ public class DomainEventSupervisor {
         domainEventSubscribers.forEach(s -> ((DomainEventSubscriber<T>) s).onEvent(event));
     }
 
-    private void setEventPersistanceHandler(Consumer<Event> handler) {
+    private void setEventPersistanceHandler(Function<Event, Event> handler) {
         eventPersistanceHandler = handler;
-    }
-
-    private void setEventRetrieveHandler(Function<Long, Event> handler) {
-        eventRetrieveHandler = handler;
     }
 
     private void setSubscribers(List<DomainEventSubscriber<?>> subscribers) {
@@ -240,7 +266,7 @@ public class DomainEventSupervisor {
             if (events.size() == 0) {
                 removeDomainEventPublisher(this);
             }
-            if(CollectionUtils.isNotEmpty(publishedEvents)) {
+            if (CollectionUtils.isNotEmpty(publishedEvents)) {
                 return Collections.unmodifiableList(publishedEvents);
             } else {
                 return Collections.emptyList();

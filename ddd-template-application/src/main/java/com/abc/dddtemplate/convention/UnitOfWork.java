@@ -52,14 +52,14 @@ public class UnitOfWork {
     /**
      * 领域事件需要发送
      */
-    public static class TriggerDomainEventFireEvent extends ApplicationEvent {
+    public static class DomainEventFireEvent extends ApplicationEvent {
         /**
          * Create a new {@code ApplicationEvent}.
          *
          * @param source the object on which the event initially occurred or with
          *               which the event is associated (never {@code null})
          */
-        public TriggerDomainEventFireEvent(Object source){
+        public DomainEventFireEvent(Object source){
             super(source);
         }
     }
@@ -470,7 +470,7 @@ public class UnitOfWork {
         if (transactionHandler != null) {
             transactionHandler.exec();
         }
-        applicationEventPublisher.publishEvent(new TriggerDomainEventFireEvent(this));
+        applicationEventPublisher.publishEvent(new DomainEventFireEvent(this));
     }
 
     private <T> T transactionWithOutput(TransactionHandlerWithOutput<T> transactionHandler) {
@@ -479,7 +479,7 @@ public class UnitOfWork {
         if (transactionHandler != null) {
             result = transactionHandler.exec();
         }
-        applicationEventPublisher.publishEvent(new TriggerDomainEventFireEvent(this));
+        applicationEventPublisher.publishEvent(new DomainEventFireEvent(this));
         return result;
     }
 
@@ -489,7 +489,7 @@ public class UnitOfWork {
         if (transactionHandler != null) {
             result = transactionHandler.exec(in);
         }
-        applicationEventPublisher.publishEvent(new TriggerDomainEventFireEvent(this));
+        applicationEventPublisher.publishEvent(new DomainEventFireEvent(this));
         return result;
     }
 

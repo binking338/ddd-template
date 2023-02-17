@@ -180,7 +180,7 @@ CREATE TABLE `__archived_event` (
   `try_times` int(11) NOT NULL DEFAULT '0',
   `version` int(11) NOT NULL DEFAULT '0',
   `db_created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-  `db_updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  `db_updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '更新时间',
   PRIMARY KEY (`id`, `db_created_at`),
   KEY `idx_created_at` (`db_created_at`),
   KEY `idx_updated_at` (`db_updated_at`)
@@ -203,7 +203,7 @@ CREATE TABLE `__archived_saga` (
   `try_times` int(11) NOT NULL DEFAULT '0',
   `version` int(11) NOT NULL DEFAULT '0',
   `db_created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-  `db_updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  `db_updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '更新时间',
   PRIMARY KEY (`id`, `db_created_at`),
   KEY `idx_created_at` (`db_created_at`),
   KEY `idx_updated_at` (`db_updated_at`)
@@ -224,7 +224,7 @@ CREATE TABLE `__archived_saga_process` (
   `last_try_time` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `exception` varchar(255) NOT NULL DEFAULT '',
   `db_created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-  `db_updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  `db_updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '更新时间',
   PRIMARY KEY (`id`, `db_created_at`),
   KEY `idx_created_at` (`db_created_at`),
   KEY `idx_updated_at` (`db_updated_at`)

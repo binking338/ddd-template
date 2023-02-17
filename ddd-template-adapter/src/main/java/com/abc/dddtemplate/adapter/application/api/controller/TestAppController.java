@@ -79,7 +79,7 @@ public class TestAppController {
     public String domainevent(String input){
         var msg = new ExampleExternalDomainEventSubscriber.ExampleExternalDomainEvent();
         msg.setMsg(input);
-        domainEventSupervisor.dispatchOnce(msg);
+        domainEventSupervisor.dispatchRawImmediately(msg);
         return input;
     }
 

@@ -6,7 +6,6 @@ import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -15,7 +14,6 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -33,7 +31,7 @@ public class EventScheduleService {
     private boolean enabled;
 
     private final AggregateRepository<Event, Long> eventRepository;
-    private final ApplicationEventPublisher applicationEventPublisher;
+    private final DomainEventSupervisor domainEventSupervisor;
     private final LockerService lockerService;
 
     private boolean compensationRunning = false;
@@ -57,7 +55,6 @@ public class EventScheduleService {
         Duration lockDuration = Duration.ofSeconds(30);
         try {
             boolean noneEvent = false;
-            boolean existConcurrency = false;
             while (!noneEvent) {
                 try {
                     if (!lockerService.acquire(locker, pwd, lockDuration)) {
@@ -81,29 +78,8 @@ public class EventScheduleService {
                         noneEvent = true;
                         break;
                     }
-
-                    List<Event> retryEvents = new ArrayList<>(10);
-                    try {
-                        for (Event event : events) {
-                            Date now = new Date();
-                            if (!event.tryDelivery(now)) {
-                                eventRepository.save(event);
-                                continue;
-                            } else {
-                                event = eventRepository.saveAndFlush(event);
-                                retryEvents.add(event);
-                            }
-                        }
-                    } catch (Exception ex) {
-                        // 数据库并发异常
-                        existConcurrency = true;
-                        log.error("集成事件补偿发送-持久化失败", ex);
-                    }
-
-
-                    UnitOfWork.TransactionCommittedEvent transactionCommittedEvent = new UnitOfWork.TransactionCommittedEvent(this, retryEvents);
-                    applicationEventPublisher.publishEvent(transactionCommittedEvent);
-                    if (existConcurrency) {
+                    int failedCount = domainEventSupervisor.dispatchImmediately(events.toList());
+                    if (failedCount > 0) {
                         break;
                     }
                 } catch (Exception ex) {

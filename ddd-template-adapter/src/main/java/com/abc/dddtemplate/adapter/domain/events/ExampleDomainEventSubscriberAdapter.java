@@ -25,6 +25,6 @@ public class ExampleDomainEventSubscriberAdapter implements RocketMQListener<Exa
 
     @Override
     public void onMessage(ExampleExternalDomainEvent event) {
-        domainEventSupervisor.dispatchOnce(event);
+        domainEventSupervisor.dispatchRawImmediately(event);
     }
 }
