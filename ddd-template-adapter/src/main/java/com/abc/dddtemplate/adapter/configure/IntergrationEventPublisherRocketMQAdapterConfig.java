@@ -27,7 +27,7 @@ import java.util.List;
 @Slf4j
 @Configuration
 @ConditionalOnClass(DefaultMQProducer.class)
-public class IntergrationEventPublisherAdapterConfig {
+public class IntergrationEventPublisherRocketMQAdapterConfig {
     private final RocketMQTemplate rocketMQTemplate;
     private final AggregateRepository<Event, Long> eventRepository;
 
@@ -40,7 +40,7 @@ public class IntergrationEventPublisherAdapterConfig {
      * @param rocketMQTemplate
      */
     @SuppressWarnings("SpringJavaInjectionPointsAutowiringInspection")
-    public IntergrationEventPublisherAdapterConfig(
+    public IntergrationEventPublisherRocketMQAdapterConfig(
             @Autowired(required = false) RocketMQTemplate rocketMQTemplate,
             @Autowired(required = false) AggregateRepository<Event, Long> eventRepository
     ) {

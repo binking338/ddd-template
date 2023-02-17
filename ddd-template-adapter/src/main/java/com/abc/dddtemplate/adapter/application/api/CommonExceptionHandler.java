@@ -56,6 +56,20 @@ public class CommonExceptionHandler {
         private Map<String, String[]> params;
     }
 
+    @ExceptionHandler(NoHandlerFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ResponseData<Object> handleError(NoHandlerFoundException e) {
+        log.warn(String.format("404没找到请求:%s", e.getMessage()), e);
+        return ResponseData.fail(CodeEnum.NOT_FOUND);
+    }
+
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    @ResponseStatus(HttpStatus.METHOD_NOT_ALLOWED)
+    public ResponseData<Object> handleError(HttpRequestMethodNotSupportedException e) {
+        log.warn(String.format("不支持当前请求方法:%s", e.getMessage()), e);
+        return ResponseData.fail(CodeEnum.METHOD_NOT_SUPPORTED);
+    }
+
     /**
      * 参数校验异常
      *
@@ -70,9 +84,9 @@ public class CommonExceptionHandler {
         Set<ConstraintViolation<?>> constraintViolations = e.getConstraintViolations();
         for (ConstraintViolation<?> constraintViolation : constraintViolations) {
             String message = constraintViolation.getMessage();
-            return ResponseData.fail(message);
+            return ResponseData.fail(CodeEnum.PARAM_INVALIDATE.getCode(), message);
         }
-        return ResponseData.fail(e.getLocalizedMessage());
+        return ResponseData.fail(CodeEnum.PARAM_INVALIDATE.getCode(), e.getLocalizedMessage());
     }
 
     @ExceptionHandler(MissingServletRequestParameterException.class)
@@ -80,7 +94,7 @@ public class CommonExceptionHandler {
     public ResponseData<Object> handleError(MissingServletRequestParameterException e) {
         log.warn(String.format("缺少请求参数:%s", e.getMessage()), e);
         String message = String.format("缺少必要的请求参数: %s", e.getParameterName());
-        return ResponseData.fail(message);
+        return ResponseData.fail(CodeEnum.PARAM_INVALIDATE.getCode(), message);
     }
 
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
@@ -88,7 +102,7 @@ public class CommonExceptionHandler {
     public ResponseData<Object> handleError(MethodArgumentTypeMismatchException e) {
         log.warn(String.format("请求参数格式错误:%s", e.getMessage()), e);
         String message = String.format("请求参数格式错误: %s", e.getName());
-        return ResponseData.fail(message);
+        return ResponseData.fail(CodeEnum.PARAM_INVALIDATE.getCode(), message);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
@@ -105,46 +119,18 @@ public class CommonExceptionHandler {
         return ResponseData.fail(CodeEnum.PARAM_INVALIDATE.getCode(), "参数不正确");
     }
 
-    @ExceptionHandler(NoHandlerFoundException.class)
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ResponseData<Object> handleError(NoHandlerFoundException e) {
-        log.warn(String.format("404没找到请求:%s", e.getMessage()), e);
-        return ResponseData.fail(CodeEnum.NOT_FOUND);
-    }
-
     @ExceptionHandler(HttpMessageNotReadableException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ResponseData<Object> handleError(HttpServletRequest request, HttpMessageNotReadableException e) {
         log.error(String.format("消息不能读取:%s request:%s", e.getMessage(), getRequestInfo(request)), e);
-        return ResponseData.fail(CodeEnum.MESSAGE_NOT_READ);
-    }
-
-    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
-    @ResponseStatus(HttpStatus.METHOD_NOT_ALLOWED)
-    public ResponseData<Object> handleError(HttpRequestMethodNotSupportedException e) {
-        log.warn(String.format("不支持当前请求方法:%s", e.getMessage()), e);
-        return ResponseData.fail(CodeEnum.METHOD_NOT_SUPPORTED);
+        return ResponseData.fail(CodeEnum.MESSAGE_NOT_READABLE);
     }
 
     @ExceptionHandler(value = MissingRequestHeaderException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     public ResponseData<Object> headerParamException(HttpServletRequest request, MissingRequestHeaderException e) {
         log.warn(String.format("缺少header参数:%s request:%s",  e.getHeaderName(), getRequestInfo(request)), e);
-        return ResponseData.fail("缺少header参数");
-    }
-
-    @ExceptionHandler(value = ErrorException.class)
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    public ResponseData<Object> errorException(ErrorException be) {
-        log.error("发生业务错误: ", be);
-        return ResponseData.fail(be);
-    }
-
-    @ExceptionHandler(value = WarnException.class)
-    @ResponseStatus(HttpStatus.OK)
-    public ResponseData<Object> warnException(WarnException be) {
-        log.warn("发生业务警告: ", be);
-        return ResponseData.fail(be);
+        return ResponseData.fail(CodeEnum.PARAM_INVALIDATE.getCode(), "缺少header参数");
     }
 
     @ExceptionHandler(value = KnownException.class)
@@ -157,6 +143,20 @@ public class CommonExceptionHandler {
         } else if (log.isDebugEnabled()) {
             log.debug("业务失败返回: ", be);
         }
+        return ResponseData.fail(be);
+    }
+
+    @ExceptionHandler(value = WarnException.class)
+    @ResponseStatus(HttpStatus.OK)
+    public ResponseData<Object> warnException(WarnException be) {
+        log.warn("发生业务警告: ", be);
+        return ResponseData.fail(be);
+    }
+
+    @ExceptionHandler(value = ErrorException.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public ResponseData<Object> errorException(ErrorException be) {
+        log.error("发生业务错误: ", be);
         return ResponseData.fail(be);
     }
 

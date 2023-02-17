@@ -104,7 +104,6 @@ public class EventScheduleService {
                     UnitOfWork.TransactionCommittedEvent transactionCommittedEvent = new UnitOfWork.TransactionCommittedEvent(this, retryEvents);
                     applicationEventPublisher.publishEvent(transactionCommittedEvent);
                     if (existConcurrency) {
-                        log.info("集成事件补偿发送-并发退出");
                         break;
                     }
                 } catch (Exception ex) {

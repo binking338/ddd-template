@@ -14,43 +14,31 @@ public enum CodeEnum {
     /**
      * 失败
      */
-    FAIL(1001, "失败"),
+    FAIL(-1, "失败"),
     /**
-     * 不合法参数
+     * 参数错误
      */
-    PARAM_INVALIDATE(2, "不合法参数"),
+    PARAM_INVALIDATE(-2, "参数错误"),
     /**
-     * 运营后台
+     * 约束未通过
      */
-    MANAGER_TOKEN_EXPIRE(1, "登录过期，请重新登录"),
+    SPECIFICATION_UNSATISFIED(-3, "约束不满足"),
     /**
-     * 用户端
+     * 系统异常
      */
-    USER_TOKEN_EXPIRE(291, "登录过期，请重新登录"),
-    /**
-     * 未登录，请先登录
-     */
-    UN_LOGIN(1002, "未登录，请先登录"),
-    /**
-     * 消息不能读取
-     */
-    MESSAGE_NOT_READ(407, "消息不能读取"),
-    /**
-     * 不支持当前请求方法
-     */
-    METHOD_NOT_SUPPORTED(405, "不支持当前请求方法"),
+    ERROR(-9, "系统异常"),
     /**
      * 404
      */
     NOT_FOUND(404, "没找到请求"),
     /**
-     * 约束未通过
+     * 不支持当前请求方法
      */
-    SPECIFICATION_UNSATISFIED(9000, "约束不满足"),
+    METHOD_NOT_SUPPORTED(405, "不支持当前请求方法"),
     /**
-     * 系统异常
+     * 消息不能读取
      */
-    ERROR(9999, "系统异常");
+    MESSAGE_NOT_READABLE(407, "消息不能读取");
 
     private final Integer code;
     private final String value;

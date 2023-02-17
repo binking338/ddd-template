@@ -70,7 +70,6 @@ public class EurekaConfig implements ApplicationListener<WebServerInitializedEve
     @Slf4j
     public static class ServiceRegistryDownFilter extends OncePerRequestFilter {
 
-
         private static final String STATUS_DOWN = "DOWN";
         private static final String STATUS_UP = "UP";
         private static final String STATUS_PARAM = "status";

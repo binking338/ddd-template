@@ -3,12 +3,15 @@ package com.abc.dddtemplate.convention;
 import com.abc.dddtemplate.share.annotation.DomainEvent;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Scope;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 /**
  * 领域事件控制器
@@ -18,37 +21,58 @@ public class DomainEventSupervisor {
 
     public DomainEventSupervisor(
             AggregateRepository<Event, Long> eventRepository,
+            ApplicationEventPublisher applicationEventPublisher,
             @Autowired(required = false) List<DomainEventSubscriber<?>> subscribers) {
         setEventPersistanceHandler(event -> eventRepository.saveAndFlush(event));
+        setEventRetrieveHandler(id -> eventRepository.findById(id).orElse(null));
+        this.applicationEventPublisher = applicationEventPublisher;
         setSubscribers(subscribers);
         DomainEventPublisher.Factory.setFactoryMethord(entity -> new DefaultDomainEventPublisher(entity));
         instance = this;
     }
 
+    private final ApplicationEventPublisher applicationEventPublisher;
+
     private Consumer<Event> eventPersistanceHandler = null;
+    private Function<Long, Event> eventRetrieveHandler = null;
     private Map<Class<?>, List<DomainEventSubscriber<?>>> subscribersMap = new HashMap<>();
     private static DomainEventSupervisor instance;
     private static final ThreadLocal<List<Event>> threadLocalDispatchedIntergrationEvents = new ThreadLocal<>();
 
-    public static List<Event> getDispatchedIntergrationEvents() {
-        return threadLocalDispatchedIntergrationEvents.get();
-    }
-
-    public static List<Object> fireAttachedEvents() {
+    static List<Object> fireAttachedEvents() {
         List<DefaultDomainEventPublisher> domainEventPublishers = DefaultDomainEventPublisher.getDomainEventPublishers();
         List<Object> publishedEvents = new ArrayList<>();
         if (CollectionUtils.isNotEmpty(domainEventPublishers)) {
             List<DefaultDomainEventPublisher> clonedPublishers = new ArrayList<>(domainEventPublishers);
             for (DefaultDomainEventPublisher publisher : clonedPublishers) {
                 List<Object> events = publisher.fireAttachedEvents(instance::dispatchOnce);
-                publishedEvents.addAll(events);
+                if(CollectionUtils.isNotEmpty(events)) {
+                    publishedEvents.addAll(events);
+                }
             }
         }
-        return Collections.unmodifiableList(publishedEvents);
+        if(CollectionUtils.isNotEmpty(publishedEvents)) {
+            return Collections.unmodifiableList(publishedEvents);
+        } else {
+            return Collections.emptyList();
+        }
+    }
+
+    @EventListener
+    public void onTriggerDomainEventFireEvent(UnitOfWork.TriggerDomainEventFireEvent event) {
+        fireAttachedEvents();
+        List<Event> intergrationEvents = threadLocalDispatchedIntergrationEvents.get();
+        if(CollectionUtils.isNotEmpty(intergrationEvents)) {
+            threadLocalDispatchedIntergrationEvents.get().clear();
+            UnitOfWork.TransactionCommittedEvent transactionCommittedEvent =
+                    new UnitOfWork.TransactionCommittedEvent(this, intergrationEvents);
+            applicationEventPublisher.publishEvent(transactionCommittedEvent);
+        }
     }
 
     /**
      * 立即发送传入的 event 领域事件
+     *
      * @param event
      * @param <T>
      */
@@ -92,6 +116,10 @@ public class DomainEventSupervisor {
 
     private void setEventPersistanceHandler(Consumer<Event> handler) {
         eventPersistanceHandler = handler;
+    }
+
+    private void setEventRetrieveHandler(Function<Long, Event> handler) {
+        eventRetrieveHandler = handler;
     }
 
     private void setSubscribers(List<DomainEventSubscriber<?>> subscribers) {
@@ -212,7 +240,11 @@ public class DomainEventSupervisor {
             if (events.size() == 0) {
                 removeDomainEventPublisher(this);
             }
-            return Collections.unmodifiableList(publishedEvents);
+            if(CollectionUtils.isNotEmpty(publishedEvents)) {
+                return Collections.unmodifiableList(publishedEvents);
+            } else {
+                return Collections.emptyList();
+            }
         }
     }
 }

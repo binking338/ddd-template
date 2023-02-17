@@ -43,6 +43,16 @@ public class TestAppController {
         return ResponseData.success(result.getTimestamp());
     }
 
+    @GetMapping("serviceMock")
+    public ResponseData<Object> serviceMock(@RequestParam("delay") long delay){
+        try {
+            Thread.sleep(delay);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        return ResponseData.success(0);
+    }
+
     @Autowired
     DemoSagaService demoSagaService;
     @GetMapping("saga")

@@ -29,6 +29,9 @@ import java.util.stream.Collectors;
 @Slf4j
 public class UnitOfWork {
 
+    /**
+     * UoW事务成功提交事件
+     */
     public static class TransactionCommittedEvent extends ApplicationEvent {
         @Getter
         List<Event> events;
@@ -42,6 +45,22 @@ public class UnitOfWork {
         public TransactionCommittedEvent(Object source, List<Event> events) {
             super(source);
             this.events = events;
+        }
+    }
+
+
+    /**
+     * 领域事件需要发送
+     */
+    public static class TriggerDomainEventFireEvent extends ApplicationEvent {
+        /**
+         * Create a new {@code ApplicationEvent}.
+         *
+         * @param source the object on which the event initially occurred or with
+         *               which the event is associated (never {@code null})
+         */
+        public TriggerDomainEventFireEvent(Object source){
+            super(source);
         }
     }
 
@@ -451,10 +470,7 @@ public class UnitOfWork {
         if (transactionHandler != null) {
             transactionHandler.exec();
         }
-        DomainEventSupervisor.fireAttachedEvents();
-        TransactionCommittedEvent transactionCommittedEvent = new TransactionCommittedEvent(this,
-                DomainEventSupervisor.getDispatchedIntergrationEvents());
-        applicationEventPublisher.publishEvent(transactionCommittedEvent);
+        applicationEventPublisher.publishEvent(new TriggerDomainEventFireEvent(this));
     }
 
     private <T> T transactionWithOutput(TransactionHandlerWithOutput<T> transactionHandler) {
@@ -463,10 +479,7 @@ public class UnitOfWork {
         if (transactionHandler != null) {
             result = transactionHandler.exec();
         }
-        DomainEventSupervisor.fireAttachedEvents();
-        TransactionCommittedEvent transactionCommittedEvent = new TransactionCommittedEvent(this,
-                DomainEventSupervisor.getDispatchedIntergrationEvents());
-        applicationEventPublisher.publishEvent(transactionCommittedEvent);
+        applicationEventPublisher.publishEvent(new TriggerDomainEventFireEvent(this));
         return result;
     }
 
@@ -476,10 +489,7 @@ public class UnitOfWork {
         if (transactionHandler != null) {
             result = transactionHandler.exec(in);
         }
-        DomainEventSupervisor.fireAttachedEvents();
-        TransactionCommittedEvent transactionCommittedEvent = new TransactionCommittedEvent(this,
-                DomainEventSupervisor.getDispatchedIntergrationEvents());
-        applicationEventPublisher.publishEvent(transactionCommittedEvent);
+        applicationEventPublisher.publishEvent(new TriggerDomainEventFireEvent(this));
         return result;
     }
 

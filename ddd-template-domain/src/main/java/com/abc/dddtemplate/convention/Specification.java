@@ -17,7 +17,9 @@ public interface Specification<Root> {
      * 是否在事务中校验
      * @return
      */
-    boolean inTransaction();
+    default boolean inTransaction() {
+        return true;
+    }
 
     /**
      * 约束校验

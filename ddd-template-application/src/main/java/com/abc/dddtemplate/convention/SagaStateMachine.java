@@ -30,9 +30,6 @@ public abstract class SagaStateMachine<Context> {
     protected AggregateRepository<Saga, Long> sagaRepository;
     @Autowired
     Environment environment;
-    @Getter
-    @PersistenceContext
-    private EntityManager entityManager;
 
     protected String svcName;
     protected Process<Context> process;

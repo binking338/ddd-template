@@ -88,7 +88,7 @@ public class Event {
 
     private Date calculateNextTryTime(Date now) {
         if (this.triedTimes <= 0) {
-            return DateUtils.addSeconds(now, 30);
+            return DateUtils.addSeconds(now, 10);
         } else if (this.triedTimes <= 3) {
             return DateUtils.addSeconds(now, 10);
         } else if (this.triedTimes <= 6) {
@@ -220,7 +220,7 @@ public class Event {
          */
         INIT(0, "init"),
         /**
-         * 待确认发送结构
+         * 待确认发送结果
          */
         COMFIRMING(-1, "comfirming"),
         /**
