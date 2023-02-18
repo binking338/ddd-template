@@ -1,6 +1,6 @@
 package com.abc.dddtemplate.convention;
 
-import com.abc.dddtemplate.convention.annotation.SagaProcess;
+import com.abc.dddtemplate.share.annotation.SagaProcess;
 import com.alibaba.fastjson.JSON;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
@@ -13,8 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 
 import javax.annotation.PostConstruct;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import java.lang.reflect.Method;
 import java.util.*;
 import java.util.function.Consumer;
@@ -95,7 +93,8 @@ public abstract class SagaStateMachine<Context> {
                 .filter(m -> m.getAnnotation(SagaProcess.class) != null)
                 .collect(Collectors.toList());
         if (sagaProcessMethods.size() == 0) {
-            log.warn("SAGA type=[" + clazz.getTypeName() + "]没有声明任何SagaProcess方法！");
+            log.error("SAGA type=[" + clazz.getTypeName() + "]没有声明任何SagaProcess方法！");
+            throw new RuntimeException("没有声明任何SagaProcess方法！");
         }
         List<Method> startSagaProcessMethods = sagaProcessMethods.stream()
                 .filter(m -> {
@@ -105,6 +104,7 @@ public abstract class SagaStateMachine<Context> {
                 .collect(Collectors.toList());
         if (startSagaProcessMethods.size() == 0) {
             log.error("SAGA type=[" + clazz.getTypeName() + "]没有声明起始SagaProcess方法！");
+            throw new RuntimeException("没有声明起始SagaProcess方法！");
         }
         if (startSagaProcessMethods.size() == 1) {
             process = transformProcess(startSagaProcessMethods.get(0), sagaProcessMethods, sagaStateMachine);
@@ -119,15 +119,16 @@ public abstract class SagaStateMachine<Context> {
     }
 
     private Process<Context> transformProcess(Method processMethod, List<Method> allSagaProcessMethods, Object sagaStateMachine) {
-        Process<Context> process = Process.of(context -> {
+
+        SagaProcess anno = processMethod.getAnnotation(SagaProcess.class);
+        String processName = StringUtils.isNotEmpty(anno.name()) ? anno.name() : processMethod.getName();
+        Process<Context> process = Process.of(anno.code(), processName, context -> {
             try {
                 processMethod.invoke(sagaStateMachine, context);
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
         });
-        SagaProcess anno = processMethod.getAnnotation(SagaProcess.class);
-        String processName = StringUtils.isNotEmpty(anno.name()) ? anno.name() : processMethod.getName();
         List<Method> subProcessMethods = allSagaProcessMethods.stream()
                 .filter(m -> {
                     SagaProcess annoSub = m.getAnnotation(SagaProcess.class);
@@ -142,7 +143,9 @@ public abstract class SagaStateMachine<Context> {
             if (codeComp != 0) {
                 return codeComp;
             } else {
-                return StringUtils.compare(annoA.name(), annoB.name());
+                String processAName = StringUtils.isNotEmpty(annoA.name()) ? annoA.name() : a.getName();
+                String processBName = StringUtils.isNotEmpty(annoB.name()) ? annoB.name() : b.getName();
+                return StringUtils.compare(processAName, processBName);
             }
         });
         for (Method subProcessMethod : subProcessMethods) {
@@ -199,6 +202,10 @@ public abstract class SagaStateMachine<Context> {
             return null;
         }
         Saga saga = sagaOptional.get();
+        if (!this.getBizType().equals(saga.getBizType())) {
+            log.error("bizType不匹配 sagaId=" + saga.getId());
+            return null;
+        }
         saga = resume(saga);
         return saga;
     }
@@ -208,6 +215,10 @@ public abstract class SagaStateMachine<Context> {
      * @return
      */
     public Saga resume(Saga saga) {
+        if (!this.getBizType().equals(saga.getBizType())) {
+            log.error("bizType不匹配 sagaId=" + saga.getId());
+            return null;
+        }
         Date now = new Date();
         boolean started = saga.startRunning(now, DateUtils.addSeconds(now, getNextTryIdleInSeconds(saga.getTriedTimes())));
         if (!started) {
@@ -311,10 +322,18 @@ public abstract class SagaStateMachine<Context> {
             return null;
         }
         Saga saga = sagaOptional.get();
+        if (!this.getBizType().equals(saga.getBizType())) {
+            log.error("bizType不匹配 sagaId=" + saga.getId());
+            return null;
+        }
         return rollback(saga);
     }
 
     public Saga rollback(Saga saga) {
+        if (!this.getBizType().equals(saga.getBizType())) {
+            log.error("bizType不匹配 sagaId=" + saga.getId());
+            return null;
+        }
         Context context = JSON.parseObject(saga.getContextData(), getContextClass());
         saga = internalRollback(saga, context, process);
         if (!saga.getProcesses().stream().allMatch(p -> Saga.SagaState.ROLLBACKED.equals(p.getProcessState()) || Saga.SagaState.INIT.equals(p.getProcessState()))) {

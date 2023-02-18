@@ -2,7 +2,6 @@ package com.abc.dddtemplate.convention;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
 import org.apache.commons.lang3.time.DateUtils;
@@ -13,11 +12,11 @@ import org.springframework.data.domain.Sort;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 
 import java.time.Duration;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -31,9 +30,11 @@ public class SagaScheduleService {
 
     @Value("${schedule.saga.enabled:false}")
     private boolean enabled;
+    @Value("${app.id:default}")
+    private String svcName;
 
     protected final AggregateRepository<Saga, Long> sagaRepository;
-    protected final List<SagaStateMachine> sagaStateMachines;
+    protected final SagaSupervisor sagaSupervisor;
     private final LockerService lockerService;
 
     private boolean compensationRunning = false;
@@ -50,16 +51,14 @@ public class SagaScheduleService {
         }
         compensationRunning = true;
         String pwd = RandomStringUtils.random(8, true, true);
-        String locker = "saga_compensation";
-        Duration lockDuration = Duration.ofSeconds(120);
+        String locker = "saga_compensation[" + svcName + "]";
         try {
             boolean noneSaga = false;
-            Map<Integer, SagaStateMachine> sagaMap = sagaStateMachines.stream().collect(Collectors.toMap(s -> s.getBizType(), s -> s));
-            if (MapUtils.isEmpty(sagaMap)) {
+            if (CollectionUtils.isEmpty(sagaSupervisor.getSupportedBizTypes())) {
                 return;
             }
             while (!noneSaga) {
-                if (!lockerService.acquire(locker, pwd, lockDuration)) {
+                if (!lockerService.acquire(locker, pwd, Duration.ofMinutes(5))) {
                     return;
                 }
                 Date now = new Date();
@@ -69,12 +68,12 @@ public class SagaScheduleService {
                                     // 【初始状态】
                                     cb.equal(root.get("sagaState"), Saga.SagaState.INIT),
                                     cb.lessThan(root.get("nextTryTime"), now),
-                                    root.get("bizType").in(sagaMap.keySet())
+                                    root.get("bizType").in(sagaSupervisor.getSupportedBizTypes())
                             ), cb.and(
                                     // 【未知状态】
                                     cb.equal(root.get("sagaState"), Saga.SagaState.RUNNING),
                                     cb.lessThan(root.get("nextTryTime"), now),
-                                    root.get("bizType").in(sagaMap.keySet())
+                                    root.get("bizType").in(sagaSupervisor.getSupportedBizTypes())
                             )));
                     return null;
                 }, PageRequest.of(0, 10, Sort.by(Sort.Direction.ASC, "createAt")));
@@ -83,9 +82,7 @@ public class SagaScheduleService {
                     break;
                 }
                 for (Saga saga : sagas.toList()) {
-                    if (sagaMap.containsKey(saga.getBizType())) {
-                        sagaMap.get(saga.getBizType()).resume(saga);
-                    }
+                    sagaSupervisor.resume(saga);
                 }
             }
         } catch (Exception ex) {
@@ -107,16 +104,14 @@ public class SagaScheduleService {
         }
         rollbackingRunning = true;
         String pwd = RandomStringUtils.random(8, true, true);
-        String locker = "saga_rollbacking";
-        Duration lockDuration = Duration.ofSeconds(120);
+        String locker = "saga_rollbacking[" + svcName + "]";
         try {
             boolean noneSaga = false;
-            Map<Integer, SagaStateMachine> sagaMap = sagaStateMachines.stream().collect(Collectors.toMap(s -> s.getBizType(), s -> s));
-            if (MapUtils.isEmpty(sagaMap)) {
+            if (CollectionUtils.isEmpty(sagaSupervisor.getSupportedBizTypes())) {
                 return;
             }
             while (!noneSaga) {
-                if (!lockerService.acquire(locker, pwd, lockDuration)) {
+                if (!lockerService.acquire(locker, pwd, Duration.ofMinutes(5))) {
                     return;
                 }
                 Date now = new Date();
@@ -125,7 +120,7 @@ public class SagaScheduleService {
                             cb.and(
                                     // 【回滚状态】
                                     cb.equal(root.get("sagaState"), Saga.SagaState.ROLLBACKING),
-                                    root.get("bizType").in(sagaMap.keySet())
+                                    root.get("bizType").in(sagaSupervisor.getSupportedBizTypes())
 
                             ));
                     return null;
@@ -136,9 +131,7 @@ public class SagaScheduleService {
                 }
 
                 for (Saga saga : sagas.toList()) {
-                    if (sagaMap.containsKey(saga.getBizType())) {
-                        sagaMap.get(saga.getBizType()).rollback(saga);
-                    }
+                    sagaSupervisor.rollback(saga);
                 }
             }
         } catch (Exception ex) {
@@ -159,17 +152,11 @@ public class SagaScheduleService {
         }
         String pwd = RandomStringUtils.random(8, true, true);
         String locker = "event_archiving";
-        Duration lockDuration = Duration.ofHours(3);
 
         Date now = new Date();
-        boolean noneSaga = false;
-        Map<Integer, SagaStateMachine> sagaMap = sagaStateMachines.stream().collect(Collectors.toMap(s -> s.getBizType(), s -> s));
-        if (MapUtils.isEmpty(sagaMap)) {
-            return;
-        }
-        while (!noneSaga) {
+        while (true) {
             try {
-                if (!lockerService.acquire(locker, pwd, lockDuration)) {
+                if (!lockerService.acquire(locker, pwd, Duration.ofHours(1))) {
                     return;
                 }
                 Page<Saga> sagas = sagaRepository.findAll((root, cq, cb) -> {
@@ -183,13 +170,11 @@ public class SagaScheduleService {
                                             cb.equal(root.get("sagaState"), Saga.SagaState.ROLLBACKED),
                                             cb.equal(root.get("sagaState"), Saga.SagaState.DONE)
                                     ),
-                                    cb.lessThan(root.get("expireAt"), DateUtils.addDays(now, 7)),
-                                    root.get("bizType").in(sagaMap.keySet())
-                            ));
+                                    cb.lessThan(root.get("expireAt"), DateUtils.addDays(now, 7)))
+                    );
                     return null;
                 }, PageRequest.of(0, 100, Sort.by(Sort.Direction.ASC, "createAt")));
                 if (!sagas.hasContent()) {
-                    noneSaga = true;
                     break;
                 }
                 List<ArchivedSaga> archivedSagas = sagas.stream().map(s -> ArchivedSaga.builder()
@@ -229,10 +214,10 @@ public class SagaScheduleService {
 
     @Scheduled(cron = "0 0 0 * * ?")
     public void addPartition() {
-        if(!enabled){
+        if (!enabled) {
             return;
         }
-        Date now  = new Date();
+        Date now = new Date();
         addPartition("__saga", DateUtils.addMonths(now, 1));
         addPartition("__saga_process", DateUtils.addMonths(now, 1));
         addPartition("__archived_saga", DateUtils.addMonths(now, 1));
@@ -240,12 +225,13 @@ public class SagaScheduleService {
     }
 
     private final JdbcTemplate jdbcTemplate;
-    private void addPartition(String table, Date date){
+
+    private void addPartition(String table, Date date) {
         String sql = "alter table `" + table + "` add partition (partition p" + DateFormatUtils.format(date, "yyyyMM") + " values less than (to_days('" + DateFormatUtils.format(DateUtils.addMonths(date, 1), "yyyy-MM") + "-01')) ENGINE=InnoDB)";
-        try{
+        try {
             jdbcTemplate.execute(sql);
-        } catch (Exception ex){
-            if(!ex.getMessage().contains("Duplicate partition")) {
+        } catch (Exception ex) {
+            if (!ex.getMessage().contains("Duplicate partition")) {
                 log.error("分区创建异常 table = " + table + " partition = p" + DateFormatUtils.format(date, "yyyyMM"), ex);
             }
         }

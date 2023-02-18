@@ -1,7 +1,7 @@
 package com.abc.dddtemplate.application.sagas;
 
 import com.abc.dddtemplate.convention.SagaStateMachine;
-import com.abc.dddtemplate.convention.annotation.SagaProcess;
+import com.abc.dddtemplate.share.annotation.SagaProcess;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
