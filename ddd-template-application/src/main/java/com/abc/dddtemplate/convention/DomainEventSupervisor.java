@@ -81,9 +81,10 @@ public class DomainEventSupervisor {
             throw new NullPointerException("param event is null");
         }
 
-        dispatch2LocalSubscriber(event);
         if (DomainEventPublisher.isIntergrationEvent(event)) {
             dispatch2RemoteSubscriber(event);
+        } else {
+            dispatch2LocalSubscriber(event);
         }
     }
 
