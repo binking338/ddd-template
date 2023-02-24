@@ -1,4 +1,4 @@
-package com.abc.dddtemplate.adapter.configure;
+package com.abc.dddtemplate.adapter.configure.convention;
 
 import com.alibaba.fastjson.JSON;
 import com.abc.dddtemplate.convention.AggregateRepository;
