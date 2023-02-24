@@ -1,5 +1,6 @@
 package com.abc.dddtemplate.convention;
 
+import com.abc.dddtemplate.convention.aggregates.Saga;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;

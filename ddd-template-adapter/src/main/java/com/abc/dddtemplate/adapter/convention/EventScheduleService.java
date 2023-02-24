@@ -1,5 +1,10 @@
-package com.abc.dddtemplate.convention;
+package com.abc.dddtemplate.adapter.convention;
 
+import com.abc.dddtemplate.convention.AggregateRepository;
+import com.abc.dddtemplate.convention.DomainEventSupervisor;
+import com.abc.dddtemplate.convention.UnitOfWork;
+import com.abc.dddtemplate.convention.aggregates.ArchivedEvent;
+import com.abc.dddtemplate.convention.aggregates.Event;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.RandomStringUtils;

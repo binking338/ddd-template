@@ -1,5 +1,6 @@
 package com.abc.dddtemplate.convention;
 
+import com.abc.dddtemplate.convention.aggregates.Event;
 import com.abc.dddtemplate.share.CodeEnum;
 import com.abc.dddtemplate.share.exception.KnownException;
 import lombok.Getter;

@@ -1,4 +1,4 @@
-package com.abc.dddtemplate.convention;
+package com.abc.dddtemplate.convention.aggregates;
 
 import com.abc.dddtemplate.share.annotation.AggregateRoot;
 import com.alibaba.fastjson.JSON;

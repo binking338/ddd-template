@@ -2,7 +2,7 @@ package com.abc.dddtemplate.adapter.configure;
 
 import com.alibaba.fastjson.JSON;
 import com.abc.dddtemplate.convention.AggregateRepository;
-import com.abc.dddtemplate.convention.Event;
+import com.abc.dddtemplate.convention.aggregates.Event;
 import com.abc.dddtemplate.convention.UnitOfWork;
 import com.abc.dddtemplate.share.exception.ErrorException;
 import lombok.extern.slf4j.Slf4j;
@@ -60,7 +60,12 @@ public class IntergrationEventPublisherRocketMQAdapterConfig {
             return;
         }
         if (rocketMQTemplate == null) {
-            throw new ErrorException("RocketMq未配置，无法发送集成事件！");
+            for (Event event : events) {
+                event.comfirmedDelivered();
+                eventRepository.save(event);
+            }
+            return;
+            //throw new ErrorException("RocketMq未配置，无法发送集成事件！");
         }
         for (Event event : events) {
             try {

@@ -2,7 +2,7 @@ package com.abc.dddtemplate.application.commands.order;
 
 import com.abc.dddtemplate.application.sagas.PlaceOrderSagaService;
 import com.abc.dddtemplate.convention.Command;
-import com.abc.dddtemplate.convention.Saga;
+import com.abc.dddtemplate.convention.aggregates.Saga;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

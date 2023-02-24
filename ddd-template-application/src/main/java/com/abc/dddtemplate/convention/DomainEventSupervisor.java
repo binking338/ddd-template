@@ -1,5 +1,6 @@
 package com.abc.dddtemplate.convention;
 
+import com.abc.dddtemplate.convention.aggregates.Event;
 import com.abc.dddtemplate.share.annotation.DomainEvent;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;

@@ -1,5 +1,8 @@
-package com.abc.dddtemplate.convention;
+package com.abc.dddtemplate.adapter.convention;
 
+import com.abc.dddtemplate.convention.AggregateRepository;
+import com.abc.dddtemplate.convention.UnitOfWork;
+import com.abc.dddtemplate.convention.aggregates.Locker;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.time.DateUtils;
