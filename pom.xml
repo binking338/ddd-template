@@ -48,6 +48,7 @@
 
         <springdoc.version>1.6.0</springdoc.version>
         <knife4j.version>3.0.3</knife4j.version>
+        <swagger3.version>2.1.11</swagger3.version>
     </properties>
 
     <dependencyManagement>
@@ -163,6 +164,11 @@
                 <groupId>com.github.xiaoymin</groupId>
                 <artifactId>knife4j-springdoc-ui</artifactId>
                 <version>${knife4j.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.swagger.core.v3</groupId>
+                <artifactId>swagger-annotations</artifactId>
+                <version>${swagger3.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

@@ -1,5 +1,6 @@
 package com.abc.dddtemplate.adapter.application.api.controller;
 
+import com.abc.dddtemplate.adapter.configure.orika.DemoA2BCustomMapper;
 import com.abc.dddtemplate.application.sagas.DemoAnnotationSaga;
 import com.abc.dddtemplate.application.sagas.DemoSagaService;
 import com.abc.dddtemplate.application.subscribers.external.ExampleExternalDomainEventSubscriber;
@@ -8,6 +9,8 @@ import com.abc.dddtemplate.convention.SagaSupervisor;
 import com.abc.dddtemplate.share.dto.ResponseData;
 import com.abc.dddtemplate.external.clients.SysTime;
 import com.abc.dddtemplate.external.clients.TimeServiceClient;
+import com.abc.dddtemplate.share.util.MapperUtil;
+import com.alibaba.fastjson.JSON;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import lombok.var;
@@ -75,12 +78,18 @@ public class TestAppController {
 
     @Autowired
     DomainEventSupervisor domainEventSupervisor;
-    @GetMapping("de")
+    @GetMapping("domainEvent")
     public String domainevent(String input){
         var msg = new ExampleExternalDomainEventSubscriber.ExampleExternalDomainEvent();
         msg.setMsg(input);
         domainEventSupervisor.dispatchRawImmediately(msg);
         return input;
+    }
+
+    @PostMapping("mapper")
+    public String mapper(@RequestBody DemoA2BCustomMapper.A a){
+        DemoA2BCustomMapper.B b = MapperUtil.map(a, DemoA2BCustomMapper.B.class);
+        return JSON.toJSONString(b);
     }
 
 }

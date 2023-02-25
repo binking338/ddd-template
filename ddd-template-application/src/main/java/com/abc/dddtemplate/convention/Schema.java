@@ -9,7 +9,7 @@ import javax.persistence.criteria.Predicate;
 /**
  * Schema
  *
- * @author <template>
+ * @author <template/>
  * @date
  */
 public class Schema {

@@ -153,7 +153,7 @@ public class UnitOfWork {
                                 getEntityManager().flush();
                                 continue;
                             }
-                        } catch (Exception _) {
+                        } catch (Exception _ex) {
                             /* we don't care */
                         }
                         getEntityManager().persist(entity);
