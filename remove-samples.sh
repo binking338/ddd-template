@@ -3,11 +3,11 @@
 rm -f ./*-adapter/src/main/java/com/abc/*/adapter/external/**/*.java
 rm -f ./*-adapter/src/main/java/com/abc/*/adapter/external/clients/rest/ServiceMockRest.java
 rm -f ./*-adapter/src/main/java/com/abc/*/adapter/domain/**/*.java
-rm -f ./*-adapter/src/main/java/com/abc/*/adapter/application/api/controller/app/AccountController.java
-rm -f ./*-adapter/src/main/java/com/abc/*/adapter/application/api/controller/app/BillController.java
-rm -f ./*-adapter/src/main/java/com/abc/*/adapter/application/api/controller/app/OrderController.java
-rm -f ./*-adapter/src/main/java/com/abc/*/adapter/application/jobs/*.java
-rm -f ./*-adapter/src/main/java/com/abc/*/adapter/application/queues/*.java
+rm -f ./*-adapter/src/main/java/com/abc/*/adapter/portal/api/controller/app/AccountController.java
+rm -f ./*-adapter/src/main/java/com/abc/*/adapter/portal/api/controller/app/BillController.java
+rm -f ./*-adapter/src/main/java/com/abc/*/adapter/portal/api/controller/app/OrderController.java
+rm -f ./*-adapter/src/main/java/com/abc/*/adapter/portal/jobs/*.java
+rm -f ./*-adapter/src/main/java/com/abc/*/adapter/portal/queues/*.java
 
 rm -f ./*-application/src/main/java/com/abc/*/convention/schemas/*.java
 rm -f ./*-application/src/main/java/com/abc/*/application/**/*.java

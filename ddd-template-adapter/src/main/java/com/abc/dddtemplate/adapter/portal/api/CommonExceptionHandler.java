@@ -1,4 +1,4 @@
-package com.abc.dddtemplate.adapter.application.api;
+package com.abc.dddtemplate.adapter.portal.api;
 
 import com.alibaba.fastjson.JSON;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;

@@ -1,4 +1,4 @@
-package com.abc.dddtemplate.adapter.application.api.controller;
+package com.abc.dddtemplate.adapter.portal.api.controller;
 
 import com.abc.dddtemplate.share.dto.ResponseData;
 import com.abc.dddtemplate.application.commands.bill.PayBillCmd;

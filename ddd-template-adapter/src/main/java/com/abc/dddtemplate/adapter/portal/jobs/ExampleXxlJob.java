@@ -1,4 +1,4 @@
-package com.abc.dddtemplate.adapter.application.jobs;
+package com.abc.dddtemplate.adapter.portal.jobs;
 
 import com.xxl.job.core.handler.annotation.XxlJob;
 import lombok.extern.slf4j.Slf4j;

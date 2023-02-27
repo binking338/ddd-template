@@ -1,4 +1,4 @@
-package com.abc.dddtemplate.adapter.domain.events;
+package com.abc.dddtemplate.adapter.domain.subscribers;
 
 import com.abc.dddtemplate.convention.DomainEventSupervisor;
 import com.abc.dddtemplate.application.subscribers.external.ExampleExternalDomainEventSubscriber.ExampleExternalDomainEvent;

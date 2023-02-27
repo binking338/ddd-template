@@ -1,4 +1,4 @@
-package com.abc.dddtemplate.adapter.application.queues;
+package com.abc.dddtemplate.adapter.portal.queues;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.rocketmq.spring.annotation.RocketMQMessageListener;
