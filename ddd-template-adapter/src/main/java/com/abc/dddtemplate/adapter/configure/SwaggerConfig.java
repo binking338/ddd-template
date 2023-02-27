@@ -23,20 +23,32 @@ public class SwaggerConfig implements ApplicationListener<WebServerInitializedEv
     private String applicationName;
     @Value("${spring.application.version:1.0.0}")
     private String applicationVersion;
-    @Value("${springdoc.packagesToScan}")
-    private String[] packagesToScan;
 
-    @Bean
-    public GroupedOpenApi groupedOpenApi() {
-        String[] paths = {"/**"};
-        return GroupedOpenApi.builder()
-                .group(applicationName)
-                .pathsToMatch(paths)
-                .packagesToScan(packagesToScan)
-                .addOperationCustomizer((operation, handlerMethod) -> operation)
-                .build();
-    }
+//    /**
+//     * 用于多个文档情形
+//     * @return
+//     */
+//    @Bean
+//    public GroupedOpenApi groupedOpenApi() {
+//        String[] paths = {"/**"};
+//        return GroupedOpenApi.builder()
+//                .group(applicationName)
+//                .pathsToMatch(paths)
+//                .packagesToScan("com.abc.dddtemplate.adapter.portal.api.controller")
+//                .addOperationCustomizer((operation, handlerMethod) -> operation)
+//                .addOpenApiCustomiser(openApi -> openApi.info(new Info()
+//                        .title(applicationName)
+//                        .version(applicationVersion) ))
+//                .build();
+//    }
 
+    /**
+     * 用于单个文档情形
+     * 可配置项
+     * springdoc.packagesToScan=package1, package2
+     * springdoc.pathsToMatch=/v1, /api/balance/**
+     * @return
+     */
     @Bean
     public OpenAPI openAPI() {
         return new OpenAPI()
@@ -50,11 +62,9 @@ public class SwaggerConfig implements ApplicationListener<WebServerInitializedEv
     private String serverPort;
     @Value("${server.servlet.context-path:/}")
     private String serverServletContentPath;
-    @Value("${springdoc.swagger-ui.path:/index.html}")
-    private String swaggeruiPath;
 
     @Override
     public void onApplicationEvent(WebServerInitializedEvent webServerInitializedEvent) {
-        log.info("swagger URL: http://localhost:" + serverPort + serverServletContentPath + "/swagger-ui" + swaggeruiPath);
+        log.info("swagger URL: http://localhost:" + serverPort + serverServletContentPath + "/swagger-ui/index.html");
     }
 }

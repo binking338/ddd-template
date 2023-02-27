@@ -1,4 +1,4 @@
-package com.abc.dddtemplate.adapter.configure;
+package com.abc.dddtemplate.adapter.portal.api;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;

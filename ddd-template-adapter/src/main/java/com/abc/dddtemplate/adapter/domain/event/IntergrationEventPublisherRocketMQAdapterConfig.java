@@ -1,4 +1,4 @@
-package com.abc.dddtemplate.adapter.domain.convention;
+package com.abc.dddtemplate.adapter.domain.event;
 
 import com.alibaba.fastjson.JSON;
 import com.abc.dddtemplate.convention.AggregateRepository;
