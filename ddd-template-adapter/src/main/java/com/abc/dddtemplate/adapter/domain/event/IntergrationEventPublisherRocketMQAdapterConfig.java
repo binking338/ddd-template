@@ -53,7 +53,7 @@ public class IntergrationEventPublisherRocketMQAdapterConfig {
      *
      * @param transactionCommittedEvent
      */
-    @TransactionalEventListener(fallbackExecution = true)
+    @TransactionalEventListener(fallbackExecution = true, classes = UnitOfWork.TransactionCommittedEvent.class)
     public void publishEventByRocketMqAfterTransactionCommit(UnitOfWork.TransactionCommittedEvent transactionCommittedEvent) {
         List<Event> events = transactionCommittedEvent.getEvents();
         if (CollectionUtils.isEmpty(events)) {
