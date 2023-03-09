@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
  * @date 2023-02-25
  */
 @Component
-public class DemoA2BCustomMapper extends OrikaMapper.CustomMapperAutoConfiguration<DemoA2BCustomMapper.A, DemoA2BCustomMapper.B> {
+public class DemoCustomMapper extends OrikaMapper.CustomMapperAutoConfiguration<DemoCustomMapper.A, DemoCustomMapper.B> {
 
     @Override
     public void mapAtoB(A a, B b, MappingContext context) {
