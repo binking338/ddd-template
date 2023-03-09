@@ -1,6 +1,7 @@
 package com.abc.dddtemplate.adapter.portal.api.controller;
 
 import com.abc.dddtemplate.adapter.configure.orika.DemoA2BCustomMapper;
+import com.abc.dddtemplate.adapter.configure.orika.DemoC2DCustomMapperBuilder;
 import com.abc.dddtemplate.application.sagas.DemoAnnotationSaga;
 import com.abc.dddtemplate.application.sagas.DemoSagaService;
 import com.abc.dddtemplate.application.subscribers.external.ExampleExternalDomainEventSubscriber;
@@ -86,10 +87,16 @@ public class TestAppController {
         return input;
     }
 
-    @PostMapping("mapper")
-    public String mapper(@RequestBody DemoA2BCustomMapper.A a){
+    @PostMapping("mapperA2B")
+    public String mapperA2B(@RequestBody DemoA2BCustomMapper.A a){
         DemoA2BCustomMapper.B b = MapperUtil.map(a, DemoA2BCustomMapper.B.class);
         return JSON.toJSONString(b);
+    }
+
+    @PostMapping("mapperC2D")
+    public String mapperC2D(@RequestBody DemoC2DCustomMapperBuilder.C c){
+        DemoC2DCustomMapperBuilder.D d = MapperUtil.map(c, DemoC2DCustomMapperBuilder.D.class);
+        return JSON.toJSONString(d);
     }
 
 }

@@ -1,6 +1,5 @@
 package com.abc.dddtemplate.adapter.configure.orika;
 
-import lombok.RequiredArgsConstructor;
 import ma.glasnost.orika.*;
 import ma.glasnost.orika.impl.ConfigurableMapper;
 import ma.glasnost.orika.impl.DefaultMapperFactory;
@@ -158,9 +157,11 @@ public class OrikaMapper extends ConfigurableMapper {
             mapperFactory.registerMapper(this);
         }
 
-        public abstract void mapAtoB(DemoA2BCustomMapper.A a, DemoA2BCustomMapper.B b, MappingContext context);
+        @Override
+        public abstract void mapAtoB(S a, D b, MappingContext context);
 
-        public abstract void mapBtoA(DemoA2BCustomMapper.B b, DemoA2BCustomMapper.A a, MappingContext context);
+        @Override
+        public abstract void mapBtoA(D b, S a, MappingContext context);
     }
 
     /**
@@ -188,9 +189,11 @@ public class OrikaMapper extends ConfigurableMapper {
         public void apply(MapperFactory mapperFactory) {
             this.mapperFactory = mapperFactory;
             ClassMapBuilder<S, D> classMapBuilder = mapperFactory.classMap(srcClass, destClass);
+            classMapBuilder.byDefault();
             configure(classMapBuilder, mapperFactory);
             classMapBuilder.register();
             ClassMapBuilder<D, S> reverseClassMapBuilder = mapperFactory.classMap(destClass, srcClass);
+            reverseClassMapBuilder.byDefault();
             configureReverse(reverseClassMapBuilder, mapperFactory);
             reverseClassMapBuilder.register();
         }
