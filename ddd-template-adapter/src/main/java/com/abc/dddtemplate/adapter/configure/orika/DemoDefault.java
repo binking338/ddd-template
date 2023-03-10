@@ -3,7 +3,7 @@ package com.abc.dddtemplate.adapter.configure.orika;
 import lombok.Data;
 
 /**
- * @author qiaohe
+ * @author <template/>
  * @date 2023-03-09
  */
 public class DemoDefault {

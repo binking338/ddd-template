@@ -28,7 +28,7 @@ import java.util.Objects;
 
 /**
  * 自动监听集成事件对应的RocketMQ
- * @author qiaohe
+ * @author <template/>
  * @date 2023-02-28
  */
 @Configuration

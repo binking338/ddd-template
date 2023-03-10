@@ -59,6 +59,10 @@ public class DomainEventSupervisor {
         }
     }
 
+    public static void clearDispatchedIntergrationEvents(){
+        threadLocalDispatchedIntergrationEvents.remove();
+    }
+
     @EventListener
     private void onDomainEventFireEvent(UnitOfWork.DomainEventFireEvent event) {
         fireAttachedEvents();

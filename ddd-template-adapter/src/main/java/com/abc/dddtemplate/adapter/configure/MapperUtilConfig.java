@@ -10,7 +10,7 @@ import org.springframework.context.annotation.Configuration;
 import java.util.List;
 
 /**
- * @author qiaohe
+ * @author <template/>
  * @date 2023-02-25
  */
 @Configuration

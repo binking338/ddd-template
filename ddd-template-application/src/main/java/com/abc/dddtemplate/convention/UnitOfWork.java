@@ -95,6 +95,16 @@ public class UnitOfWork {
     private ConcurrentHashMap<Class, List<Specification>> specificationsClassMap = new ConcurrentHashMap<>();
     private ThreadLocal<Map<Object, Boolean>> preValidatedThreadLocal = ThreadLocal.withInitial(() -> new HashMap<>());
     private ThreadLocal<Map<Object, Boolean>> postValidatedThreadLocal = ThreadLocal.withInitial(() -> new HashMap<>());
+    private ThreadLocal<Integer> stackDepthCounterThreadLocal = ThreadLocal.withInitial(() -> 0);
+
+    /**
+     * 移除上下文
+     */
+    public void clear(){
+        preValidatedThreadLocal.remove();
+        postValidatedThreadLocal.remove();
+        stackDepthCounterThreadLocal.remove();
+    }
 
     /**
      * 事务删除
@@ -238,6 +248,7 @@ public class UnitOfWork {
      */
     public <T> T save(TransactionHandlerWithInputOutput<DomainEventPublisher, T> transactionHandler, Propagation propagation) {
         T result = null;
+        stackDepthCounterThreadLocal.set(stackDepthCounterThreadLocal.get() + 1);
         preValidSpecifications();
         switch (propagation) {
             case SUPPORTS:
@@ -262,6 +273,11 @@ public class UnitOfWork {
             default:
                 result = instance.required(transactionHandler, DomainEventPublisher.Factory.create(null));
                 break;
+        }
+        stackDepthCounterThreadLocal.set(stackDepthCounterThreadLocal.get() - 1);
+        if(stackDepthCounterThreadLocal.get().equals(0)){
+            preValidatedThreadLocal.get().clear();
+            postValidatedThreadLocal.get().clear();
         }
         return result;
     }
@@ -334,6 +350,13 @@ public class UnitOfWork {
             }
             postValidatedThreadLocal.get().putIfAbsent(entity, true);
         }
+    }
+
+    /**
+     * 清除上下文
+     */
+    public static void clearContext(){
+        instance.clear();
     }
 
     /**
