@@ -1,7 +1,7 @@
 package com.abc.dddtemplate.adapter.external.reports;
 
 import com.abc.dddtemplate.adapter.domain.repositories.OrderRepository;
-import com.abc.dddtemplate.external.reports.OrderReport;
+import com.abc.dddtemplate.application.queries.SearchOrderQry;
 import com.abc.dddtemplate.share.dto.PageData;
 import com.abc.dddtemplate.share.dto.PageParam;
 import lombok.RequiredArgsConstructor;
@@ -14,11 +14,11 @@ import org.springframework.stereotype.Service;
  */
 @Service
 @RequiredArgsConstructor
-public class OrderReportFacadeImpl implements OrderReport.Facade {
+public class OrderReportHandlerImpl implements SearchOrderQry.OrderReport.Handler {
     private final OrderRepository orderRepository;
     @Override
-    public PageData<OrderReport> search(String owner, String key, PageParam page) {
-        Page<OrderReport> result = orderRepository.search(owner, key, page.toSpringData());
+    public PageData<SearchOrderQry.OrderReport> search(String owner, String key, PageParam page) {
+        Page<SearchOrderQry.OrderReport> result = orderRepository.search(owner, key, page.toSpringData());
         return PageData.fromSpringData(result);
     }
 }

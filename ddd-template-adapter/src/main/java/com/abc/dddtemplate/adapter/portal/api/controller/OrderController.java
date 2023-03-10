@@ -5,7 +5,6 @@ import com.abc.dddtemplate.share.dto.ResponseData;
 import com.abc.dddtemplate.application.commands.order.CloseOrderCmd;
 import com.abc.dddtemplate.application.commands.order.PlaceOrderCmd;
 import com.abc.dddtemplate.application.queries.SearchOrderQry;
-import com.abc.dddtemplate.external.reports.OrderReport;
 import com.abc.dddtemplate.share.dto.PageData;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
@@ -27,7 +26,7 @@ public class OrderController {
     SearchOrderQry.Handler searchOrderQry;
 
     @PostMapping("search")
-    public ResponseData<PageData<OrderReport>> search(@RequestBody SearchOrderQry param) {
+    public ResponseData<PageData<SearchOrderQry.OrderReport>> search(@RequestBody SearchOrderQry param) {
         var query = searchOrderQry.exec(param);
         return ResponseData.success(query);
     }

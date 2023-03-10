@@ -33,10 +33,6 @@ import javax.persistence.*;
 @Getter
 public class Bill extends BaseEntity {
 
-    public void attach(Order order) {
-        this.orderId = order.getId();
-    }
-
     public void pay(Integer amount) {
         if (!this.getClosed() && !this.getPayed() && this.getAmount() <= amount) {
             payed = true;

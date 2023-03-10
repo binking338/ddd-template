@@ -16,9 +16,21 @@ import org.springframework.stereotype.Service;
  */
 @Data
 public class ChargeAccountCmd {
+    /**
+     * 账户Id
+     */
     Long accountId;
+    /**
+     * 账户名称
+     */
     String accountName;
+    /**
+     * 转账编号
+     */
     String transferNo;
+    /**
+     * 金额
+     */
     Integer amount;
 
     @Service

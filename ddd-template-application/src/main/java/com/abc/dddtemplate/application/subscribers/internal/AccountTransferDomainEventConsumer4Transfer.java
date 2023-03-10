@@ -1,5 +1,6 @@
 package com.abc.dddtemplate.application.subscribers.internal;
 
+import com.abc.dddtemplate.application.commands.account.RecordTransferCmd;
 import com.abc.dddtemplate.domain.aggregates.samples.Transfer;
 import com.abc.dddtemplate.domain.events.internal.AccountTransferDomainEvent;
 import com.abc.dddtemplate.convention.AggregateRepository;
@@ -16,8 +17,7 @@ import java.util.Date;
 @Service
 @RequiredArgsConstructor
 public class AccountTransferDomainEventConsumer4Transfer implements DomainEventSubscriber<AccountTransferDomainEvent> {
-    private final AggregateRepository<Transfer, Long> transferRepository;
-    private final UnitOfWork unitOfWork;
+    private final RecordTransferCmd.Handler handler;
 
     @Override
     public Class<AccountTransferDomainEvent> forEventClass() {
@@ -26,15 +26,12 @@ public class AccountTransferDomainEventConsumer4Transfer implements DomainEventS
 
     @Override
     public void onEvent(AccountTransferDomainEvent event) {
-        Transfer transfer = Transfer.builder()
+        handler.exec(RecordTransferCmd.builder()
                 .accountId(event.getAccountId())
                 .time(new Date())
                 .bizType(event.getBizType())
                 .bizId(event.getBizId())
                 .amount(event.getAmount())
-                .build();
-        unitOfWork.required(() -> {
-            transferRepository.save(transfer);
-        });
+                .build());
     }
 }

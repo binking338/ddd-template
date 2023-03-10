@@ -1,6 +1,7 @@
 package com.abc.dddtemplate.application.subscribers.internal;
 
 
+import com.abc.dddtemplate.application.commands.order.CompleteOrderCmd;
 import com.abc.dddtemplate.domain.aggregates.samples.Order;
 import com.abc.dddtemplate.domain.events.BillPaidDomainEvent;
 import com.abc.dddtemplate.share.exception.ErrorException;
@@ -17,7 +18,7 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class BillPaiedDomainEventSubscriber4Order implements DomainEventSubscriber<BillPaidDomainEvent> {
-    private final AggregateRepository<Order, Long> orderRepository;
+    private final CompleteOrderCmd.Handler completedOrderCmdHandler;
 
     @Override
     public Class<BillPaidDomainEvent> forEventClass() {
@@ -26,12 +27,6 @@ public class BillPaiedDomainEventSubscriber4Order implements DomainEventSubscrib
 
     @Override
     public void onEvent(BillPaidDomainEvent event) {
-        Order order = orderRepository.findById(event.getBill().getOrderId())
-                .orElseThrow(()->new ErrorException("订单丢失"));
-        order.finish();
-        UnitOfWork.saveTransactional(()->{
-            orderRepository.save(order);
-        });
-
+        completedOrderCmdHandler.exec(CompleteOrderCmd.builder().orderId(event.getBill().getOrderId()).build());
     }
 }

@@ -1,5 +1,6 @@
 package com.abc.dddtemplate.application.subscribers.internal;
 
+import com.abc.dddtemplate.application.commands.bill.CloseBillCmd;
 import com.abc.dddtemplate.convention.schemas.BillSchema;
 import com.abc.dddtemplate.domain.aggregates.samples.Bill;
 import com.abc.dddtemplate.domain.events.internal.OrderClosedDomainEvent;
@@ -17,8 +18,7 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class OrderClosedDomainEventSubscriber4Bill implements DomainEventSubscriber<OrderClosedDomainEvent> {
-    private final AggregateRepository<Bill, Long> billRepository;
-    private final UnitOfWork unitOfWork;
+    private final CloseBillCmd.Handler handler;
 
     @Override
     public Class<OrderClosedDomainEvent> forEventClass() {
@@ -27,13 +27,8 @@ public class OrderClosedDomainEventSubscriber4Bill implements DomainEventSubscri
 
     @Override
     public void onEvent(OrderClosedDomainEvent event) {
-        Bill bill = billRepository.findOne(BillSchema.specify(b -> b.orderId().eq(event.getOrder().getId())))
-                .orElseThrow(() -> new ErrorException("账单丢失"));
-        bill.close();
-        UnitOfWork.saveTransactional(() -> {
-            billRepository.save(bill);
-            // throw new WarnException("测试UnitOfWork的静态方法实现");
-            return null;
-        });
+        handler.exec(CloseBillCmd.builder()
+                .orderId( event.getOrder().getId())
+                .build());
     }
 }

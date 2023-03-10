@@ -15,6 +15,9 @@ import org.springframework.stereotype.Service;
  */
 @Data
 public class OpenAccountCmd {
+    /**
+     * 账户名称
+     */
     private String name;
 
     @Service

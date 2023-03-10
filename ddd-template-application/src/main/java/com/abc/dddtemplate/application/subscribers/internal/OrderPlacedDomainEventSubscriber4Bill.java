@@ -1,6 +1,7 @@
 package com.abc.dddtemplate.application.subscribers.internal;
 
 
+import com.abc.dddtemplate.application.commands.bill.BillingCmd;
 import com.abc.dddtemplate.domain.aggregates.samples.Bill;
 import com.abc.dddtemplate.domain.events.internal.OrderPlacedDomainEvent;
 import com.abc.dddtemplate.convention.AggregateRepository;
@@ -9,11 +10,13 @@ import com.abc.dddtemplate.convention.UnitOfWork;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+/**
+ * 下订单事件
+ */
 @Service
 @RequiredArgsConstructor
 public class OrderPlacedDomainEventSubscriber4Bill implements DomainEventSubscriber<OrderPlacedDomainEvent> {
-    private final AggregateRepository<Bill, Long> billRepository;
-    private final UnitOfWork unitOfWork;
+    private final BillingCmd.Handler handler;
 
     @Override
     public Class<OrderPlacedDomainEvent> forEventClass() {
@@ -22,17 +25,11 @@ public class OrderPlacedDomainEventSubscriber4Bill implements DomainEventSubscri
 
     @Override
     public void onEvent(OrderPlacedDomainEvent event) {
-
-        Bill bill = Bill.builder()
+        handler.exec(BillingCmd.builder()
                 .orderId(event.getOrder().getId())
                 .name(event.getOrder().getName())
                 .amount(event.getOrder().getAmount())
-                .build();
-        unitOfWork.save(bill);
-//            unitOfWork.required(() -> {
-//                billRepository.save(bill);
-//                // throw new WarnException("测试UnitOfWork的实例方法实现");
-//                return null;
-//            });
+                .owner(event.getOrder().getOwner())
+        .build());
     }
 }
