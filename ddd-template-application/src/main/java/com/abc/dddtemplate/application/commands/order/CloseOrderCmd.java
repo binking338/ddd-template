@@ -22,7 +22,7 @@ public class CloseOrderCmd implements Command<Long, Boolean> {
 
     @Override
     public Boolean exec(Long id) {
-        Order order =  unitOfWork.required(() ->  orderRepository.findById(id).orElse(null));
+        Order order = orderRepository.findById(id).orElse(null);
         if (order == null) {
             return false;
         }

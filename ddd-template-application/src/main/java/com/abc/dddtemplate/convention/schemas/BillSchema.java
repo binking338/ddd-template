@@ -44,7 +44,7 @@ public class BillSchema {
      * varchar(100)
      */
     public Schema.Field<String> owner(){
-        return new Schema.Field<>(root.get("owner"));
+        return new Schema.Field<>(root.get("accountName"));
     }
 
     /**

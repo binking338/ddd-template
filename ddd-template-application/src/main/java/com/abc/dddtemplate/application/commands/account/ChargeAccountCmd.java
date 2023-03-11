@@ -42,7 +42,7 @@ public class ChargeAccountCmd {
 
         @Override
         public Boolean exec(ChargeAccountCmd chargeAccountCmd) {
-            Account account = accountAggregateRepository.getOne(chargeAccountCmd.accountId);
+            Account account = accountAggregateRepository.getReferenceById(chargeAccountCmd.accountId);
             if (!account.getName().equals(chargeAccountCmd.getAccountName())) {
                 return false;
             }

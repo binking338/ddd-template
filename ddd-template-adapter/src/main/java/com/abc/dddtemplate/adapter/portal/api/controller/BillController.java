@@ -1,5 +1,6 @@
 package com.abc.dddtemplate.adapter.portal.api.controller;
 
+import com.abc.dddtemplate.application.sagas.PaymentSagaService;
 import com.abc.dddtemplate.share.dto.ResponseData;
 import com.abc.dddtemplate.application.commands.bill.PayBillCmd;
 import com.abc.dddtemplate.application.queries.ListBillQry;
@@ -33,11 +34,11 @@ public class BillController {
     }
 
     @Autowired
-    PayBillCmd.Handler payBillCmdHandler;
+    PaymentSagaService paymentSagaService;
 
     @PostMapping("pay")
-    public ResponseData<Boolean> pay(@RequestBody PayBillCmd payBillDTO) {
-        var result = payBillCmdHandler.exec(payBillDTO);
-        return ResponseData.success(result);
+    public ResponseData<Boolean> pay(@RequestBody PaymentSagaService.PaymentSagaContext payBillDTO) {
+        var saga = paymentSagaService.run(payBillDTO);
+        return ResponseData.success(true);
     }
 }

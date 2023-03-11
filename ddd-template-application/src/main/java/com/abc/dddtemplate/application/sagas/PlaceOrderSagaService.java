@@ -1,5 +1,6 @@
 package com.abc.dddtemplate.application.sagas;
 
+import com.abc.dddtemplate.application.commands.order.PlaceOrderCmd;
 import com.abc.dddtemplate.domain.aggregates.samples.Order;
 import com.abc.dddtemplate.convention.SagaStateMachine;
 import com.abc.dddtemplate.convention.UnitOfWork;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 /**
  * 下单Saga服务，模拟扣减库存的需求
+ *
  * @author <template/>
  * @date
  */
@@ -22,6 +24,8 @@ import org.springframework.stereotype.Service;
 public class PlaceOrderSagaService extends SagaStateMachine<PlaceOrderSagaService.Context> {
     @Autowired
     InventoryClient inventoryClient;
+    @Autowired
+    PlaceOrderCmd placeOrderCmd;
 
     @Override
     protected Integer getBizType() {
@@ -38,9 +42,12 @@ public class PlaceOrderSagaService extends SagaStateMachine<PlaceOrderSagaServic
         return Process.of((Context context) -> {
             inventoryClient.reduce(context.name, context.num);
         }).then(context -> {
-            Order order = Order.placeOrder(context.owner, context.name, context.price, context.num);
-            UnitOfWork.saveEntities(order);
-            context.orderId = order.getId();
+            placeOrderCmd.exec(PlaceOrderCmd.CreateOrderDTO.builder()
+                .owner(context.owner)
+                .name(context.name)
+                .price(context.price)
+                .num(context.num)
+                .build());
         }).root();
     }
 

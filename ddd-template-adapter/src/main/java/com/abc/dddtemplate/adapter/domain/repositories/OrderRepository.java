@@ -16,7 +16,7 @@ public interface OrderRepository extends AggregateRepository<Order, Long> {
 
     String SEARCH_SQL = "from `order` o  \n" +
             "join bill b on b.order_id=o.id and b.db_deleted=false \n" +
-            "where o.db_deleted=false and o.owner = :o and o.name like concat('%', :k,'%') ";
+            "where o.db_deleted=false and o.accountName = :o and o.name like concat('%', :k,'%') ";
     @Query(nativeQuery = true,
         countQuery = "select count(*)\n" + SEARCH_SQL,
         value = "select o.id,o.name,o.amount,o.closed,o.finished,b.id billId \n" + SEARCH_SQL)

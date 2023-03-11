@@ -47,7 +47,7 @@ public class Account extends BaseEntity {
                 .build();
     }
 
-    public void use(Integer bizType, Long bizId, int amount){
+    public void spend(Integer bizType, Long bizId, int amount){
         if(amount > this.amount){
             throw new ErrorException("账户余额不够");
         }

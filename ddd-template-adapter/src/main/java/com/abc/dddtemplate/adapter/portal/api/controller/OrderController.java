@@ -1,11 +1,14 @@
 package com.abc.dddtemplate.adapter.portal.api.controller;
 
 import com.abc.dddtemplate.application.commands.order.ModifyOrderCmd;
+import com.abc.dddtemplate.application.sagas.PlaceOrderSagaService;
+import com.abc.dddtemplate.convention.aggregates.Saga;
 import com.abc.dddtemplate.share.dto.ResponseData;
 import com.abc.dddtemplate.application.commands.order.CloseOrderCmd;
 import com.abc.dddtemplate.application.commands.order.PlaceOrderCmd;
 import com.abc.dddtemplate.application.queries.SearchOrderQry;
 import com.abc.dddtemplate.share.dto.PageData;
+import com.abc.dddtemplate.share.util.MapperUtil;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import lombok.var;
@@ -16,7 +19,7 @@ import org.springframework.web.bind.annotation.*;
  * @author <template/>
  * @date
  */
-@Tag(name="订单")
+@Tag(name = "订单")
 @RestController
 @RequestMapping(value = "/appApi/order")
 @Slf4j
@@ -32,11 +35,13 @@ public class OrderController {
     }
 
     @Autowired
-    PlaceOrderCmd placeOrderCmd;
+    PlaceOrderSagaService placeOrderSagaService;
 
     @PostMapping("place")
     public ResponseData<Long> create(@RequestBody PlaceOrderCmd.CreateOrderDTO orderDTO) {
-        var result = placeOrderCmd.exec(orderDTO);
+        Saga saga = placeOrderSagaService.run(MapperUtil.map(orderDTO, PlaceOrderSagaService.Context.class));
+
+        var result = saga.getContext(PlaceOrderSagaService.Context.class).getOrderId();
         return ResponseData.success(result);
     }
 
