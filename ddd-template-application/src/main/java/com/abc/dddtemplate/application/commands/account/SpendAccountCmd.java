@@ -33,14 +33,12 @@ public class SpendAccountCmd {
 
         @Override
         public Boolean exec(SpendAccountCmd cmd) {
+            Account account = accountRepository
+                    .findOne(AccountSchema.specify(root -> root.name().eq(cmd.accountName)))
+                    .orElseThrow(()->new ErrorException(cmd.accountName + " 的账户不存在"));
 
-            Optional<Account> accountOptional = accountRepository
-                    .findOne(AccountSchema.specify(root -> root.name().eq(cmd.accountName)));
-            if (!accountOptional.isPresent()) {
-                throw new ErrorException(cmd.accountName + " 的账户不存在");
-            }
-            accountOptional.get().spend(Transfer.BILL, cmd.billId, cmd.amount);
-            UnitOfWork.saveEntities(accountOptional.get());
+            account.spend(Transfer.BILL, cmd.billId, cmd.amount);
+            UnitOfWork.saveEntities(account);
             return true;
         }
     }

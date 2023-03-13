@@ -46,9 +46,8 @@ public class ChargeAccountCmd {
             if (!account.getName().equals(chargeAccountCmd.getAccountName())) {
                 return false;
             }
-            unitOfWork.required(() -> {
-                account.charge(chargeAccountCmd.transferNo, chargeAccountCmd.amount);
-            });
+            account.charge(chargeAccountCmd.transferNo, chargeAccountCmd.amount);
+            unitOfWork.save(account);
             return true;
         }
     }

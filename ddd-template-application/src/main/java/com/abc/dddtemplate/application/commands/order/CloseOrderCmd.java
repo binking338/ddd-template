@@ -4,6 +4,7 @@ import com.abc.dddtemplate.convention.Command;
 import com.abc.dddtemplate.domain.aggregates.samples.Order;
 import com.abc.dddtemplate.convention.AggregateRepository;
 import com.abc.dddtemplate.convention.UnitOfWork;
+import com.abc.dddtemplate.share.exception.KnownException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -22,10 +23,8 @@ public class CloseOrderCmd implements Command<Long, Boolean> {
 
     @Override
     public Boolean exec(Long id) {
-        Order order = orderRepository.findById(id).orElse(null);
-        if (order == null) {
-            return false;
-        }
+        Order order = orderRepository.findById(id)
+                .orElseThrow(() -> new KnownException("订单不存在"));
         order.close();
         unitOfWork.save(order);
         return true;

@@ -4,7 +4,7 @@ import com.abc.dddtemplate.convention.AggregateRepository;
 import com.abc.dddtemplate.convention.Command;
 import com.abc.dddtemplate.convention.UnitOfWork;
 import com.abc.dddtemplate.domain.aggregates.samples.Order;
-import com.abc.dddtemplate.share.exception.ErrorException;
+import com.abc.dddtemplate.share.exception.KnownException;
 import lombok.Builder;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
@@ -31,11 +31,9 @@ public class CompleteOrderCmd {
         @Override
         public Boolean exec(CompleteOrderCmd cmd) {
             Order order = orderRepository.findById(cmd.getOrderId())
-                    .orElseThrow(() -> new ErrorException("订单丢失"));
+                    .orElseThrow(() -> new KnownException("订单不存在"));
             order.finish();
-            UnitOfWork.saveTransactional(() -> {
-                orderRepository.save(order);
-            });
+            UnitOfWork.saveEntities(order);
             return true;
         }
     }

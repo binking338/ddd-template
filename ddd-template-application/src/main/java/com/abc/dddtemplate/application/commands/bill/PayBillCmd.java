@@ -37,16 +37,13 @@ public class PayBillCmd {
 
         @Override
         public Boolean exec(PayBillCmd cmd) {
-            Bill bill = billRepository.findById(cmd.getBillId()).orElse(null);
-            if (bill == null) {
-                throw new ErrorException(cmd.getBillId() + " 账单不存在");
-            }
-            Optional<Account> accountOptional = accountRepository
-                    .findOne(AccountSchema.specify(root -> root.name().eq(cmd.accountName)));
-            if (!accountOptional.isPresent()) {
-                throw new ErrorException(cmd.accountName + " 的账户不存在");
-            }
-            paymentDomainService.pay(accountOptional.get(), bill);
+            Bill bill = billRepository.findById(cmd.getBillId())
+                    .orElseThrow(()->new ErrorException(cmd.getBillId() + " 账单不存在"));
+            Account account = accountRepository
+                    .findOne(AccountSchema.specify(root -> root.name().eq(cmd.accountName)))
+                    .orElseThrow(()->new ErrorException(cmd.accountName + " 的账户不存在"));
+
+            paymentDomainService.pay(account, bill);
             return true;
         }
     }
