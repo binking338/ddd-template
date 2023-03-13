@@ -1,13 +1,8 @@
 package com.abc.dddtemplate.application.subscribers.internal;
 
-
 import com.abc.dddtemplate.application.commands.order.CompleteOrderCmd;
-import com.abc.dddtemplate.domain.aggregates.samples.Order;
 import com.abc.dddtemplate.domain.events.BillPaidDomainEvent;
-import com.abc.dddtemplate.share.exception.ErrorException;
-import com.abc.dddtemplate.convention.AggregateRepository;
 import com.abc.dddtemplate.convention.DomainEventSubscriber;
-import com.abc.dddtemplate.convention.UnitOfWork;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

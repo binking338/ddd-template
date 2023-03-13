@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 /**
+ * 账户业务约束接口
  * @author <template/>
  * @date 2023-03-13
  */
@@ -25,7 +26,7 @@ public class AccountSpec  implements Specification<Account> {
     @Override
     public boolean valid(Account account) {
         boolean sameName = accountRepo.exists(AccountSchema.specify(builder -> builder.name().eq(account.getName())));
-        return sameName;
+        return !sameName;
     }
 
     @Override

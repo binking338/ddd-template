@@ -20,6 +20,7 @@ import javax.persistence.PersistenceContext;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * @author <template/>
@@ -60,7 +61,7 @@ public class UnitOfWork {
          * @param source the object on which the event initially occurred or with
          *               which the event is associated (never {@code null})
          */
-        public DomainEventFireEvent(Object source){
+        public DomainEventFireEvent(Object source) {
             super(source);
         }
     }
@@ -96,14 +97,16 @@ public class UnitOfWork {
     private ThreadLocal<Map<Object, Boolean>> preValidatedThreadLocal = ThreadLocal.withInitial(() -> new HashMap<>());
     private ThreadLocal<Map<Object, Boolean>> postValidatedThreadLocal = ThreadLocal.withInitial(() -> new HashMap<>());
     private ThreadLocal<Integer> stackDepthCounterThreadLocal = ThreadLocal.withInitial(() -> 0);
+    private ThreadLocal<List<Object>> additionalAttachedEntitiesThreadLocal = ThreadLocal.withInitial(() -> new ArrayList<>());
 
     /**
      * 移除上下文
      */
-    public void clear(){
+    public void clear() {
         preValidatedThreadLocal.remove();
         postValidatedThreadLocal.remove();
         stackDepthCounterThreadLocal.remove();
+        additionalAttachedEntitiesThreadLocal.remove();
     }
 
     /**
@@ -149,6 +152,13 @@ public class UnitOfWork {
      * @param deleteEntities 删除实体
      */
     public void save(Collection<?> saveEntities, Collection<?> deleteEntities) {
+        List<Object> attachedEntities = additionalAttachedEntitiesThreadLocal.get();
+        if (CollectionUtils.isNotEmpty(saveEntities)) {
+            attachedEntities.addAll(saveEntities);
+        }
+        if (CollectionUtils.isNotEmpty(deleteEntities)) {
+            attachedEntities.addAll(deleteEntities);
+        }
         save(() -> {
             if (CollectionUtils.isNotEmpty(saveEntities)) {
                 for (Object entity : saveEntities) {
@@ -182,6 +192,7 @@ public class UnitOfWork {
                 }
             }
         });
+        additionalAttachedEntitiesThreadLocal.remove();
     }
 
     /**
@@ -275,7 +286,7 @@ public class UnitOfWork {
                 break;
         }
         stackDepthCounterThreadLocal.set(stackDepthCounterThreadLocal.get() - 1);
-        if(stackDepthCounterThreadLocal.get().equals(0)){
+        if (stackDepthCounterThreadLocal.get().equals(0)) {
             preValidatedThreadLocal.get().clear();
             postValidatedThreadLocal.get().clear();
         }
@@ -283,16 +294,18 @@ public class UnitOfWork {
     }
 
     protected List<Object> attachedEntities() {
+        Stream<Object> entities = additionalAttachedEntitiesThreadLocal.get().stream();
         try {
-            if (((SessionImplementor) getEntityManager().getDelegate()).isClosed()) {
-                return Collections.EMPTY_LIST;
+            if (!((SessionImplementor) getEntityManager().getDelegate()).isClosed()) {
+
+                org.hibernate.engine.spi.PersistenceContext persistenceContext = ((SessionImplementor) getEntityManager().getDelegate()).getPersistenceContext();
+                Stream<Object> entitiesInPersistenceContext = Arrays.stream(persistenceContext.reentrantSafeEntityEntries()).map(e -> e.getKey());
+                entities = Stream.concat(entities, entitiesInPersistenceContext);
             }
-            org.hibernate.engine.spi.PersistenceContext persistenceContext = ((SessionImplementor) getEntityManager().getDelegate()).getPersistenceContext();
-            return Arrays.stream(persistenceContext.reentrantSafeEntityEntries()).map(e -> e.getKey()).collect(Collectors.toList());
         } catch (Exception ex) {
             log.debug("跟踪实体获取失败", ex);
-            return Collections.EMPTY_LIST;
         }
+        return entities.distinct().collect(Collectors.toList());
     }
 
     protected List<Specification> getSpecificationsForEntityClass(Class clazz) {
@@ -355,7 +368,7 @@ public class UnitOfWork {
     /**
      * 清除上下文
      */
-    public static void clearContext(){
+    public static void clearContext() {
         instance.clear();
     }
 

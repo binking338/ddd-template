@@ -1,13 +1,8 @@
 package com.abc.dddtemplate.application.subscribers.internal;
 
 import com.abc.dddtemplate.application.commands.bill.CloseBillCmd;
-import com.abc.dddtemplate.convention.schemas.BillSchema;
-import com.abc.dddtemplate.domain.aggregates.samples.Bill;
 import com.abc.dddtemplate.domain.events.internal.OrderClosedDomainEvent;
-import com.abc.dddtemplate.share.exception.ErrorException;
-import com.abc.dddtemplate.convention.AggregateRepository;
 import com.abc.dddtemplate.convention.DomainEventSubscriber;
-import com.abc.dddtemplate.convention.UnitOfWork;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
