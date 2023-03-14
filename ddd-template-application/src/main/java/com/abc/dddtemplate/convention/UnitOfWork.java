@@ -260,7 +260,7 @@ public class UnitOfWork {
     public <T> T save(TransactionHandlerWithInputOutput<DomainEventPublisher, T> transactionHandler, Propagation propagation) {
         T result = null;
         stackDepthCounterThreadLocal.set(stackDepthCounterThreadLocal.get() + 1);
-        preValidSpecifications();
+        preTransactionSpecifications();
         switch (propagation) {
             case SUPPORTS:
                 result = instance.supports(transactionHandler, DomainEventPublisher.Factory.create(null));
@@ -293,7 +293,7 @@ public class UnitOfWork {
         return result;
     }
 
-    protected List<Object> attachedEntities() {
+    protected List<Object> correlatedEntities() {
         Stream<Object> entities = additionalAttachedEntitiesThreadLocal.get().stream();
         try {
             if (!((SessionImplementor) getEntityManager().getDelegate()).isClosed()) {
@@ -325,8 +325,8 @@ public class UnitOfWork {
         return list;
     }
 
-    protected void preValidSpecifications() {
-        List<Object> entities = attachedEntities();
+    protected void preTransactionSpecifications() {
+        List<Object> entities = correlatedEntities();
         for (Object entity : entities) {
             if (preValidatedThreadLocal.get().containsKey(entity)) {
                 continue;
@@ -345,8 +345,8 @@ public class UnitOfWork {
         }
     }
 
-    protected void postValidSpecifications() {
-        List<Object> entities = attachedEntities();
+    protected void inTransactionSpecifications() {
+        List<Object> entities = correlatedEntities();
         for (Object entity : entities) {
             if (postValidatedThreadLocal.get().containsKey(entity)) {
                 continue;
@@ -503,7 +503,7 @@ public class UnitOfWork {
     private final ApplicationEventPublisher applicationEventPublisher;
 
     private void transaction(TransactionHandler transactionHandler) {
-        postValidSpecifications();
+        inTransactionSpecifications();
         if (transactionHandler != null) {
             transactionHandler.exec();
         }
@@ -512,7 +512,7 @@ public class UnitOfWork {
 
     private <T> T transactionWithOutput(TransactionHandlerWithOutput<T> transactionHandler) {
         T result = null;
-        postValidSpecifications();
+        inTransactionSpecifications();
         if (transactionHandler != null) {
             result = transactionHandler.exec();
         }
@@ -522,7 +522,7 @@ public class UnitOfWork {
 
     private <I, O> O transactionWithInputOutput(TransactionHandlerWithInputOutput<I, O> transactionHandler, I in) {
         O result = null;
-        postValidSpecifications();
+        inTransactionSpecifications();
         if (transactionHandler != null) {
             result = transactionHandler.exec(in);
         }
