@@ -43,7 +43,7 @@ CREATE TABLE `account` (
   `version` int(11) NOT NULL DEFAULT '0',
   `db_deleted` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8 COMMENT='账户\n@R;@M=samples;';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='账户\n@R;@M=samples;';
 
 -- Create syntax for TABLE 'transfer'
 CREATE TABLE `transfer` (
@@ -56,7 +56,7 @@ CREATE TABLE `transfer` (
   `version` int(11) NOT NULL DEFAULT '0',
   `db_deleted` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8 COMMENT='转账记录\n@R;@M=samples;';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='转账记录\n@R;@M=samples;';
 
 -- Create syntax for TABLE 'order'
 CREATE TABLE `order` (
@@ -70,7 +70,7 @@ CREATE TABLE `order` (
   `version` int(11) NOT NULL DEFAULT '0',
   `db_deleted` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=105 DEFAULT CHARSET=utf8 COMMENT='订单\n@R;@M=samples;';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='订单\n@R;@M=samples;';
 
 -- Create syntax for TABLE 'order_item'
 CREATE TABLE `order_item` (
@@ -81,7 +81,7 @@ CREATE TABLE `order_item` (
   `order_id` bigint(20) NOT NULL DEFAULT '0' COMMENT '@Rel=ManyToOne;',
   `db_deleted` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=105 DEFAULT CHARSET=utf8 COMMENT='订单项\n@P=order;@M=samples;';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='订单项\n@P=order;@M=samples;';
 
 -- Create syntax for TABLE 'bill'
 CREATE TABLE `bill` (
@@ -95,7 +95,7 @@ CREATE TABLE `bill` (
   `version` int(11) NOT NULL DEFAULT '0',
   `db_deleted` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=106 DEFAULT CHARSET=utf8 COMMENT='账单\n@R;@M=samples;';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='账单\n@R;@M=samples;';
 
 -- Create syntax for TABLE '__event'
 CREATE TABLE `__event` (
@@ -140,7 +140,7 @@ CREATE TABLE `__saga` (
   PRIMARY KEY (`id`, `db_created_at`),
   KEY `idx_created_at` (`db_created_at`),
   KEY `idx_updated_at` (`db_updated_at`)
-) ENGINE=InnoDB AUTO_INCREMENT=56 DEFAULT CHARSET=utf8 COMMENT='SAGA事务\n@I;'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='SAGA事务\n@I;'
 partition by range(to_days(db_created_at))
 (partition p202201 values less than (to_days('2022-02-01')) ENGINE=InnoDB);
 
@@ -162,7 +162,7 @@ CREATE TABLE `__saga_process` (
   PRIMARY KEY (`id`, `db_created_at`),
   KEY `idx_created_at` (`db_created_at`),
   KEY `idx_updated_at` (`db_updated_at`)
-) ENGINE=InnoDB AUTO_INCREMENT=180 DEFAULT CHARSET=utf8 COMMENT='SAGA事务-子环节\n@I;'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='SAGA事务-子环节\n@I;'
 partition by range(to_days(db_created_at))
 (partition p202201 values less than (to_days('2022-02-01')) ENGINE=InnoDB);
 
@@ -184,7 +184,7 @@ CREATE TABLE `__archived_event` (
   PRIMARY KEY (`id`, `db_created_at`),
   KEY `idx_created_at` (`db_created_at`),
   KEY `idx_updated_at` (`db_updated_at`)
-) ENGINE=InnoDB AUTO_INCREMENT=140 DEFAULT CHARSET=utf8 COMMENT='集成事件存档\n@I;'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='集成事件存档\n@I;'
 partition by range(to_days(db_created_at))
 (partition p202201 values less than (to_days('2022-02-01')) ENGINE=InnoDB);
 
@@ -207,7 +207,7 @@ CREATE TABLE `__archived_saga` (
   PRIMARY KEY (`id`, `db_created_at`),
   KEY `idx_created_at` (`db_created_at`),
   KEY `idx_updated_at` (`db_updated_at`)
-) ENGINE=InnoDB AUTO_INCREMENT=38 DEFAULT CHARSET=utf8 COMMENT='SAGA事务存档\n@I;'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='SAGA事务存档\n@I;'
 partition by range(to_days(db_created_at))
 (partition p202201 values less than (to_days('2022-02-01')) ENGINE=InnoDB);
 
@@ -228,7 +228,7 @@ CREATE TABLE `__archived_saga_process` (
   PRIMARY KEY (`id`, `db_created_at`),
   KEY `idx_created_at` (`db_created_at`),
   KEY `idx_updated_at` (`db_updated_at`)
-) ENGINE=InnoDB AUTO_INCREMENT=75 DEFAULT CHARSET=utf8 COMMENT='SAGA事务存档-子环节\n@I;'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='SAGA事务存档-子环节\n@I;'
 partition by range(to_days(db_created_at))
 (partition p202201 values less than (to_days('2022-02-01')) ENGINE=InnoDB);
 
@@ -244,6 +244,4 @@ CREATE TABLE `__locker` (
   PRIMARY KEY (`id`),
   KEY `idx_created_at` (`db_created_at`),
   KEY `idx_updated_at` (`db_updated_at`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COMMENT='锁\n@I;'
-partition by range(to_days(db_created_at))
-(partition p202201 values less than (to_days('2022-02-01')) ENGINE=InnoDB);
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='锁\n@I;';
