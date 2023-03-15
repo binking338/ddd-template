@@ -36,7 +36,7 @@ import java.util.Objects;
 public class IntergrationEventSubscriberRocketMQAdapterConfig {
     @Value("${spring.application.name:default}")
     String applicationName;
-    @Value("${rocketmq.name-server}")
+    @Value("${rocketmq.name-server:}")
     String defaultNameSrv;
     @Autowired
     Environment environment;
