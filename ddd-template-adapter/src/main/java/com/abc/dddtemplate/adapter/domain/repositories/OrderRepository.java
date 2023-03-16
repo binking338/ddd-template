@@ -1,8 +1,8 @@
 package com.abc.dddtemplate.adapter.domain.repositories;
 
-import com.abc.dddtemplate.application.queries.SearchOrderQry;
 import com.abc.dddtemplate.convention.AggregateRepository;
 import com.abc.dddtemplate.domain.aggregates.samples.Order;
+import com.abc.dddtemplate.application.queries.SearchOrderQry;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
