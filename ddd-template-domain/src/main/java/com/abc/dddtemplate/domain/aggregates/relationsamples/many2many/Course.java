@@ -1,4 +1,6 @@
 package com.abc.dddtemplate.domain.aggregates.relationsamples.many2many;
+import org.hibernate.annotations.Where;
+import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.FetchMode;
 import org.hibernate.annotations.Fetch;
 import com.abc.dddtemplate.convention.BaseEntity;
@@ -54,7 +56,7 @@ public class Course extends BaseEntity {
     private String name;
 
     @ManyToMany(cascade = { CascadeType.ALL }, fetch = FetchType.EAGER) @Fetch(FetchMode.SUBSELECT)
-    @JoinTable(name = "`course_id`", joinColumns = {@JoinColumn(name = "`student_id`")}, inverseJoinColumns = {@JoinColumn(name = "`m2m_student_course_rel`")})
+    @JoinTable(name = "`m2m_student_course_rel`", joinColumns = {@JoinColumn(name = "`course_id`")}, inverseJoinColumns = {@JoinColumn(name = "`student_id`")})
     private java.util.List<com.abc.dddtemplate.domain.aggregates.relationsamples.many2many.Student> students;
 
     // 【字段映射结束】本段落由[gen-ddd-maven-plugin]维护，请不要手工改动

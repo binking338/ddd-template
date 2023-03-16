@@ -10,6 +10,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
+import org.hibernate.annotations.Fetch;
+import org.hibernate.annotations.FetchMode;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
 
@@ -139,7 +141,7 @@ public class Order extends BaseEntity {
     @Column(name = "`update_at`", insertable = false, updatable = true)
     private java.util.Date updateAt;
 
-    @OneToMany(cascade = { CascadeType.ALL }, fetch = FetchType.LAZY, orphanRemoval = true)
+    @OneToMany(cascade = { CascadeType.ALL }, fetch = FetchType.EAGER, orphanRemoval = true) @Fetch(FetchMode.SUBSELECT)
     @JoinColumn(name = "`order_id`", nullable = false)
     private java.util.List<com.abc.dddtemplate.domain.aggregates.samples.OrderItem> orderItems;
 

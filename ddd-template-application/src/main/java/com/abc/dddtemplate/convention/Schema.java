@@ -9,16 +9,16 @@ import javax.persistence.criteria.Predicate;
 /**
  * Schema
  *
- * @author <template/>
- * @date
+ * @author <template>
+ * @date 
  */
 public class Schema {
 
     /**
      * 断言构建器
      */
-    public interface PredicateBuilder<S> {
-        Expression<Boolean> build(S schema);
+    public static interface PredicateBuilder<S> {
+        public Expression<Boolean> build(S schema);
     }
 
     /**

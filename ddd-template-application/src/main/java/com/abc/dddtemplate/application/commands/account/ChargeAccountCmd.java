@@ -4,6 +4,7 @@ import com.abc.dddtemplate.convention.Command;
 import com.abc.dddtemplate.domain.aggregates.samples.Account;
 import com.abc.dddtemplate.convention.AggregateRepository;
 import com.abc.dddtemplate.convention.UnitOfWork;
+import com.abc.dddtemplate.share.exception.KnownException;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -42,7 +43,8 @@ public class ChargeAccountCmd {
 
         @Override
         public Boolean exec(ChargeAccountCmd chargeAccountCmd) {
-            Account account = accountAggregateRepository.getReferenceById(chargeAccountCmd.accountId);
+            Account account = accountAggregateRepository.findById(chargeAccountCmd.accountId)
+                    .orElseThrow(()-> new KnownException("账户不存在"));
             if (!account.getName().equals(chargeAccountCmd.getAccountName())) {
                 return false;
             }

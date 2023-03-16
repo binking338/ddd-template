@@ -1,4 +1,6 @@
 package com.abc.dddtemplate.domain.aggregates.relationsamples.many2many;
+import org.hibernate.annotations.Where;
+import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.FetchMode;
 import org.hibernate.annotations.Fetch;
 import com.abc.dddtemplate.convention.BaseEntity;
