@@ -28,6 +28,7 @@ import java.util.Objects;
 
 /**
  * 自动监听集成事件对应的RocketMQ
+ *
  * @author <template/>
  * @date 2023-02-28
  */
@@ -42,7 +43,7 @@ public class IntergrationEventSubscriberRocketMQAdapterConfig {
     Environment environment;
     @Autowired
     DomainEventSupervisor domainEventSupervisor;
-    @Autowired
+    @Autowired(required = false)
     List<DomainEventSubscriber> domainEventSubscribers;
 
     List<MQPushConsumer> mqPushConsumers;
@@ -53,12 +54,14 @@ public class IntergrationEventSubscriberRocketMQAdapterConfig {
             return;
         }
         mqPushConsumers = new ArrayList<>();
-        domainEventSubscribers.forEach(domainEventSubscriber -> {
-            MQPushConsumer mqPushConsumer = startConsuming(domainEventSubscriber);
-            if (mqPushConsumer != null) {
-                mqPushConsumers.add(mqPushConsumer);
-            }
-        });
+        if (CollectionUtils.isNotEmpty(domainEventSubscribers)) {
+            domainEventSubscribers.forEach(domainEventSubscriber -> {
+                MQPushConsumer mqPushConsumer = startConsuming(domainEventSubscriber);
+                if (mqPushConsumer != null) {
+                    mqPushConsumers.add(mqPushConsumer);
+                }
+            });
+        }
     }
 
     @EventListener(classes = ContextClosedEvent.class)
