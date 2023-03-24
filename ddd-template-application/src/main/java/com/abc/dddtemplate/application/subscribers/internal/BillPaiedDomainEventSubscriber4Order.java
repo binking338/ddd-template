@@ -1,7 +1,7 @@
 package com.abc.dddtemplate.application.subscribers.internal;
 
 import com.abc.dddtemplate.application.commands.order.CompleteOrderCmd;
-import com.abc.dddtemplate.domain.events.BillPaidDomainEvent;
+import com.abc.dddtemplate.domain.events.external.BillPaidDomainEvent;
 import com.abc.dddtemplate.convention.DomainEventSubscriber;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

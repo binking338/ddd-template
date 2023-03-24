@@ -15,7 +15,7 @@ import static com.abc.dddtemplate.share.Constants.QUEUE_EXAMPLE_TOPIC;
  */
 @Slf4j
 @Component
-@RocketMQMessageListener(topic = QUEUE_EXAMPLE_TOPIC, consumerGroup = QUEUE_EXAMPLE_CONSUMER_GROUP)
+//@RocketMQMessageListener(topic = QUEUE_EXAMPLE_TOPIC, consumerGroup = QUEUE_EXAMPLE_CONSUMER_GROUP)
 public class ExampleQueueConsumer implements RocketMQListener<String> {
     @Override
     public void onMessage(String s) {

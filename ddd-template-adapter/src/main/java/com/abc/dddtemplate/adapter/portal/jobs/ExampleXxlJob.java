@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class ExampleXxlJob {
 
-    @XxlJob("ddd-template-XxlExampleJob")
+//    @XxlJob("ddd-template-XxlExampleJob")
     public void execute() throws Exception {
     }
 }
