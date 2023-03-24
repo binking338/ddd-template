@@ -16,6 +16,7 @@ import org.apache.rocketmq.common.consumer.ConsumeFromWhere;
 import org.apache.rocketmq.common.message.MessageExt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.context.event.EventListener;
@@ -32,8 +33,9 @@ import java.util.Objects;
  * @author <template/>
  * @date 2023-02-28
  */
-@Configuration
 @Slf4j
+@Configuration
+@ConditionalOnClass(DefaultMQPushConsumer.class)
 public class IntergrationEventSubscriberRocketMQAdapterConfig {
     @Value("${spring.application.name:default}")
     String applicationName;
