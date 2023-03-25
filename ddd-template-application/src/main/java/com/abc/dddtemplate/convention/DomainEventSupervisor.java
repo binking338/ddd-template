@@ -82,23 +82,34 @@ public class DomainEventSupervisor {
      * @param <T>
      */
     public <T> void dispatchRawImmediately(T event) {
+        dispatchRawImmediately(event, false);
+    }
+
+    /**
+     * 立即发送传入的 event 领域事件
+     * @param event
+     * @param forceLocal
+     * @param <T>
+     */
+    public <T> void dispatchRawImmediately(T event, boolean forceLocal){
         if (Objects.isNull(event)) {
             throw new NullPointerException("param event is null");
         }
 
-        if (DomainEventPublisher.isIntergrationEvent(event)) {
+        if (!forceLocal && DomainEventPublisher.isIntergrationEvent(event)) {
             dispatch2RemoteSubscriber(event);
         } else {
             dispatch2LocalSubscriber(event);
         }
     }
 
+
     /**
-     * 立即发送传入的 领域事件
+     * 立即发送传入的集成事件
      * @param events
      * @return
      */
-    public int dispatchImmediately(List<Event> events) {
+    public int dispatchIntergrationEventImmediately(List<Event> events) {
         List<Event> retryEvents = new ArrayList<>(10);
         int failedCount = 0;
         for (Event event : events) {
@@ -140,8 +151,9 @@ public class DomainEventSupervisor {
     }
 
     private <T> void dispatch2LocalSubscriber(T event) {
+        applicationEventPublisher.publishEvent(event);
         if (subscribersMap == null || subscribersMap.size() == 0) {
-            throw new RuntimeException("没有配置领域事件订阅器，调用前需通过 DomainEventSubscriber.Supervisor.setSubscribers 方法配置。");
+            return;
         }
         if (!subscribersMap.containsKey(event.getClass())) {
             return;

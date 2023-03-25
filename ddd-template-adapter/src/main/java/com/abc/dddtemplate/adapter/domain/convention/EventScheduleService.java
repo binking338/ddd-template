@@ -83,7 +83,7 @@ public class EventScheduleService {
                         noneEvent = true;
                         break;
                     }
-                    int failedCount = domainEventSupervisor.dispatchImmediately(events.toList());
+                    int failedCount = domainEventSupervisor.dispatchIntergrationEventImmediately(events.toList());
                     if (failedCount > 0) {
                         break;
                     }

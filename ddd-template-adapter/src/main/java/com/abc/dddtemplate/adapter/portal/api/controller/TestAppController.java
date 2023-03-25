@@ -8,6 +8,7 @@ import com.abc.dddtemplate.application.sagas.DemoSagaService;
 import com.abc.dddtemplate.application.subscribers.external.ExampleExternalDomainEventSubscriber;
 import com.abc.dddtemplate.convention.DomainEventSupervisor;
 import com.abc.dddtemplate.convention.SagaSupervisor;
+import com.abc.dddtemplate.external.events.ExampleExternalDomainEvent;
 import com.abc.dddtemplate.share.dto.ResponseData;
 import com.abc.dddtemplate.external.clients.SysTime;
 import com.abc.dddtemplate.external.clients.TimeServiceClient;
@@ -82,7 +83,7 @@ public class TestAppController {
     DomainEventSupervisor domainEventSupervisor;
     @GetMapping("domainEvent")
     public String domainevent(String input){
-        var msg = new ExampleExternalDomainEventSubscriber.ExampleExternalDomainEvent();
+        var msg = new ExampleExternalDomainEvent();
         msg.setMsg(input);
         domainEventSupervisor.dispatchRawImmediately(msg);
         return input;

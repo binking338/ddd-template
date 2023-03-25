@@ -1,8 +1,8 @@
-package com.abc.dddtemplate.adapter.domain.event;
+package com.abc.dddtemplate.adapter.external.event;
 
-import com.abc.dddtemplate.convention.DomainEventSubscriber;
 import com.abc.dddtemplate.convention.DomainEventSupervisor;
 import com.abc.dddtemplate.share.annotation.DomainEvent;
+import com.abc.dddtemplate.share.util.ScanUtils;
 import com.alibaba.fastjson.JSON;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -17,6 +17,7 @@ import org.apache.rocketmq.common.message.MessageExt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.context.event.EventListener;
@@ -26,6 +27,7 @@ import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 /**
  * 自动监听集成事件对应的RocketMQ
@@ -35,7 +37,10 @@ import java.util.Objects;
  */
 @Slf4j
 @Configuration
-@ConditionalOnClass(DefaultMQPushConsumer.class)
+@ConditionalOnProperty(
+        prefix = "rocketmq",
+        value = {"name-server"}
+)
 public class IntergrationEventSubscriberRocketMQAdapterConfig {
     @Value("${spring.application.name:default}")
     String applicationName;
@@ -45,25 +50,25 @@ public class IntergrationEventSubscriberRocketMQAdapterConfig {
     Environment environment;
     @Autowired
     DomainEventSupervisor domainEventSupervisor;
-    @Autowired(required = false)
-    List<DomainEventSubscriber> domainEventSubscribers;
 
-    List<MQPushConsumer> mqPushConsumers;
+    List<MQPushConsumer> mqPushConsumers = new ArrayList<>();
 
     @PostConstruct
     public void init() {
-        if (CollectionUtils.isEmpty(domainEventSubscribers)) {
-            return;
-        }
-        mqPushConsumers = new ArrayList<>();
-        if (CollectionUtils.isNotEmpty(domainEventSubscribers)) {
-            domainEventSubscribers.forEach(domainEventSubscriber -> {
-                MQPushConsumer mqPushConsumer = startConsuming(domainEventSubscriber);
-                if (mqPushConsumer != null) {
-                    mqPushConsumers.add(mqPushConsumer);
-                }
-            });
-        }
+        Set<Class<?>> classes = ScanUtils.scanClass("com.abc.dddtemplate.external", true);
+        classes.stream().filter(cls -> {
+            DomainEvent domainEvent = cls.getAnnotation(DomainEvent.class);
+            if (!Objects.isNull(domainEvent) && StringUtils.isNotEmpty(domainEvent.value())) {
+                return true;
+            } else {
+                return false;
+            }
+        }).forEach(domainEventClass -> {
+            MQPushConsumer mqPushConsumer = startConsuming(domainEventClass);
+            if (mqPushConsumer != null) {
+                mqPushConsumers.add(mqPushConsumer);
+            }
+        });
     }
 
     @EventListener(classes = ContextClosedEvent.class)
@@ -76,8 +81,7 @@ public class IntergrationEventSubscriberRocketMQAdapterConfig {
         });
     }
 
-    private DefaultMQPushConsumer startConsuming(DomainEventSubscriber domainEventSubscriber) {
-        Class domainEventClass = domainEventSubscriber.forEventClass();
+    private DefaultMQPushConsumer startConsuming(Class domainEventClass) {
         DomainEvent domainEvent = (DomainEvent) domainEventClass.getAnnotation(DomainEvent.class);
         if (Objects.isNull(domainEvent) || StringUtils.isBlank(domainEvent.value())) {
             // 不是集成事件
@@ -102,7 +106,7 @@ public class IntergrationEventSubscriberRocketMQAdapterConfig {
                                     msgs) {
                                 String strMsg = new String(msg.getBody(), "UTF-8");
                                 Object event = JSON.parseObject(strMsg, domainEventClass);
-                                domainEventSubscriber.onEvent(event);
+                                domainEventSupervisor.dispatchRawImmediately(event, true);
                             }
                             return ConsumeConcurrentlyStatus.CONSUME_SUCCESS;
                         } catch (Exception ex) {

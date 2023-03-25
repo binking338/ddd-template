@@ -1,7 +1,7 @@
 package com.abc.dddtemplate.adapter.portal.api.controller;
 
 import com.abc.dddtemplate.application.commands.order.ModifyOrderCmd;
-import com.abc.dddtemplate.application.sagas.PlaceOrderSagaService;
+import com.abc.dddtemplate.application.sagas.PlaceOrderSaga;
 import com.abc.dddtemplate.convention.aggregates.Saga;
 import com.abc.dddtemplate.share.dto.ResponseData;
 import com.abc.dddtemplate.application.commands.order.CloseOrderCmd;
@@ -35,13 +35,13 @@ public class OrderController {
     }
 
     @Autowired
-    PlaceOrderSagaService placeOrderSagaService;
+    PlaceOrderSaga.Handler placeOrderSagaHandler;
 
     @PostMapping("place")
     public ResponseData<Long> create(@RequestBody PlaceOrderCmd.CreateOrderDTO orderDTO) {
-        Saga saga = placeOrderSagaService.run(MapperUtil.map(orderDTO, PlaceOrderSagaService.Context.class));
+        Saga saga = placeOrderSagaHandler.run(MapperUtil.map(orderDTO, PlaceOrderSaga.class));
 
-        var result = saga.getContext(PlaceOrderSagaService.Context.class).getOrderId();
+        var result = saga.getContext(PlaceOrderSaga.class).getOrderId();
         return ResponseData.success(result);
     }
 

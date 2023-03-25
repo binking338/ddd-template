@@ -1,4 +1,4 @@
-package com.abc.dddtemplate.adapter.external.queries;
+package com.abc.dddtemplate.adapter.application.queries;
 
 import com.abc.dddtemplate.adapter.domain.repositories.OrderRepository;
 import com.abc.dddtemplate.application.queries.SearchOrderQry;
