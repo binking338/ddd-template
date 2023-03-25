@@ -1,5 +1,6 @@
 package com.abc.dddtemplate.application.commands.bill;
 
+import com.abc.dddtemplate.convention.UnitOfWork;
 import com.abc.dddtemplate.convention.schemas.AccountSchema;
 import com.abc.dddtemplate.domain.aggregates.samples.Account;
 import com.abc.dddtemplate.domain.aggregates.samples.Bill;
@@ -12,8 +13,6 @@ import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
-
 /**
  * 命令模式 （风格一）
  * 支付账单
@@ -24,7 +23,7 @@ import java.util.Optional;
 @Data
 @Builder
 public class PayBillCmd {
-    String accountName;
+    String owner;
     Long billId;
     Integer amount;
 
@@ -40,10 +39,11 @@ public class PayBillCmd {
             Bill bill = billRepository.findById(cmd.getBillId())
                     .orElseThrow(()->new ErrorException(cmd.getBillId() + " 账单不存在"));
             Account account = accountRepository
-                    .findOne(AccountSchema.specify(root -> root.name().eq(cmd.accountName)))
-                    .orElseThrow(()->new ErrorException(cmd.accountName + " 的账户不存在"));
+                    .findOne(AccountSchema.specify(root -> root.name().eq(cmd.owner)))
+                    .orElseThrow(()->new ErrorException(cmd.owner + " 的账户不存在"));
 
             paymentDomainService.pay(account, bill);
+            UnitOfWork.saveEntities(bill,  account);
             return true;
         }
     }

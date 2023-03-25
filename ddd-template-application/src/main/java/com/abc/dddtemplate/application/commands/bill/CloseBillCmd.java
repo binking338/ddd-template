@@ -24,7 +24,6 @@ public class CloseBillCmd {
      */
     private Long orderId;
 
-
     @Service
     @RequiredArgsConstructor
     public static class Handler implements Command<CloseBillCmd, Boolean>{
@@ -36,11 +35,12 @@ public class CloseBillCmd {
             Bill bill = billRepository.findOne(BillSchema.specify(b -> b.orderId().eq(cmd.getOrderId())))
                     .orElseThrow(() -> new ErrorException("账单丢失"));
             bill.close();
-            UnitOfWork.saveTransactional(() -> {
-                billRepository.save(bill);
-                // throw new WarnException("测试UnitOfWork的静态方法实现");
-                return null;
-            });
+            unitOfWork.save(bill);
+//            unitOfWork.required(() -> {
+//                billRepository.save(bill);
+//                // throw new WarnException("测试UnitOfWork的静态方法实现");
+//                return null;
+//            });
             return true;
         }
     }

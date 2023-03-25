@@ -26,7 +26,7 @@ public class PaymentSaga {
     /**
      * 用户
      */
-    String user;
+    String accountName;
     /**
      * 账单
      */
@@ -65,11 +65,11 @@ public class PaymentSaga {
                 if (context.couponAmount == null || context.couponAmount == 0) {
                     return;
                 }
-                couponClient.deduct(context.getUser(), context.getCouponAmount());
+                couponClient.deduct(context.accountName, context.getCouponAmount());
             }).then(context -> {
                 // 支付
                 payBillCmdHandler.exec(PayBillCmd.builder()
-                        .accountName(context.user)
+                        .owner(context.accountName)
                         .billId(context.getBillId())
                         .amount(context.getAccountAmount())
                         .build());

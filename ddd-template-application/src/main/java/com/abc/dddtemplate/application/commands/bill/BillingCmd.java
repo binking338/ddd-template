@@ -42,7 +42,7 @@ public class BillingCmd {
     @Service
     @RequiredArgsConstructor
     public static class  Handler implements Command<BillingCmd, Long>{
-        private final AggregateRepository<Bill, Long> billRepository;
+//        private final AggregateRepository<Bill, Long> billRepository;
         private final UnitOfWork unitOfWork;
 
         @Override
