@@ -2,6 +2,8 @@ package com.abc.dddtemplate.application.specifications;
 
 import com.abc.dddtemplate.convention.Specification;
 import com.abc.dddtemplate.domain.aggregates.samples.Order;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 /**
@@ -10,6 +12,8 @@ import org.springframework.stereotype.Service;
  * @date
  */
 @Service
+@RequiredArgsConstructor
+@Slf4j
 public class OrderSpec implements Specification<Order> {
     @Override
     public Class<Order> entityClass() {
