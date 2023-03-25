@@ -106,20 +106,24 @@ public abstract class SagaStateMachine<Context> {
         if (startSagaProcessMethods.size() == 0) {
             log.error("SAGA type=[" + clazz.getTypeName() + "]没有声明起始SagaProcess方法！");
             throw new RuntimeException("没有声明起始SagaProcess方法！");
-        }
-        if (startSagaProcessMethods.size() == 1) {
+        } else if (startSagaProcessMethods.size() == 1) {
             process = transformProcess(startSagaProcessMethods.get(0), sagaProcessMethods, sagaStateMachine);
         } else {
-            process = Process.of(0, "start", context -> {
-            });
+            startSagaProcessMethods.sort(this::sagaCompare);
+            Process<Context> currentProcess = null;
             for (Method m : startSagaProcessMethods) {
-                process.addSub(transformProcess(m, sagaProcessMethods, sagaStateMachine));
+                if(currentProcess == null){
+                    currentProcess = transformProcess(m, sagaProcessMethods, sagaStateMachine);
+                    process = currentProcess;
+                } else {
+                    currentProcess.addSub(transformProcess(m, sagaProcessMethods, sagaStateMachine));
+                }
             }
         }
         return process;
     }
 
-    private Process<Context> transformProcess(Method processMethod, List<Method> allSagaProcessMethods, Object sagaStateMachine) {
+    protected Process<Context> transformProcess(Method processMethod, List<Method> allSagaProcessMethods, Object sagaStateMachine) {
 
         SagaProcess anno = processMethod.getAnnotation(SagaProcess.class);
         String processName = StringUtils.isNotEmpty(anno.name()) ? anno.name() : processMethod.getName();
@@ -137,18 +141,7 @@ public abstract class SagaStateMachine<Context> {
                 })
                 .collect(Collectors.toList());
 
-        subProcessMethods.sort((a, b) -> {
-            SagaProcess annoA = a.getAnnotation(SagaProcess.class);
-            SagaProcess annoB = b.getAnnotation(SagaProcess.class);
-            int codeComp = Integer.compare(annoA.code(), annoB.code());
-            if (codeComp != 0) {
-                return codeComp;
-            } else {
-                String processAName = StringUtils.isNotEmpty(annoA.name()) ? annoA.name() : a.getName();
-                String processBName = StringUtils.isNotEmpty(annoB.name()) ? annoB.name() : b.getName();
-                return StringUtils.compare(processAName, processBName);
-            }
-        });
+        subProcessMethods.sort(this::sagaCompare);
         for (Method subProcessMethod : subProcessMethods) {
             process.addSub(transformProcess(subProcessMethod, allSagaProcessMethods, sagaStateMachine));
         }
@@ -163,6 +156,19 @@ public abstract class SagaStateMachine<Context> {
             process.then(transformProcess(nextProcessMethod, allSagaProcessMethods, sagaStateMachine));
         }
         return process;
+    }
+
+    protected Integer sagaCompare(Method a, Method b){
+        SagaProcess annoA = a.getAnnotation(SagaProcess.class);
+        SagaProcess annoB = b.getAnnotation(SagaProcess.class);
+        int codeComp = Integer.compare(annoA.code(), annoB.code());
+        if (codeComp != 0) {
+            return codeComp;
+        } else {
+            String processAName = StringUtils.isNotEmpty(annoA.name()) ? annoA.name() : a.getName();
+            String processBName = StringUtils.isNotEmpty(annoB.name()) ? annoB.name() : b.getName();
+            return StringUtils.compare(processAName, processBName);
+        }
     }
 
     /**
