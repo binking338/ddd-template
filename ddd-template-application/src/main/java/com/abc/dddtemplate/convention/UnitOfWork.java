@@ -97,7 +97,7 @@ public class UnitOfWork {
     private ThreadLocal<Map<Object, Boolean>> preValidatedThreadLocal = ThreadLocal.withInitial(() -> new HashMap<>());
     private ThreadLocal<Map<Object, Boolean>> postValidatedThreadLocal = ThreadLocal.withInitial(() -> new HashMap<>());
     private ThreadLocal<Integer> stackDepthCounterThreadLocal = ThreadLocal.withInitial(() -> 0);
-    private ThreadLocal<Set<Object>> additionalAttachedEntitiesThreadLocal = ThreadLocal.withInitial(() -> new HashSet<>());
+    private ThreadLocal<Set<Object>> correlaedEntitiesThreadLocal = ThreadLocal.withInitial(() -> new HashSet<>());
     private ThreadLocal<Set<Object>> attachedEntitiesThreadLocal = ThreadLocal.withInitial(() -> new HashSet<>());
     private ThreadLocal<Set<Object>> removedEntitiesThreadLocal = ThreadLocal.withInitial(() -> new HashSet<>());
 
@@ -108,7 +108,7 @@ public class UnitOfWork {
         preValidatedThreadLocal.remove();
         postValidatedThreadLocal.remove();
         stackDepthCounterThreadLocal.remove();
-        additionalAttachedEntitiesThreadLocal.remove();
+        correlaedEntitiesThreadLocal.remove();
         attachedEntitiesThreadLocal.remove();
         removedEntitiesThreadLocal.remove();
     }
@@ -119,7 +119,7 @@ public class UnitOfWork {
      * @param entities
      */
     public void attach(Object... entities) {
-        attach(Arrays.stream(entities).collect(Collectors.toList()));
+        attach(entities.length > 0 ? Arrays.stream(entities).collect(Collectors.toList()) : null);
     }
 
     /**
@@ -128,8 +128,10 @@ public class UnitOfWork {
      * @param entities
      */
     public void attach(Collection<?> entities) {
-        Set<Object> attachedEntities = attachedEntitiesThreadLocal.get();
-        attachedEntities.addAll(entities);
+        if(CollectionUtils.isNotEmpty(entities)) {
+            Set<Object> attachedEntities = attachedEntitiesThreadLocal.get();
+            attachedEntities.addAll(entities);
+        }
     }
 
     /**
@@ -138,7 +140,7 @@ public class UnitOfWork {
      * @param entities
      */
     public void remove(Object... entities) {
-        remove(Arrays.stream(entities).collect(Collectors.toList()));
+        remove(entities.length > 0 ? Arrays.stream(entities).collect(Collectors.toList()) : null);
     }
 
     /**
@@ -147,8 +149,10 @@ public class UnitOfWork {
      * @param entities
      */
     public void remove(Collection<?> entities) {
-        Set<Object> removedEntities = removedEntitiesThreadLocal.get();
-        removedEntities.addAll(entities);
+        if(CollectionUtils.isNotEmpty(entities)) {
+            Set<Object> removedEntities = removedEntitiesThreadLocal.get();
+            removedEntities.addAll(entities);
+        }
     }
 
     /**
@@ -194,19 +198,26 @@ public class UnitOfWork {
      * @param deleteEntities 删除实体
      */
     public void save(Collection<?> saveEntities, Collection<?> deleteEntities) {
-        List<?> saveEntityList = CollectionUtils.isNotEmpty(saveEntities)
+        Set<Object> saveEntityList = CollectionUtils.isNotEmpty(saveEntities)
                 ? Stream.concat(attachedEntitiesThreadLocal.get().stream(), saveEntities.stream())
-                .collect(Collectors.toList())
-                : attachedEntitiesThreadLocal.get().stream().collect(Collectors.toList());
-        List<?> deleteEntityList = CollectionUtils.isNotEmpty(deleteEntities)
+                .collect(Collectors.toSet())
+                : attachedEntitiesThreadLocal.get().stream().collect(Collectors.toSet());
+        attachedEntitiesThreadLocal.get().clear();
+        Set<Object> deleteEntityList = CollectionUtils.isNotEmpty(deleteEntities)
                 ? Stream.concat(removedEntitiesThreadLocal.get().stream(), deleteEntities.stream())
-                .collect(Collectors.toList())
-                : removedEntitiesThreadLocal.get().stream().collect(Collectors.toList());
+                .collect(Collectors.toSet())
+                : removedEntitiesThreadLocal.get().stream().collect(Collectors.toSet());
+        removedEntitiesThreadLocal.get().clear();
+        for (Object entity : persistenceContextEntities()){
+            if(!deleteEntityList.contains(entity)){
+                saveEntityList.add(entity);
+            }
+        }
         if (CollectionUtils.isNotEmpty(saveEntityList)) {
-            additionalAttachedEntitiesThreadLocal.get().addAll(saveEntityList);
+            correlaedEntitiesThreadLocal.get().addAll(saveEntityList);
         }
         if (CollectionUtils.isNotEmpty(deleteEntityList)) {
-            additionalAttachedEntitiesThreadLocal.get().addAll(deleteEntityList);
+            correlaedEntitiesThreadLocal.get().addAll(deleteEntityList);
         }
         save(() -> {
             if (CollectionUtils.isNotEmpty(saveEntityList)) {
@@ -241,7 +252,7 @@ public class UnitOfWork {
                 }
             }
         });
-        additionalAttachedEntitiesThreadLocal.remove();
+        correlaedEntitiesThreadLocal.remove();
     }
 
     /**
@@ -342,19 +353,21 @@ public class UnitOfWork {
         return result;
     }
 
-    protected List<Object> correlatedEntities() {
-        Stream<Object> entities = additionalAttachedEntitiesThreadLocal.get().stream();
+    protected Set<Object> correlatedEntities() {
+        return correlaedEntitiesThreadLocal.get();
+    }
+
+    protected List<Object> persistenceContextEntities() {
         try {
             if (!((SessionImplementor) getEntityManager().getDelegate()).isClosed()) {
-
                 org.hibernate.engine.spi.PersistenceContext persistenceContext = ((SessionImplementor) getEntityManager().getDelegate()).getPersistenceContext();
                 Stream<Object> entitiesInPersistenceContext = Arrays.stream(persistenceContext.reentrantSafeEntityEntries()).map(e -> e.getKey());
-                entities = Stream.concat(entities, entitiesInPersistenceContext);
+                return entitiesInPersistenceContext.collect(Collectors.toList());
             }
         } catch (Exception ex) {
             log.debug("跟踪实体获取失败", ex);
         }
-        return entities.distinct().collect(Collectors.toList());
+        return Collections.emptyList();
     }
 
     protected List<Specification> getSpecificationsForEntityClass(Class clazz) {
@@ -375,7 +388,7 @@ public class UnitOfWork {
     }
 
     protected void preTransactionSpecifications() {
-        List<Object> entities = correlatedEntities();
+        Set<Object> entities = correlatedEntities();
         for (Object entity : entities) {
             if (preValidatedThreadLocal.get().containsKey(entity)) {
                 continue;
@@ -395,7 +408,7 @@ public class UnitOfWork {
     }
 
     protected void inTransactionSpecifications() {
-        List<Object> entities = correlatedEntities();
+        Set<Object> entities = correlatedEntities();
         for (Object entity : entities) {
             if (postValidatedThreadLocal.get().containsKey(entity)) {
                 continue;
