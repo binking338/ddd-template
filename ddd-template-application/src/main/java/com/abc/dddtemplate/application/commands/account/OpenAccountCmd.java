@@ -29,7 +29,8 @@ public class OpenAccountCmd {
         @Override
         public Long exec(OpenAccountCmd chargeAccountCmd) {
             Account account = Account.open(chargeAccountCmd.name);
-            unitOfWork.save(account);
+            unitOfWork.attach(account);
+            unitOfWork.save();
             return account.getId();
         }
     }

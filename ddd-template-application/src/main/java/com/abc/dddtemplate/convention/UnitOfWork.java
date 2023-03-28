@@ -97,7 +97,9 @@ public class UnitOfWork {
     private ThreadLocal<Map<Object, Boolean>> preValidatedThreadLocal = ThreadLocal.withInitial(() -> new HashMap<>());
     private ThreadLocal<Map<Object, Boolean>> postValidatedThreadLocal = ThreadLocal.withInitial(() -> new HashMap<>());
     private ThreadLocal<Integer> stackDepthCounterThreadLocal = ThreadLocal.withInitial(() -> 0);
-    private ThreadLocal<List<Object>> additionalAttachedEntitiesThreadLocal = ThreadLocal.withInitial(() -> new ArrayList<>());
+    private ThreadLocal<Set<Object>> additionalAttachedEntitiesThreadLocal = ThreadLocal.withInitial(() -> new HashSet<>());
+    private ThreadLocal<Set<Object>> attachedEntitiesThreadLocal = ThreadLocal.withInitial(() -> new HashSet<>());
+    private ThreadLocal<Set<Object>> removedEntitiesThreadLocal = ThreadLocal.withInitial(() -> new HashSet<>());
 
     /**
      * 移除上下文
@@ -107,6 +109,46 @@ public class UnitOfWork {
         postValidatedThreadLocal.remove();
         stackDepthCounterThreadLocal.remove();
         additionalAttachedEntitiesThreadLocal.remove();
+        attachedEntitiesThreadLocal.remove();
+        removedEntitiesThreadLocal.remove();
+    }
+
+    /**
+     * 将实体附加到UoW上下文
+     *
+     * @param entities
+     */
+    public void attach(Object... entities) {
+        attach(Arrays.stream(entities).collect(Collectors.toList()));
+    }
+
+    /**
+     * 将实体附加到UoW上下文
+     *
+     * @param entities
+     */
+    public void attach(Collection<?> entities) {
+        Set<Object> attachedEntities = attachedEntitiesThreadLocal.get();
+        attachedEntities.addAll(entities);
+    }
+
+    /**
+     * 将欲删除的实体附加到UoW上下文
+     *
+     * @param entities
+     */
+    public void remove(Object... entities) {
+        remove(Arrays.stream(entities).collect(Collectors.toList()));
+    }
+
+    /**
+     * 将欲删除的实体附加到UoW上下文
+     *
+     * @param entities
+     */
+    public void remove(Collection<?> entities) {
+        Set<Object> removedEntities = removedEntitiesThreadLocal.get();
+        removedEntities.addAll(entities);
     }
 
     /**
@@ -115,7 +157,7 @@ public class UnitOfWork {
      * @param entities
      */
     public void delete(Object... entities) {
-        delete(Arrays.stream(entities).collect(Collectors.toList()));
+        delete(entities.length > 0 ? Arrays.stream(entities).collect(Collectors.toList()) : null);
     }
 
     /**
@@ -133,7 +175,7 @@ public class UnitOfWork {
      * @param entities 待持久化的实体
      */
     public void save(Object... entities) {
-        save(Arrays.stream(entities).collect(Collectors.toList()));
+        save(entities.length > 0 ? Arrays.stream(entities).collect(Collectors.toList()) : null);
     }
 
     /**
@@ -152,16 +194,23 @@ public class UnitOfWork {
      * @param deleteEntities 删除实体
      */
     public void save(Collection<?> saveEntities, Collection<?> deleteEntities) {
-        List<Object> attachedEntities = additionalAttachedEntitiesThreadLocal.get();
-        if (CollectionUtils.isNotEmpty(saveEntities)) {
-            attachedEntities.addAll(saveEntities);
+        List<?> saveEntityList = CollectionUtils.isNotEmpty(saveEntities)
+                ? Stream.concat(attachedEntitiesThreadLocal.get().stream(), saveEntities.stream())
+                .collect(Collectors.toList())
+                : attachedEntitiesThreadLocal.get().stream().collect(Collectors.toList());
+        List<?> deleteEntityList = CollectionUtils.isNotEmpty(deleteEntities)
+                ? Stream.concat(removedEntitiesThreadLocal.get().stream(), deleteEntities.stream())
+                .collect(Collectors.toList())
+                : removedEntitiesThreadLocal.get().stream().collect(Collectors.toList());
+        if (CollectionUtils.isNotEmpty(saveEntityList)) {
+            additionalAttachedEntitiesThreadLocal.get().addAll(saveEntityList);
         }
-        if (CollectionUtils.isNotEmpty(deleteEntities)) {
-            attachedEntities.addAll(deleteEntities);
+        if (CollectionUtils.isNotEmpty(deleteEntityList)) {
+            additionalAttachedEntitiesThreadLocal.get().addAll(deleteEntityList);
         }
         save(() -> {
-            if (CollectionUtils.isNotEmpty(saveEntities)) {
-                for (Object entity : saveEntities) {
+            if (CollectionUtils.isNotEmpty(saveEntityList)) {
+                for (Object entity : saveEntityList) {
                     if (getEntityManager().contains(entity)) {
                         getEntityManager().merge(entity);
                         getEntityManager().flush();
@@ -182,8 +231,8 @@ public class UnitOfWork {
                     }
                 }
             }
-            if (CollectionUtils.isNotEmpty(deleteEntities)) {
-                for (Object entity : deleteEntities) {
+            if (CollectionUtils.isNotEmpty(deleteEntityList)) {
+                for (Object entity : deleteEntityList) {
                     if (getEntityManager().contains(entity)) {
                         getEntityManager().remove(entity);
                     } else {
@@ -370,6 +419,42 @@ public class UnitOfWork {
      */
     public static void clearContext() {
         instance.clear();
+    }
+
+    /**
+     * 将实体附加到UoW上下文
+     *
+     * @param entities
+     */
+    public static void attachEntities(Object... entities) {
+        instance.attach(entities);
+    }
+
+    /**
+     * 将实体附加到UoW上下文
+     *
+     * @param entities
+     */
+    public static void attachEntities(Collection<?> entities) {
+        instance.attach(entities);
+    }
+
+    /**
+     * 将欲删除的实体附加到UoW上下文
+     *
+     * @param entities
+     */
+    public static void removeEntities(Object... entities) {
+        instance.remove(entities);
+    }
+
+    /**
+     * 将欲删除的实体附加到UoW上下文
+     *
+     * @param entities
+     */
+    public static void removeEntities(Collection<?> entities) {
+        instance.remove(entities);
     }
 
     /**
