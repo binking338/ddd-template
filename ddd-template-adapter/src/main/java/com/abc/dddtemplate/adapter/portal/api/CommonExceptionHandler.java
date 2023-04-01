@@ -170,7 +170,21 @@ public class CommonExceptionHandler {
     @ExceptionHandler(Throwable.class)
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ResponseData<Object> handleError(HttpServletRequest request, Throwable e) {
+        KnownException ke = getKnownException(e);
+        if (ke != null) {
+            return knownException(ke);
+        }
         log.error(String.format("发生未知异常:%s request:%s", e.getMessage(), getRequestInfo(request)), e);
         return ResponseData.fail(CodeEnum.ERROR);
+    }
+
+    private KnownException getKnownException(Throwable e) {
+        if (e instanceof KnownException) {
+            return (KnownException) e;
+        }
+        if (e.getCause() != null && e.getCause() != e) {
+            return getKnownException(e.getCause());
+        }
+        return null;
     }
 }
