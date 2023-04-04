@@ -21,6 +21,6 @@ ENV JAVA_APP_DIR=/
 
 ENV JAVA_OPTIONS="-server -Dserver.port=80 -Djava.security.egd=file:/dev/./urandom -Drocketmq.client.logUseSlf4j=true \
     -XX:InitialRAMPercentage=70.0 -XX:MaxRAMPercentage=70.0 -XX:MinRAMPercentage=70.0 -XX:NewRatio=2 -Xss256k -XX:MetaspaceSize=128m -XX:MaxMetaspaceSize=512m -XX:MaxDirectMemorySize=256m -XX:-OmitStackTraceInFastThrow -XX:+UseConcMarkSweepGC -XX:+CMSParallelRemarkEnabled -XX:+ParallelRefProcEnabled -XX:+CMSScavengeBeforeRemark -XX:+UseCMSCompactAtFullCollection -XX:CMSInitiatingOccupancyFraction=65 -XX:+UseCMSInitiatingOccupancyOnly -XX:+ExplicitGCInvokesConcurrentAndUnloadsClasses \
-    -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/heap/ddd-template.hprof -Xloggc:/gc.log -XX:+PrintGCDetails -XX:+PrintGCDateStamps
+    -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/heap/ddd-template.hprof -Xloggc:/gc.log -XX:+PrintGCDetails -XX:+PrintGCDateStamps"
 VOLUME /heap
 ENTRYPOINT ["sh", "/deployments/run-java.sh"]
