@@ -3,9 +3,14 @@ package com.abc.dddtemplate.convention.schemas;
 import com.abc.dddtemplate.convention.Schema;
 import com.abc.dddtemplate.domain.aggregates.samples.OrderItem;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 
 import javax.persistence.criteria.*;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.stream.Collectors;
 
 /**
  * 订单项 
@@ -21,7 +26,7 @@ public class OrderItemSchema {
     }
 
     public Schema.Field<Long> id(){
-        return new Schema.Field<>(root.get("id"));
+        return root == null ? new Schema.Field<>("id") : new Schema.Field<>(root.get("id"));
     }
 
     /**
@@ -29,7 +34,7 @@ public class OrderItemSchema {
      * varchar(100)
      */
     public Schema.Field<String> name(){
-        return new Schema.Field<>(root.get("name"));
+        return root == null ? new Schema.Field<>("name") : new Schema.Field<>(root.get("name"));
     }
 
     /**
@@ -37,7 +42,7 @@ public class OrderItemSchema {
      * int(11)
      */
     public Schema.Field<Integer> price(){
-        return new Schema.Field<>(root.get("price"));
+        return root == null ? new Schema.Field<>("price") : new Schema.Field<>(root.get("price"));
     }
 
     /**
@@ -45,7 +50,7 @@ public class OrderItemSchema {
      * int(11)
      */
     public Schema.Field<Integer> num(){
-        return new Schema.Field<>(root.get("num"));
+        return root == null ? new Schema.Field<>("num") : new Schema.Field<>(root.get("num"));
     }
 
     /**
@@ -77,6 +82,31 @@ public class OrderItemSchema {
             criteriaQuery.where(builder.build(orderItem));
             return null;
         };
+    }
+    
+    /**
+     * 构建排序
+     * @param builders
+     * @return
+     */
+    public static Sort orderBy(Schema.OrderBuilder<OrderItemSchema>... builders){
+        return orderBy(Arrays.asList(builders));
+    }
+
+    /**
+     * 构建排序
+     *
+     * @param builders
+     * @return
+     */
+    public static Sort orderBy(Collection<Schema.OrderBuilder<OrderItemSchema>> builders){
+        if(CollectionUtils.isEmpty(builders)){
+            return Sort.unsorted();
+        }
+        return Sort.by(builders.stream()
+                .map(builder -> builder.build(new OrderItemSchema(null, null)))
+                .collect(Collectors.toList())
+        );
     }
 
 }

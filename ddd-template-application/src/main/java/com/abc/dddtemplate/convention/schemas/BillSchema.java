@@ -3,9 +3,14 @@ package com.abc.dddtemplate.convention.schemas;
 import com.abc.dddtemplate.convention.Schema;
 import com.abc.dddtemplate.domain.aggregates.samples.Bill;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 
 import javax.persistence.criteria.*;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.stream.Collectors;
 
 /**
  * 账单 
@@ -21,14 +26,14 @@ public class BillSchema {
     }
 
     public Schema.Field<Long> id(){
-        return new Schema.Field<>(root.get("id"));
+        return root == null ? new Schema.Field<>("id") : new Schema.Field<>(root.get("id"));
     }
 
     /**
      * bigint(20)
      */
     public Schema.Field<Long> orderId(){
-        return new Schema.Field<>(root.get("orderId"));
+        return root == null ? new Schema.Field<>("orderId") : new Schema.Field<>(root.get("orderId"));
     }
 
     /**
@@ -36,7 +41,7 @@ public class BillSchema {
      * varchar(100)
      */
     public Schema.Field<String> name(){
-        return new Schema.Field<>(root.get("name"));
+        return root == null ? new Schema.Field<>("name") : new Schema.Field<>(root.get("name"));
     }
 
     /**
@@ -44,7 +49,7 @@ public class BillSchema {
      * varchar(100)
      */
     public Schema.Field<String> owner(){
-        return new Schema.Field<>(root.get("owner"));
+        return root == null ? new Schema.Field<>("owner") : new Schema.Field<>(root.get("owner"));
     }
 
     /**
@@ -52,7 +57,7 @@ public class BillSchema {
      * int(11)
      */
     public Schema.Field<Integer> amount(){
-        return new Schema.Field<>(root.get("amount"));
+        return root == null ? new Schema.Field<>("amount") : new Schema.Field<>(root.get("amount"));
     }
 
     /**
@@ -60,7 +65,7 @@ public class BillSchema {
      * bit(1)
      */
     public Schema.Field<Boolean> payed(){
-        return new Schema.Field<>(root.get("payed"));
+        return root == null ? new Schema.Field<>("payed") : new Schema.Field<>(root.get("payed"));
     }
 
     /**
@@ -68,7 +73,7 @@ public class BillSchema {
      * bit(1)
      */
     public Schema.Field<Boolean> closed(){
-        return new Schema.Field<>(root.get("closed"));
+        return root == null ? new Schema.Field<>("closed") : new Schema.Field<>(root.get("closed"));
     }
 
     /**
@@ -100,6 +105,31 @@ public class BillSchema {
             criteriaQuery.where(builder.build(bill));
             return null;
         };
+    }
+    
+    /**
+     * 构建排序
+     * @param builders
+     * @return
+     */
+    public static Sort orderBy(Schema.OrderBuilder<BillSchema>... builders){
+        return orderBy(Arrays.asList(builders));
+    }
+
+    /**
+     * 构建排序
+     *
+     * @param builders
+     * @return
+     */
+    public static Sort orderBy(Collection<Schema.OrderBuilder<BillSchema>> builders){
+        if(CollectionUtils.isEmpty(builders)){
+            return Sort.unsorted();
+        }
+        return Sort.by(builders.stream()
+                .map(builder -> builder.build(new BillSchema(null, null)))
+                .collect(Collectors.toList())
+        );
     }
 
 }

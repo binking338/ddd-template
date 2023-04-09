@@ -3,9 +3,14 @@ package com.abc.dddtemplate.convention.schemas;
 import com.abc.dddtemplate.convention.Schema;
 import com.abc.dddtemplate.domain.aggregates.samples.Transfer;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 
 import javax.persistence.criteria.*;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.stream.Collectors;
 
 /**
  * 转账记录 
@@ -21,7 +26,7 @@ public class TransferSchema {
     }
 
     public Schema.Field<Long> id(){
-        return new Schema.Field<>(root.get("id"));
+        return root == null ? new Schema.Field<>("id") : new Schema.Field<>(root.get("id"));
     }
 
     /**
@@ -29,7 +34,7 @@ public class TransferSchema {
      * bigint(100)
      */
     public Schema.Field<Long> accountId(){
-        return new Schema.Field<>(root.get("accountId"));
+        return root == null ? new Schema.Field<>("accountId") : new Schema.Field<>(root.get("accountId"));
     }
 
     /**
@@ -37,7 +42,7 @@ public class TransferSchema {
      * datetime
      */
     public Schema.Field<java.util.Date> time(){
-        return new Schema.Field<>(root.get("time"));
+        return root == null ? new Schema.Field<>("time") : new Schema.Field<>(root.get("time"));
     }
 
     /**
@@ -45,7 +50,7 @@ public class TransferSchema {
      * int(11)
      */
     public Schema.Field<Integer> bizType(){
-        return new Schema.Field<>(root.get("bizType"));
+        return root == null ? new Schema.Field<>("bizType") : new Schema.Field<>(root.get("bizType"));
     }
 
     /**
@@ -53,7 +58,7 @@ public class TransferSchema {
      * varchar(20)
      */
     public Schema.Field<String> bizId(){
-        return new Schema.Field<>(root.get("bizId"));
+        return root == null ? new Schema.Field<>("bizId") : new Schema.Field<>(root.get("bizId"));
     }
 
     /**
@@ -61,7 +66,7 @@ public class TransferSchema {
      * int(11)
      */
     public Schema.Field<Integer> amount(){
-        return new Schema.Field<>(root.get("amount"));
+        return root == null ? new Schema.Field<>("amount") : new Schema.Field<>(root.get("amount"));
     }
 
     /**
@@ -93,6 +98,31 @@ public class TransferSchema {
             criteriaQuery.where(builder.build(transfer));
             return null;
         };
+    }
+    
+    /**
+     * 构建排序
+     * @param builders
+     * @return
+     */
+    public static Sort orderBy(Schema.OrderBuilder<TransferSchema>... builders){
+        return orderBy(Arrays.asList(builders));
+    }
+
+    /**
+     * 构建排序
+     *
+     * @param builders
+     * @return
+     */
+    public static Sort orderBy(Collection<Schema.OrderBuilder<TransferSchema>> builders){
+        if(CollectionUtils.isEmpty(builders)){
+            return Sort.unsorted();
+        }
+        return Sort.by(builders.stream()
+                .map(builder -> builder.build(new TransferSchema(null, null)))
+                .collect(Collectors.toList())
+        );
     }
 
 }

@@ -3,9 +3,14 @@ package com.abc.dddtemplate.convention.schemas;
 import com.abc.dddtemplate.convention.Schema;
 import com.abc.dddtemplate.domain.aggregates.relationsamples.many2many.Student;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.collections4.CollectionUtils;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 
 import javax.persistence.criteria.*;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.stream.Collectors;
 
 /**
  * 学生 
@@ -21,7 +26,7 @@ public class StudentSchema {
     }
 
     public Schema.Field<Long> id(){
-        return new Schema.Field<>(root.get("id"));
+        return root == null ? new Schema.Field<>("id") : new Schema.Field<>(root.get("id"));
     }
 
     /**
@@ -29,7 +34,7 @@ public class StudentSchema {
      * varchar(100)
      */
     public Schema.Field<String> name(){
-        return new Schema.Field<>(root.get("name"));
+        return root == null ? new Schema.Field<>("name") : new Schema.Field<>(root.get("name"));
     }
 
     /**
@@ -61,6 +66,31 @@ public class StudentSchema {
             criteriaQuery.where(builder.build(student));
             return null;
         };
+    }
+    
+    /**
+     * 构建排序
+     * @param builders
+     * @return
+     */
+    public static Sort orderBy(Schema.OrderBuilder<StudentSchema>... builders){
+        return orderBy(Arrays.asList(builders));
+    }
+
+    /**
+     * 构建排序
+     *
+     * @param builders
+     * @return
+     */
+    public static Sort orderBy(Collection<Schema.OrderBuilder<StudentSchema>> builders){
+        if(CollectionUtils.isEmpty(builders)){
+            return Sort.unsorted();
+        }
+        return Sort.by(builders.stream()
+                .map(builder -> builder.build(new StudentSchema(null, null)))
+                .collect(Collectors.toList())
+        );
     }
 
 }

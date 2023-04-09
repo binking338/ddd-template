@@ -1,10 +1,14 @@
 package com.abc.dddtemplate.convention;
 
+import com.google.common.collect.Lists;
 import org.hibernate.query.criteria.internal.path.SingularAttributePath;
+import org.springframework.data.domain.Sort;
 
+import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
+import java.util.Collection;
 
 /**
  * Schema
@@ -21,15 +25,43 @@ public class Schema {
         public Expression<Boolean> build(S schema);
     }
 
+
+    /**
+     * 排序构建器
+     */
+    public static interface OrderBuilder<S> {
+        public Sort.Order build(S schema);
+    }
+
+
     /**
      * 字段
      *
      * @param <T>
      */
-    public static class Field<T> extends SingularAttributePath<T> {
+    public static class Field<T> {
+        private String name;
+        private SingularAttributePath<T> path;
 
         public Field(Path<T> path) {
-            super(((SingularAttributePath<T>) path).criteriaBuilder(), ((SingularAttributePath<T>) path).getJavaType(), ((SingularAttributePath<T>) path).getPathSource(), ((SingularAttributePath<T>) path).getAttribute());
+            this.path = new SingularAttributePath<>(((SingularAttributePath<T>) path).criteriaBuilder(), ((SingularAttributePath<T>) path).getJavaType(), ((SingularAttributePath<T>) path).getPathSource(), ((SingularAttributePath<T>) path).getAttribute());
+            this.name = name;
+        }
+
+        public Field(String name) {
+            this.name = name;
+        }
+
+        protected CriteriaBuilder criteriaBuilder() {
+            return path == null ? null : path.criteriaBuilder();
+        }
+
+        public Sort.Order asc() {
+            return Sort.Order.asc(this.name);
+        }
+
+        public Sort.Order desc() {
+            return Sort.Order.desc(this.name);
         }
 
         public Predicate isTrue() {
@@ -42,19 +74,27 @@ public class Schema {
         }
 
         public Predicate equal(Object val) {
-            return criteriaBuilder().equal(this, val);
+            return criteriaBuilder().equal(this.path, val);
         }
 
         public Predicate equal(Expression<?> val) {
-            return criteriaBuilder().equal(this, val);
+            return criteriaBuilder().equal(this.path, val);
         }
 
         public Predicate notEqual(Object val) {
-            return criteriaBuilder().notEqual(this, val);
+            return criteriaBuilder().notEqual(this.path, val);
         }
 
         public Predicate notEqual(Expression<?> val) {
-            return criteriaBuilder().notEqual(this, val);
+            return criteriaBuilder().notEqual(this.path, val);
+        }
+
+        public Predicate isNull() {
+            return criteriaBuilder().isNull(this.path);
+        }
+
+        public Predicate isNotNull() {
+            return criteriaBuilder().isNotNull(this.path);
         }
 
         public <Y extends Comparable<? super Y>> Predicate greaterThan(Y val) {
@@ -95,6 +135,26 @@ public class Schema {
 
         public <Y extends Comparable<? super Y>> Predicate between(Expression<? extends Y> val1, Expression<? extends Y> val2) {
             return criteriaBuilder().between((Expression<Y>) this, val1, val2);
+        }
+
+        public Predicate in(Object... vals) {
+            return in(Lists.newArrayList(vals));
+        }
+
+        public Predicate in(Collection<Object> vals) {
+            CriteriaBuilder.In predicate = criteriaBuilder().in(this.path);
+            for (Object o : vals) {
+                predicate.value(o);
+            }
+            return predicate;
+        }
+
+        public Predicate notIn(Object... vals) {
+            return notIn(Lists.newArrayList(vals));
+        }
+
+        public Predicate notIn(Collection<Object> vals) {
+            return criteriaBuilder().not(in(vals));
         }
 
 
@@ -164,7 +224,6 @@ public class Schema {
         public <Y extends Comparable<? super Y>> Predicate le(Expression<? extends Y> val) {
             return lessThanOrEqualTo(val);
         }
-
     }
 }
 
