@@ -59,6 +59,7 @@
           <directory>src/main/java</directory>
           <includes>
             <include>**/*.java</include>
+            <include>**/.*</include>
           </includes>
         </fileSet>
         <fileSet encoding="UTF-8">
@@ -75,6 +76,7 @@
           <directory>src/main/java</directory>
           <includes>
             <include>**/*.java</include>
+            <include>**/.*</include>
           </includes>
         </fileSet>
         <fileSet encoding="UTF-8">
@@ -91,6 +93,7 @@
           <directory>src/main/java</directory>
           <includes>
             <include>**/*.java</include>
+            <include>**/.*</include>
           </includes>
         </fileSet>
         <fileSet encoding="UTF-8">
@@ -107,6 +110,7 @@
           <directory>src/main/java</directory>
           <includes>
             <include>**/*.java</include>
+            <include>**/.*</include>
           </includes>
         </fileSet>
         <fileSet encoding="UTF-8">

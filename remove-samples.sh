@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 
-rm -f ./*-adapter/src/main/java/com/*/*/adapter/external/*/*.java
-rm -f ./*-adapter/src/main/java/com/*/*/adapter/external/*/*/*.java
+rm -f ./*-adapter/src/main/java/com/*/*/adapter/external/clients/*.java
+rm -f ./*-adapter/src/main/java/com/*/*/adapter/external/clients/*/*.java
 rm -f ./*-adapter/src/main/java/com/*/*/adapter/domain/repositories/*.java
+rm -f ./*-adapter/src/main/java/com/*/*/adapter/application/queries/*.java
 rm -f ./*-adapter/src/main/java/com/*/*/adapter/portal/api/controller/AccountController.java
 rm -f ./*-adapter/src/main/java/com/*/*/adapter/portal/api/controller/BillController.java
 rm -f ./*-adapter/src/main/java/com/*/*/adapter/portal/api/controller/OrderController.java
