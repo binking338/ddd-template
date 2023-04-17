@@ -223,8 +223,8 @@ public class UnitOfWork {
             if (CollectionUtils.isNotEmpty(saveEntityList)) {
                 for (Object entity : saveEntityList) {
                     if (getEntityManager().contains(entity)) {
-                        getEntityManager().merge(entity);
                         getEntityManager().flush();
+                        getEntityManager().refresh(entity);
                     } else {
                         try {
                             Object id = entity.getClass().getMethod("getId").invoke(entity);
