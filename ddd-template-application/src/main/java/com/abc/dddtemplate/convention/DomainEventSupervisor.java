@@ -97,6 +97,7 @@ public class DomainEventSupervisor {
         }
 
         if (!forceLocal && DomainEventPublisher.isIntergrationEvent(event)) {
+            dispatch2LocalSubscriber(event);
             dispatch2RemoteSubscriber(event);
         } else {
             dispatch2LocalSubscriber(event);
