@@ -224,7 +224,6 @@ public class UnitOfWork {
                 for (Object entity : saveEntityList) {
                     if (getEntityManager().contains(entity)) {
                         getEntityManager().flush();
-                        getEntityManager().refresh(entity);
                     } else {
                         try {
                             Object id = entity.getClass().getMethod("getId").invoke(entity);
