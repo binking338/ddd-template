@@ -16,6 +16,7 @@ import org.apache.rocketmq.common.consumer.ConsumeFromWhere;
 import org.apache.rocketmq.common.message.MessageExt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.event.ContextClosedEvent;
@@ -49,6 +50,8 @@ public class IntergrationEventSubscriberRocketMQAdapterConfig {
     Environment environment;
     @Autowired
     DomainEventSupervisor domainEventSupervisor;
+    @Autowired
+    ConfigurableBeanFactory beanFactory;
 
     List<MQPushConsumer> mqPushConsumers = new ArrayList<>();
 
@@ -87,6 +90,7 @@ public class IntergrationEventSubscriberRocketMQAdapterConfig {
             return null;
         }
         String target = domainEvent.value();
+        target = beanFactory.resolveEmbeddedValue(target);
         String topic = target.lastIndexOf(':') > 0 ? target.substring(0, target.lastIndexOf(':') - 1) : target;
         String tag = target.lastIndexOf(':') > 0 ? target.substring(target.lastIndexOf(':') + 1) : "";
 
