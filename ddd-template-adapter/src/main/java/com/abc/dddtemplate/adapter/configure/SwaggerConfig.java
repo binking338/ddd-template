@@ -24,26 +24,26 @@ public class SwaggerConfig implements ApplicationListener<WebServerInitializedEv
     @Value("${spring.application.version:1.0.0}")
     private String applicationVersion;
 
-//    /**
-//     * 用于多个文档情形
-//     * @return
-//     */
-//    @Bean
-//    public GroupedOpenApi groupedOpenApi() {
-//        String[] paths = {"/**"};
-//        return GroupedOpenApi.builder()
-//                .group(applicationName)
-//                .pathsToMatch(paths)
-//                .packagesToScan("com.abc.dddtemplate.adapter.portal.api.controller")
-//                .addOperationCustomizer((operation, handlerMethod) -> operation)
-//                .addOpenApiCustomiser(openApi -> openApi.info(new Info()
-//                        .title(applicationName)
-//                        .version(applicationVersion) ))
-//                .build();
-//    }
+    /**
+     * 用于多个文档情形，文档地址会加分组名称 /v3/api-docs/{group}，knife4j ui支持
+     * @return
+     */
+    @Bean
+    public GroupedOpenApi groupedOpenApi() {
+        String[] paths = {"/**"};
+        return GroupedOpenApi.builder()
+                .group(applicationName)
+                .pathsToMatch(paths)
+                .packagesToScan("com.abc.dddtemplate.adapter.portal.api.controller")
+                .addOperationCustomizer((operation, handlerMethod) -> operation)
+                .addOpenApiCustomiser(openApi -> openApi.info(new Info()
+                        .title(applicationName)
+                        .version(applicationVersion) ))
+                .build();
+    }
 
     /**
-     * 用于单个文档情形
+     * 用于单个文档情形，文档地址是统一的 /v3/api-docs，knife4j ui不支持
      * 可配置项
      * springdoc.packagesToScan=package1, package2
      * springdoc.pathsToMatch=/v1, /api/balance/**
@@ -66,5 +66,6 @@ public class SwaggerConfig implements ApplicationListener<WebServerInitializedEv
     @Override
     public void onApplicationEvent(WebServerInitializedEvent webServerInitializedEvent) {
         log.info("swagger URL: http://localhost:" + serverPort + serverServletContentPath + "/swagger-ui/index.html");
+        log.info("knife4j URL: http://localhost:" + serverPort + serverServletContentPath + "/doc.html");
     }
 }
