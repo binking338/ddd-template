@@ -17,7 +17,7 @@ fullnameOverride: ""
 app:
   env: {}
   # server.servlet.context-path
-  contextPath: "/ddd-template
+  contextPath: "/ddd-template"
   # ConfigMap 导入成环境变量
   envFromConfigMapName: "java-app-env"
   initialContainersEnabled: false
