@@ -182,9 +182,9 @@
     </dependencies>
     <repositories>
         <repository>
-            <id>private-repo</id>
-            <name>private-repo</name>
-            <url>https://maven.aliyun.com/repository/public</url>
+            <id>hunliji-public</id>
+            <name>hunliji-public</name>
+            <url>https://nexus.hunliji.com/repository/maven-public/</url>
             <snapshots>
                 <enabled>true</enabled>
                 <updatePolicy>always</updatePolicy>

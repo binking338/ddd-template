@@ -8,7 +8,7 @@ RUN java -version &\
 RUN --mount=type=cache,target=/.m2/repository \
     mvn -Dmaven.repo.local=/.m2/repository clean -U package -s ./.m2/settings.xml -Dfile.encoding=UTF-8 -DskipTests=true
 
-FROM fabric8/java-centos-openjdk8-jdk:1.8
+FROM registry.cn-hangzhou.aliyuncs.com/hunliji/centos7-openjdk8-jdk:2.2.0
 USER root
 ENV LANG en_US.UTF-8
 ENV TZ=Asia/Shanghai

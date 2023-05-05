@@ -123,10 +123,39 @@
             <groupId>com.xuxueli</groupId>
             <artifactId>xxl-job-core</artifactId>
         </dependency>
+
+        <dependency>
+            <groupId>com.hunliji</groupId>
+            <artifactId>gen-ddd-maven-plugin</artifactId>
+            <version>1.0-SNAPSHOT</version>
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
 
     <build>
         <plugins>
+            <plugin>
+                <groupId>com.hunliji</groupId>
+                <artifactId>gen-ddd-maven-plugin</artifactId>
+                <version>1.0-SNAPSHOT</version>
+                <configuration>
+                    <connectionString>
+                        <![CDATA[jdbc:mysql://testdb.hljnbw.cn:3306/ddd_eg?serverTimezone=Hongkong&useSSL=false&characterEncoding=utf8&zeroDateTimeBehavior=convertToNull]]></connectionString>
+                    <user>scuser</user>
+                    <pwd>fire_hunliji</pwd>
+                    <schema>ddd_eg</schema>
+                    <table>%</table>
+                    <readonlyFields>db_created_at,db_updated_at</readonlyFields>
+                    <generateDefault>false</generateDefault>
+                    <generateBuild>false</generateBuild>
+                    <generateDbType>true</generateDbType>
+                    <generateSchema>true</generateSchema>
+                    <enumValueField>code</enumValueField>
+                    <enumNameField>name</enumNameField>
+                    <deletedField>db_deleted</deletedField>
+                    <versionField>version</versionField>
+                </configuration>
+            </plugin>
         </plugins>
     </build>
 
