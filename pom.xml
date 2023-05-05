@@ -32,8 +32,10 @@
         <apollo.version>1.7.0</apollo.version>
         <spring-boot-jasypt.version>1.18</spring-boot-jasypt.version>
 
-        <spring-boot.version>2.7.6</spring-boot.version>
-        <spring-cloud.version>2021.0.5</spring-cloud.version>
+        <!--<spring-boot.version>2.7.6</spring-boot.version>-->
+        <!--<spring-cloud.version>2021.0.5</spring-cloud.version>-->
+        <spring-boot.version>2.2.13.RELEASE</spring-boot.version>
+        <spring-cloud.version>Hoxton.SR11</spring-cloud.version>
 
         <mysql-connector.version>5.1.46</mysql-connector.version>
         <spring-boot-druid.version>1.2.8</spring-boot-druid.version>
