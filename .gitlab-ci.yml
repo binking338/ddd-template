@@ -13,7 +13,6 @@ variables:
   APP_NAME: ddd-template
   APP_CONTEXT_PATH: /ddd-template
   APP_DOCKERFILE: ./Dockerfile
-  # APP_GRAY_AGENT_DISABLE: 'true'
   REPLICACOUNT: 1
   MEM_MIN: 768Mi
   MEM_MAX: 1024Mi
@@ -71,12 +70,6 @@ default:
         if [[ $BRANCH == main-* ]]; then APP_GRAY_ENV="${BRANCH/main-/}"; export ENV=prod; fi
         if [[ $BRANCH == prod-* ]]; then APP_GRAY_ENV="${BRANCH/prod-/}"; export ENV=prod; fi
 
-        if [[ -n "$APP_GRAY_ENV" && "$APP_GRAY_ENV" != '*' ]]
-        then
-            export APP_NAME_EUREKA="${APP_NAME}--gray"
-            export APP_NAME_APM="${APP_NAME}--${APP_GRAY_ENV}"
-        fi
-
         if [[ $ENV == dev ]]; then
           echo  '开发环境配置'
           export IMAGE_TAG=${CI_COMMIT_BRANCH//\//-}
@@ -98,26 +91,20 @@ default:
 
         fi
 
-        export JAVA_OPTIONS="-server -Dserver.port=80 -Dserver.servlet.context-path=${APP_CONTEXT_PATH} -Djava.security.egd=file:/dev/./urandom -Drocketmq.client.logUseSlf4j=true \
+        export JAVA_OPTIONS="-server -Dserver.port=80 -Dserver.servlet.context-path=${APP_CONTEXT_PATH} -Deureka.instance.metadata-map.env=${APP_GRAY_ENV} -Djava.security.egd=file:/dev/./urandom -Drocketmq.client.logUseSlf4j=true \
            -XX:InitialRAMPercentage=${RAMPercentage} -XX:MaxRAMPercentage=${RAMPercentage} -XX:MinRAMPercentage=${RAMPercentage} -XX:NewRatio=2 -Xss256k -XX:MetaspaceSize=128m -XX:MaxMetaspaceSize=512m -XX:MaxDirectMemorySize=256m -XX:-OmitStackTraceInFastThrow -XX:+UseConcMarkSweepGC -XX:+CMSParallelRemarkEnabled -XX:+ParallelRefProcEnabled -XX:+CMSScavengeBeforeRemark -XX:+UseCMSCompactAtFullCollection -XX:CMSInitiatingOccupancyFraction=65 -XX:+UseCMSInitiatingOccupancyOnly -XX:+ExplicitGCInvokesConcurrentAndUnloadsClasses \
-           -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/heap/${APP_NAME_APM}.hprof -Xloggc:/gc.log -XX:+PrintGCDetails -XX:+PrintGCDateStamps \
-           -javaagent:/opt/agent/skywalking-agent.jar -Dskywalking.plugin.mysql.trace_sql_parameters=true -Dskywalking.agent.keep_tracing=true"
-        if [ "$APP_GRAY_AGENT_DISABLE" != 'true' ]; then
-          JAVA_OPTIONS="$JAVA_OPTIONS -javaagent:/opt/gray-agent/gray-agent.jar -Deureka.instance.virtual-host-name=${APP_NAME_EUREKA} -Deureka.instance.secure-virtual-host-name=${APP_NAME_EUREKA} -Deureka.instance.metadata-map.env=${APP_GRAY_ENV}"
-        fi
+           -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/heap/${APP_NAME_APM}.hprof -Xloggc:/gc.log -XX:+PrintGCDetails -XX:+PrintGCDateStamps"
 
         echo "应用名称 = $APP_NAME"
         echo "灰度环境 = $APP_GRAY_ENV"
-        echo "注册服务名(Eureka) = $APP_NAME_EUREKA"
-        echo "注册服务名(APM) = $APP_NAME_APM"
         echo "JAVA_OPTIONS = $JAVA_OPTIONS"
         echo "HELM指定参数 = $HELM_EXTRA_PARAM"
         echo "IMAGE = $IMAGE_REPOSITORY:$IMAGE_TAG"
 
         echo -e "\033[47;32m 1. 开始发布 \033[0m \n";
-        helm upgrade $APP_NAME_APM ./.helm \
+        helm upgrade $APP_NAME ./.helm \
              --install \
-             --set app.env.JAVA_OPTIONS="$JAVA_OPTIONS" --set app.env.SW_AGENT_NAME=$APP_NAME_APM --set app.env.APP_GRAY_ENV=$APP_GRAY_ENV --set app.env.APP_NAME_EUREKA=$APP_NAME_EUREKA --set app.contextPath=$APP_CONTEXT_PATH \
+             --set app.env.JAVA_OPTIONS="$JAVA_OPTIONS" --set app.env.APP_GRAY_ENV=$APP_GRAY_ENV --set app.contextPath=$APP_CONTEXT_PATH \
              --set image.tag=$IMAGE_TAG --set image.repository=$IMAGE_REPOSITORY --set image.pullPolicy=$IMAGE_PULLPOLICY --set imagePullSecrets[0].name=$IMAGE_Pull_SECRET \
              --set app.env.DEPLOY_TIME=$(date +%Y%m%d%H%M%S) $HELM_EXTRA_PARAM
 
@@ -133,8 +120,6 @@ deploy-dev:
     - k8s
   variables:
     APP_GRAY_ENV: "*"
-    APP_NAME_EUREKA: "${APP_NAME}"
-    APP_NAME_APM: "${APP_NAME}"
     HELM_EXTRA_PARAM: "--set replicaCount=${REPLICACOUNT},resources.requests.memory=${MEM_MIN},resources.limits.memory=${MEM_MAX}"
   environment:
     name: dev
@@ -146,16 +131,10 @@ deploy-dev:
       if [[ $BRANCH == develop-* ]]; then APP_GRAY_ENV="${BRANCH/develop-/}"; export ENV=dev; fi
       if [[ $BRANCH == dev-* ]]; then APP_GRAY_ENV="${BRANCH/dev-/}"; export ENV=dev; fi
 
-      if [[ -n "$APP_GRAY_ENV" && "$APP_GRAY_ENV" != '*' ]]
-      then
-          export APP_NAME_EUREKA="${APP_NAME}--gray"
-          export APP_NAME_APM="${APP_NAME}--${APP_GRAY_ENV}"
-      fi
-
       sleep 10
       for ATTEMPTS in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 ; do
         echo "获取发布状态 ${ATTEMPTS} ..."
-        UNAVLIABLE=$(kubectl get deploy $APP_NAME_APM -o jsonpath="{.status.unavailableReplicas}")
+        UNAVLIABLE=$(kubectl get deploy $APP_NAME -o jsonpath="{.status.unavailableReplicas}")
         if [ -z $UNAVLIABLE ] ; then
           break
         fi
@@ -163,7 +142,7 @@ deploy-dev:
       done
       if [ -n "$UNAVLIABLE" ] ; then
         echo -e "\033[47;31m 3. 发布超时 $APP_NAME \033[0m \n"
-        POD=$(kubectl get pods -lapp.kubernetes.io/instance=$APP_NAME_APM --sort-by='{.metadata.creationTimestamp}' |tail -n1|grep -Eo "^[^ ]+")
+        POD=$(kubectl get pods -lapp.kubernetes.io/instance=$APP_NAME --sort-by='{.metadata.creationTimestamp}' |tail -n1|grep -Eo "^[^ ]+")
         kubectl logs $POD -c $APP_NAME --tail=2000
         exit 1
       else
@@ -180,8 +159,6 @@ deploy-test:
   when: manual
   variables:
     APP_GRAY_ENV: "*"
-    APP_NAME_EUREKA: "${APP_NAME}"
-    APP_NAME_APM: "${APP_NAME}"
     HELM_EXTRA_PARAM: "--set replicaCount=${REPLICACOUNT},resources.requests.memory=${MEM_MIN},resources.limits.memory=${MEM_MAX}"
   environment:
     name: test
@@ -192,16 +169,10 @@ deploy-test:
       export BRANCH=${CI_COMMIT_BRANCH//\//-} && echo "BRANCH = $BRANCH"
       if [[ $BRANCH == test-* ]]; then APP_GRAY_ENV="${BRANCH/test-/}"; export ENV=test; fi
 
-      if [[ -n "$APP_GRAY_ENV" && "$APP_GRAY_ENV" != '*' ]]
-      then
-          export APP_NAME_EUREKA="${APP_NAME}--gray"
-          export APP_NAME_APM="${APP_NAME}--${APP_GRAY_ENV}"
-      fi
-
       sleep 10
       for ATTEMPTS in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 ; do
         echo "获取发布状态 ${ATTEMPTS} ..."
-        UNAVLIABLE=$(kubectl get deploy $APP_NAME_APM -o jsonpath="{.status.unavailableReplicas}")
+        UNAVLIABLE=$(kubectl get deploy $APP_NAME -o jsonpath="{.status.unavailableReplicas}")
         if [ -z $UNAVLIABLE ] ; then
           break
         fi
@@ -209,7 +180,7 @@ deploy-test:
       done
       if [ -n "$UNAVLIABLE" ] ; then
         echo -e "\033[47;31m 3. 发布超时 $APP_NAME \033[0m \n"
-        POD=$(kubectl get pods -lapp.kubernetes.io/instance=$APP_NAME_APM --sort-by='{.metadata.creationTimestamp}' |tail -n1|grep -Eo "^[^ ]+")
+        POD=$(kubectl get pods -lapp.kubernetes.io/instance=$APP_NAME --sort-by='{.metadata.creationTimestamp}' |tail -n1|grep -Eo "^[^ ]+")
         kubectl logs $POD -c $APP_NAME --tail=2000
         exit 1
       else
@@ -226,8 +197,6 @@ deploy-pre:
   when: manual
   variables:
     APP_GRAY_ENV: "*"
-    APP_NAME_EUREKA: "${APP_NAME}"
-    APP_NAME_APM: "${APP_NAME}"
     HELM_EXTRA_PARAM: "--set replicaCount=${REPLICACOUNT},resources.requests.memory=${MEM_MIN},resources.limits.memory=${MEM_MAX}"
   environment:
     name: pre
@@ -239,16 +208,10 @@ deploy-pre:
       if [[ $BRANCH == release-* ]]; then APP_GRAY_ENV="${BRANCH/release-/}"; export ENV=pre; fi
       if [[ $BRANCH == pre-* ]]; then APP_GRAY_ENV="${BRANCH/pre-/}"; export ENV=pre; fi
 
-      if [[ -n "$APP_GRAY_ENV" && "$APP_GRAY_ENV" != '*' ]]
-      then
-          export APP_NAME_EUREKA="${APP_NAME}--gray"
-          export APP_NAME_APM="${APP_NAME}--${APP_GRAY_ENV}"
-      fi
-
       sleep 10
       for ATTEMPTS in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 ; do
         echo "获取发布状态 ${ATTEMPTS} ..."
-        UNAVLIABLE=$(kubectl get deploy $APP_NAME_APM -o jsonpath="{.status.unavailableReplicas}")
+        UNAVLIABLE=$(kubectl get deploy $APP_NAME -o jsonpath="{.status.unavailableReplicas}")
         if [ -z $UNAVLIABLE ] ; then
           break
         fi
@@ -256,7 +219,7 @@ deploy-pre:
       done
       if [ -n "$UNAVLIABLE" ] ; then
         echo -e "\033[47;31m 3. 发布超时 $APP_NAME \033[0m \n"
-        POD=$(kubectl get pods -lapp.kubernetes.io/instance=$APP_NAME_APM --sort-by='{.metadata.creationTimestamp}' |tail -n1|grep -Eo "^[^ ]+")
+        POD=$(kubectl get pods -lapp.kubernetes.io/instance=$APP_NAME --sort-by='{.metadata.creationTimestamp}' |tail -n1|grep -Eo "^[^ ]+")
         kubectl logs $POD -c $APP_NAME --tail=2000
         exit 1
       else
@@ -273,8 +236,6 @@ deploy-prod:
   when: manual
   variables:
     APP_GRAY_ENV: "*"
-    APP_NAME_EUREKA: "${APP_NAME}"
-    APP_NAME_APM: "${APP_NAME}"
     HELM_EXTRA_PARAM: "--set replicaCount=${PROD_REPLICACOUNT},resources.requests.memory=${PROD_MEM_MIN},resources.limits.memory=${PROD_MEM_MAX},app.initialContainersEnabled=true"
   environment:
     name: prod
@@ -287,16 +248,10 @@ deploy-prod:
       if [[ $BRANCH == main-* ]]; then APP_GRAY_ENV="${BRANCH/main-/}"; export ENV=prod; fi
       if [[ $BRANCH == prod-* ]]; then APP_GRAY_ENV="${BRANCH/prod-/}"; export ENV=prod; fi
 
-      if [[ -n "$APP_GRAY_ENV" && "$APP_GRAY_ENV" != '*' ]]
-      then
-          export APP_NAME_EUREKA="${APP_NAME}--gray"
-          export APP_NAME_APM="${APP_NAME}--${APP_GRAY_ENV}"
-      fi
-
       sleep 10
       for ATTEMPTS in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 ; do
         echo "获取发布状态 ${ATTEMPTS} ..."
-        UNAVLIABLE=$(kubectl get deploy $APP_NAME_APM -o jsonpath="{.status.unavailableReplicas}")
+        UNAVLIABLE=$(kubectl get deploy $APP_NAME -o jsonpath="{.status.unavailableReplicas}")
         if [ -z $UNAVLIABLE ] ; then
           break
         fi
@@ -304,7 +259,7 @@ deploy-prod:
       done
       if [ -n "$UNAVLIABLE" ] ; then
         echo -e "\033[47;31m 3. 发布超时 $APP_NAME \033[0m \n"
-        POD=$(kubectl get pods -lapp.kubernetes.io/instance=$APP_NAME_APM --sort-by='{.metadata.creationTimestamp}' |tail -n1|grep -Eo "^[^ ]+")
+        POD=$(kubectl get pods -lapp.kubernetes.io/instance=$APP_NAME --sort-by='{.metadata.creationTimestamp}' |tail -n1|grep -Eo "^[^ ]+")
         kubectl logs $POD -c $APP_NAME --tail=2000
         exit 1
       else
