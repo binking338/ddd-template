@@ -9,6 +9,13 @@ import org.springframework.boot.web.context.WebServerInitializedEvent;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+//import org.springframework.web.bind.annotation.RestController;
+//import springfox.documentation.builders.ApiInfoBuilder;
+//import springfox.documentation.builders.PathSelectors;
+//import springfox.documentation.builders.RequestHandlerSelectors;
+//import springfox.documentation.spi.DocumentationType;
+//import springfox.documentation.spring.web.plugins.Docket;
+//import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
 /**
  * swagger文档配置
@@ -18,14 +25,39 @@ import org.springframework.context.annotation.Configuration;
  */
 @Configuration
 @Slf4j
+//@EnableSwagger2
 public class SwaggerConfig implements ApplicationListener<WebServerInitializedEvent> {
     @Value("${spring.application.name:need-a-name}")
     private String applicationName;
     @Value("${spring.application.version:1.0.0}")
     private String applicationVersion;
+    private String description = "";
+
+
+    private OpenAPI openApiConfig(OpenAPI openAPI){
+        return openAPI.info(new Info()
+                .title(applicationName)
+                .version(applicationVersion)
+                .description(description));
+    }
 
     /**
-     * 用于多个文档情形，文档地址会加分组名称 /v3/api-docs/{group}，knife4j ui支持
+     * 用于单个文档情形，文档地址是统一的 /v3/api-docs，该文档地址可以通过配置项 springdoc.api-docs.path 进行自定义配置
+     * 需依赖 com.github.xiaoymin:knife4j-springdoc-ui，并取消依赖 com.github.xiaoymin:knife4j-spring-boot-starter
+     * 可配置项
+     * springdoc.api-docs.path=/v3/openapi
+     * springdoc.packagesToScan=package1, package2
+     * springdoc.pathsToMatch=/v1, /api/balance/**
+     * @return
+     */
+    @Bean
+    public OpenAPI openAPI() {
+        return openApiConfig(new OpenAPI());
+    }
+
+    /**
+     * 用于多个文档情形，文档地址会加分组名称 /v3/api-docs/{group}，该文档地址前缀可以通过配置项 springdoc.api-docs.path 进行自定义配置
+     * knife4j ui需要分组支持
      * @return
      */
     @Bean
@@ -36,27 +68,31 @@ public class SwaggerConfig implements ApplicationListener<WebServerInitializedEv
                 .pathsToMatch(paths)
                 .packagesToScan("com.abc.dddtemplate.adapter.portal.api.controller")
                 .addOperationCustomizer((operation, handlerMethod) -> operation)
-                .addOpenApiCustomiser(openApi -> openApi.info(new Info()
-                        .title(applicationName)
-                        .version(applicationVersion) ))
+                .addOpenApiCustomiser(openApi -> openApiConfig(openApi))
                 .build();
     }
 
-    /**
-     * 用于单个文档情形，文档地址是统一的 /v3/api-docs，knife4j ui不支持
-     * 可配置项
-     * springdoc.packagesToScan=package1, package2
-     * springdoc.pathsToMatch=/v1, /api/balance/**
-     * @return
-     */
-    @Bean
-    public OpenAPI openAPI() {
-        return new OpenAPI()
-                .info(new Info()
-                        .title(applicationName)
-                        .version(applicationVersion)
-                        .description(""));
-    }
+//    /**
+//     * springfox 文档配置
+//     * 需依赖 com.github.xiaoymin:knife4j-spring-boot-starter，并取消依赖 com.github.xiaoymin:knife4j-springdoc-ui
+//     * 标记 @EnableSwagger2
+//     * @return
+//     */
+//    @Bean
+//    public Docket docket() {
+//        Docket docket=new Docket(DocumentationType.SWAGGER_2)
+//                .apiInfo(new ApiInfoBuilder()
+//                        .title(applicationName)
+//                        .version(applicationVersion)
+//                        .description(description)
+//                        .build())
+//                //.groupName(applicationName)
+//                .select()
+//                .apis(RequestHandlerSelectors.withClassAnnotation(RestController.class))
+//                .paths(PathSelectors.any())
+//                .build();
+//        return docket;
+//    }
 
     @Value("${server.port:80}")
     private String serverPort;
