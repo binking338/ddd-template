@@ -28,7 +28,7 @@ public class AccountSpec  implements Specification<Account> {
     @Override
     public boolean valid(Account account) {
         if(account.getId() == null) {
-            boolean sameName = accountRepo.exists(AccountSchema.specify(builder -> builder.name().eq(account.getName())));
+            boolean sameName = accountRepo.count(AccountSchema.specify(builder -> builder.name().eq(account.getName()))) > 0;
             return !sameName;
         } else {
             return true;
