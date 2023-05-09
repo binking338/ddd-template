@@ -100,7 +100,7 @@ CREATE TABLE `bill` (
 -- Create syntax for TABLE '__event'
 CREATE TABLE `__event` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `data` varchar(255) NOT NULL DEFAULT '',
+  `data` text,
   `data_type` varchar(255) NOT NULL DEFAULT '',
   `event_state` int(11) NOT NULL DEFAULT '0',
   `event_type` varchar(255) NOT NULL DEFAULT '',
@@ -125,7 +125,7 @@ CREATE TABLE `__saga` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `biz_type` int(11) NOT NULL DEFAULT '0',
   `svc_name` varchar(255) NOT NULL DEFAULT '',
-  `context_data` varchar(2550) NOT NULL DEFAULT '',
+  `context_data` text,
   `context_data_type` varchar(255) NOT NULL DEFAULT '',
   `saga_state` int(11) NOT NULL DEFAULT '0',
   `expire_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -150,7 +150,7 @@ CREATE TABLE `__saga_process` (
   `saga_id` bigint(20) NOT NULL DEFAULT '0',
   `process_code` int(11) NOT NULL DEFAULT '0',
   `process_name` varchar(255) NOT NULL DEFAULT '',
-  `context_data` varchar(2550) NOT NULL DEFAULT '',
+  `context_data` text,
   `process_state` int(11) NOT NULL DEFAULT '0',
   `create_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `tried_times` int(11) NOT NULL DEFAULT '0',
@@ -168,7 +168,7 @@ partition by range(to_days(db_created_at))
 
 CREATE TABLE `__archived_event` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `data` varchar(255) NOT NULL DEFAULT '',
+  `data` text,
   `data_type` varchar(255) NOT NULL DEFAULT '',
   `event_state` int(11) NOT NULL DEFAULT '0',
   `event_type` varchar(255) NOT NULL DEFAULT '',
@@ -192,7 +192,7 @@ CREATE TABLE `__archived_saga` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `biz_type` int(11) NOT NULL DEFAULT '0',
   `svc_name` varchar(255) NOT NULL DEFAULT '',
-  `context_data` varchar(2550) NOT NULL DEFAULT '',
+  `context_data` text,
   `context_data_type` varchar(255) NOT NULL,
   `saga_state` int(11) NOT NULL DEFAULT '0',
   `expire_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -216,7 +216,7 @@ CREATE TABLE `__archived_saga_process` (
   `saga_id` bigint(20) NOT NULL DEFAULT '0',
   `process_code` int(11) NOT NULL DEFAULT '0',
   `process_name` varchar(255) NOT NULL DEFAULT '',
-  `context_data` varchar(2550) NOT NULL DEFAULT '',
+  `context_data` text,
   `process_state` int(11) NOT NULL DEFAULT '0',
   `create_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `tried_times` int(11) NOT NULL DEFAULT '0',

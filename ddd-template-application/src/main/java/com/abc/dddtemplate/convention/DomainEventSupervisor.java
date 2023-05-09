@@ -138,8 +138,7 @@ public class DomainEventSupervisor {
     private void dispatch2RemoteSubscriber(Object event) {
         Date now = new Date();
         Event intergrationEvent = new Event();
-        intergrationEvent.init(now, Duration.ofDays(1), 100);
-        intergrationEvent.loadPayload(event);
+        intergrationEvent.init(event, now, Duration.ofDays(1), 100);
 
         eventPersistanceHandler.apply(intergrationEvent);
 

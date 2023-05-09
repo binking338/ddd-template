@@ -57,7 +57,7 @@ public class LockerService {
         Locker locker = lockerRepository.findOne((root, cq, cb) -> {
             cq.where(cb.equal(root.get("name"), name));
             return null;
-        }).orElseGet(null);
+        }).orElseGet(() -> null);
         boolean result;
         if (locker == null) {
             result = true;
