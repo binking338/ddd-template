@@ -34,13 +34,14 @@ import java.util.Objects;
 @Slf4j
 public class Event {
 
-    public void init(Date now, Duration expireAfter, int retryTimes) {
+    public void init(Object payload, Date now, Duration expireAfter, int retryTimes) {
         this.createAt = now;
         this.expireAt = DateUtils.addSeconds(now, (int) expireAfter.getSeconds());
         this.eventState = Event.EventState.INIT;
         this.tryTimes = retryTimes;
         this.triedTimes = 1;
         this.lastTryTime = now;
+        this.loadPayload(payload);
         this.nextTryTime = calculateNextTryTime(now);
     }
 
@@ -62,7 +63,7 @@ public class Event {
         return this.payload;
     }
 
-    public void loadPayload(Object payload) {
+    private void loadPayload(Object payload) {
         this.payload = payload;
         this.data = JSON.toJSONString(payload);
         this.dataType = payload.getClass().getName();

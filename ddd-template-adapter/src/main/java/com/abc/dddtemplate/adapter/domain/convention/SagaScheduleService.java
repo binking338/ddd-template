@@ -19,6 +19,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
+import javax.annotation.PostConstruct;
 import java.time.Duration;
 import java.util.Date;
 import java.util.List;
@@ -218,6 +219,7 @@ public class SagaScheduleService {
     }
 
     @Scheduled(cron = "0 0 0 * * ?")
+    @PostConstruct
     public void addPartition() {
         if (!enabled) {
             return;
