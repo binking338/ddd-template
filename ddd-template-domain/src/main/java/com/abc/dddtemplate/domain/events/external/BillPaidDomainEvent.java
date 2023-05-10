@@ -10,7 +10,7 @@ import lombok.*;
  * @author <template/>
  * @date
  */
-@DomainEvent()
+@DomainEvent("domainevent-ddd-template-billpaid")
 @Data
 @Builder
 @NoArgsConstructor
