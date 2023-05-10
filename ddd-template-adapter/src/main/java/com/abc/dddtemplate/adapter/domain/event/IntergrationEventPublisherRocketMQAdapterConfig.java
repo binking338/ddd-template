@@ -26,10 +26,10 @@ import java.util.List;
  */
 @Slf4j
 @Configuration
-@ConditionalOnProperty(
-        prefix = "rocketmq",
-        value = {"name-server", "producer.group"}
-)
+//@ConditionalOnProperty(
+//        prefix = "rocketmq",
+//        value = {"name-server", "producer.group"}
+//)
 public class IntergrationEventPublisherRocketMQAdapterConfig {
     private final RocketMQTemplate rocketMQTemplate;
     private final AggregateRepository<Event, Long> eventRepository;
@@ -66,11 +66,6 @@ public class IntergrationEventPublisherRocketMQAdapterConfig {
             return;
         }
         if (rocketMQTemplate == null) {
-            for (Event event : events) {
-                event.comfirmedDelivered();
-                eventRepository.save(event);
-            }
-            //return;
             throw new ErrorException("RocketMq未配置，无法发送集成事件！");
         }
         for (Event event : events) {

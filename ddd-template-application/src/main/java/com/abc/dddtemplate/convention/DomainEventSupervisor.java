@@ -68,7 +68,7 @@ public class DomainEventSupervisor {
         fireAttachedEvents();
         List<Event> intergrationEvents = threadLocalDispatchedIntergrationEvents.get();
         if (CollectionUtils.isNotEmpty(intergrationEvents)) {
-            threadLocalDispatchedIntergrationEvents.get().clear();
+            threadLocalDispatchedIntergrationEvents.remove();
             UnitOfWork.TransactionCommittedEvent transactionCommittedEvent =
                     new UnitOfWork.TransactionCommittedEvent(this, intergrationEvents);
             applicationEventPublisher.publishEvent(transactionCommittedEvent);
@@ -140,7 +140,7 @@ public class DomainEventSupervisor {
         Event intergrationEvent = new Event();
         intergrationEvent.init(event, now, Duration.ofDays(1), 100);
 
-        eventPersistanceHandler.apply(intergrationEvent);
+        intergrationEvent = eventPersistanceHandler.apply(intergrationEvent);
 
         List<Event> dispatchedEvents = threadLocalDispatchedIntergrationEvents.get();
         if (dispatchedEvents == null) {
