@@ -225,19 +225,20 @@ public class UnitOfWork {
                     if (getEntityManager().contains(entity)) {
                         getEntityManager().flush();
                     } else {
+                        Object id = null;
                         try {
-                            Object id = entity.getClass().getMethod("getId").invoke(entity);
-                            if (id != null) {
-                                getEntityManager().merge(entity);
-                                getEntityManager().flush();
-                                continue;
-                            }
+                            id = entity.getClass().getMethod("getId").invoke(entity);
                         } catch (Exception _ex) {
                             /* we don't care */
                         }
-                        getEntityManager().persist(entity);
-                        getEntityManager().flush();
-                        getEntityManager().refresh(entity);
+                        if (id != null) {
+                            getEntityManager().merge(entity);
+                            getEntityManager().flush();
+                        } else {
+                            getEntityManager().persist(entity);
+                            getEntityManager().flush();
+                            getEntityManager().refresh(entity);
+                        }
                     }
                 }
             }
