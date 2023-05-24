@@ -65,11 +65,11 @@ public class Schema {
         }
 
         public Predicate isTrue() {
-            return criteriaBuilder().isTrue((Expression<Boolean>) this);
+            return criteriaBuilder().isTrue((Expression<Boolean>) this.path);
         }
 
         public Predicate isFalse() {
-            return criteriaBuilder().isTrue((Expression<Boolean>) this);
+            return criteriaBuilder().isTrue((Expression<Boolean>) this.path);
 
         }
 
@@ -98,43 +98,43 @@ public class Schema {
         }
 
         public <Y extends Comparable<? super Y>> Predicate greaterThan(Y val) {
-            return criteriaBuilder().greaterThan((Expression<Y>) this, val);
+            return criteriaBuilder().greaterThan((Expression<Y>) this.path, val);
         }
 
         public <Y extends Comparable<? super Y>> Predicate greaterThan(Expression<? extends Y> val) {
-            return criteriaBuilder().greaterThan((Expression<Y>) this, val);
+            return criteriaBuilder().greaterThan((Expression<Y>) this.path, val);
         }
 
         public <Y extends Comparable<? super Y>> Predicate greaterThanOrEqualTo(Y val) {
-            return criteriaBuilder().greaterThan((Expression<Y>) this, val);
+            return criteriaBuilder().greaterThan((Expression<Y>) this.path, val);
         }
 
         public <Y extends Comparable<? super Y>> Predicate greaterThanOrEqualTo(Expression<? extends Y> val) {
-            return criteriaBuilder().greaterThanOrEqualTo((Expression<Y>) this, val);
+            return criteriaBuilder().greaterThanOrEqualTo((Expression<Y>) this.path, val);
         }
 
         public <Y extends Comparable<? super Y>> Predicate lessThan(Y val) {
-            return criteriaBuilder().lessThan((Expression<Y>) this, val);
+            return criteriaBuilder().lessThan((Expression<Y>) this.path, val);
         }
 
         public <Y extends Comparable<? super Y>> Predicate lessThan(Expression<? extends Y> val) {
-            return criteriaBuilder().lessThan((Expression<Y>) this, val);
+            return criteriaBuilder().lessThan((Expression<Y>) this.path, val);
         }
 
         public <Y extends Comparable<? super Y>> Predicate lessThanOrEqualTo(Y val) {
-            return criteriaBuilder().lessThanOrEqualTo((Expression<Y>) this, val);
+            return criteriaBuilder().lessThanOrEqualTo((Expression<Y>) this.path, val);
         }
 
         public <Y extends Comparable<? super Y>> Predicate lessThanOrEqualTo(Expression<? extends Y> val) {
-            return criteriaBuilder().lessThanOrEqualTo((Expression<Y>) this, val);
+            return criteriaBuilder().lessThanOrEqualTo((Expression<Y>) this.path, val);
         }
 
         public <Y extends Comparable<? super Y>> Predicate between(Y val1, Y val2) {
-            return criteriaBuilder().between((Expression<Y>) this, val1, val2);
+            return criteriaBuilder().between((Expression<Y>) this.path, val1, val2);
         }
 
         public <Y extends Comparable<? super Y>> Predicate between(Expression<? extends Y> val1, Expression<? extends Y> val2) {
-            return criteriaBuilder().between((Expression<Y>) this, val1, val2);
+            return criteriaBuilder().between((Expression<Y>) this.path, val1, val2);
         }
 
         public Predicate in(Object... vals) {
@@ -159,19 +159,19 @@ public class Schema {
 
 
         public Predicate like(String val) {
-            return criteriaBuilder().like((Expression<String>) this, val);
+            return criteriaBuilder().like((Expression<String>) this.path, val);
         }
 
         public Predicate like(Expression<String> val) {
-            return criteriaBuilder().like((Expression<String>) this, val);
+            return criteriaBuilder().like((Expression<String>) this.path, val);
         }
 
         public Predicate notLike(String val) {
-            return criteriaBuilder().notLike((Expression<String>) this, val);
+            return criteriaBuilder().notLike((Expression<String>) this.path, val);
         }
 
         public Predicate notLike(Expression<String> val) {
-            return criteriaBuilder().notLike((Expression<String>) this, val);
+            return criteriaBuilder().notLike((Expression<String>) this.path, val);
         }
 
 
