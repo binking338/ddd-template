@@ -18,14 +18,14 @@ import java.util.stream.Collectors;
  */
 @RequiredArgsConstructor
 public class TeamSchema {
-    private final Root<Team> root;
+    private final Path<Team> root;
     private final CriteriaBuilder criteriaBuilder;
 
-    public CriteriaBuilder criteriaBuilder(){
+    public CriteriaBuilder criteriaBuilder() {
         return criteriaBuilder;
     }
 
-    public Schema.Field<Long> id(){
+    public Schema.Field<Long> id() {
         return root == null ? new Schema.Field<>("id") : new Schema.Field<>(root.get("id"));
     }
 
@@ -33,7 +33,7 @@ public class TeamSchema {
      * 团队名称
      * varchar(100)
      */
-    public Schema.Field<String> name(){
+    public Schema.Field<String> name() {
         return root == null ? new Schema.Field<>("name") : new Schema.Field<>(root.get("name"));
     }
 
@@ -42,7 +42,7 @@ public class TeamSchema {
      * @param restrictions
      * @return
      */
-    public Predicate all(Predicate... restrictions){
+    public Predicate all(Predicate... restrictions) {
         return criteriaBuilder().and(restrictions);
     }
 
@@ -51,16 +51,57 @@ public class TeamSchema {
      * @param restrictions
      * @return
      */
-    public Predicate any(Predicate... restrictions){
+    public Predicate any(Predicate... restrictions) {
         return criteriaBuilder().or(restrictions);
+    }
+
+    /**
+     * Member 关联查询条件定义
+     *
+     * @param builder
+     * @return
+     */
+    public Predicate joinMember(Schema.JoinType joinType, Schema.PredicateBuilder<MemberSchema> builder) {
+        JoinType type = transformJoinType(joinType);
+        Join<Team, com.abc.dddtemplate.domain.aggregates.relationsamples.one2many.Member> join = ((Root<Team>) root).join("members", type);
+        MemberSchema schema = new MemberSchema(join, criteriaBuilder);
+        return builder.build(schema);
+    }
+
+
+    private JoinType transformJoinType(Schema.JoinType joinType){
+        if(joinType == Schema.JoinType.INNER){
+            return JoinType.INNER;
+        } else if(joinType == Schema.JoinType.LEFT){
+            return JoinType.LEFT;
+        } else if(joinType == Schema.JoinType.RIGHT){
+            return JoinType.RIGHT;
+        }
+        return JoinType.LEFT;
     }
 
     /**
      * 构建查询条件
      * @param builder
+     * @param distinct
      * @return
      */
-    public static Specification<Team> specify(Schema.PredicateBuilder<TeamSchema> builder){
+    public static Specification<Team> specify(Schema.PredicateBuilder<TeamSchema> builder, boolean distinct) {
+        return (root, criteriaQuery, criteriaBuilder) -> {
+            TeamSchema team = new TeamSchema(root, criteriaBuilder);
+            criteriaQuery.where(builder.build(team));
+
+            criteriaQuery.distinct(distinct);
+            return null;
+        };
+    }
+    
+    /**
+     * 构建查询条件
+     * @param builder
+     * @return
+     */
+    public static Specification<Team> specify(Schema.PredicateBuilder<TeamSchema> builder) {
         return (root, criteriaQuery, criteriaBuilder) -> {
             TeamSchema team = new TeamSchema(root, criteriaBuilder);
             criteriaQuery.where(builder.build(team));
@@ -73,7 +114,7 @@ public class TeamSchema {
      * @param builders
      * @return
      */
-    public static Sort orderBy(Schema.OrderBuilder<TeamSchema>... builders){
+    public static Sort orderBy(Schema.OrderBuilder<TeamSchema>... builders) {
         return orderBy(Arrays.asList(builders));
     }
 
@@ -83,8 +124,8 @@ public class TeamSchema {
      * @param builders
      * @return
      */
-    public static Sort orderBy(Collection<Schema.OrderBuilder<TeamSchema>> builders){
-        if(CollectionUtils.isEmpty(builders)){
+    public static Sort orderBy(Collection<Schema.OrderBuilder<TeamSchema>> builders) {
+        if(CollectionUtils.isEmpty(builders)) {
             return Sort.unsorted();
         }
         return Sort.by(builders.stream()

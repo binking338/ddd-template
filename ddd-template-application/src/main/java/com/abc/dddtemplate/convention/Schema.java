@@ -22,7 +22,7 @@ public class Schema {
      * 断言构建器
      */
     public static interface PredicateBuilder<S> {
-        public Expression<Boolean> build(S schema);
+        public Predicate build(S schema);
     }
 
 
@@ -33,6 +33,11 @@ public class Schema {
         public Sort.Order build(S schema);
     }
 
+    public enum JoinType {
+        INNER,
+        LEFT,
+        RIGHT
+    }
 
     /**
      * 字段

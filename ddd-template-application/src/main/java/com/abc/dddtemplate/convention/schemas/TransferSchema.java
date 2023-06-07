@@ -18,14 +18,14 @@ import java.util.stream.Collectors;
  */
 @RequiredArgsConstructor
 public class TransferSchema {
-    private final Root<Transfer> root;
+    private final Path<Transfer> root;
     private final CriteriaBuilder criteriaBuilder;
 
-    public CriteriaBuilder criteriaBuilder(){
+    public CriteriaBuilder criteriaBuilder() {
         return criteriaBuilder;
     }
 
-    public Schema.Field<Long> id(){
+    public Schema.Field<Long> id() {
         return root == null ? new Schema.Field<>("id") : new Schema.Field<>(root.get("id"));
     }
 
@@ -33,7 +33,7 @@ public class TransferSchema {
      * 关联账户
      * bigint(100)
      */
-    public Schema.Field<Long> accountId(){
+    public Schema.Field<Long> accountId() {
         return root == null ? new Schema.Field<>("accountId") : new Schema.Field<>(root.get("accountId"));
     }
 
@@ -41,7 +41,7 @@ public class TransferSchema {
      * 时间
      * datetime
      */
-    public Schema.Field<java.util.Date> time(){
+    public Schema.Field<java.util.Date> time() {
         return root == null ? new Schema.Field<>("time") : new Schema.Field<>(root.get("time"));
     }
 
@@ -49,7 +49,7 @@ public class TransferSchema {
      * 业务类型
      * int(11)
      */
-    public Schema.Field<Integer> bizType(){
+    public Schema.Field<Integer> bizType() {
         return root == null ? new Schema.Field<>("bizType") : new Schema.Field<>(root.get("bizType"));
     }
 
@@ -57,7 +57,7 @@ public class TransferSchema {
      * 业务编码
      * varchar(20)
      */
-    public Schema.Field<String> bizId(){
+    public Schema.Field<String> bizId() {
         return root == null ? new Schema.Field<>("bizId") : new Schema.Field<>(root.get("bizId"));
     }
 
@@ -65,7 +65,7 @@ public class TransferSchema {
      * 转账金额
      * int(11)
      */
-    public Schema.Field<Integer> amount(){
+    public Schema.Field<Integer> amount() {
         return root == null ? new Schema.Field<>("amount") : new Schema.Field<>(root.get("amount"));
     }
 
@@ -74,7 +74,7 @@ public class TransferSchema {
      * @param restrictions
      * @return
      */
-    public Predicate all(Predicate... restrictions){
+    public Predicate all(Predicate... restrictions) {
         return criteriaBuilder().and(restrictions);
     }
 
@@ -83,16 +83,32 @@ public class TransferSchema {
      * @param restrictions
      * @return
      */
-    public Predicate any(Predicate... restrictions){
+    public Predicate any(Predicate... restrictions) {
         return criteriaBuilder().or(restrictions);
     }
 
     /**
      * 构建查询条件
      * @param builder
+     * @param distinct
      * @return
      */
-    public static Specification<Transfer> specify(Schema.PredicateBuilder<TransferSchema> builder){
+    public static Specification<Transfer> specify(Schema.PredicateBuilder<TransferSchema> builder, boolean distinct) {
+        return (root, criteriaQuery, criteriaBuilder) -> {
+            TransferSchema transfer = new TransferSchema(root, criteriaBuilder);
+            criteriaQuery.where(builder.build(transfer));
+
+            criteriaQuery.distinct(distinct);
+            return null;
+        };
+    }
+    
+    /**
+     * 构建查询条件
+     * @param builder
+     * @return
+     */
+    public static Specification<Transfer> specify(Schema.PredicateBuilder<TransferSchema> builder) {
         return (root, criteriaQuery, criteriaBuilder) -> {
             TransferSchema transfer = new TransferSchema(root, criteriaBuilder);
             criteriaQuery.where(builder.build(transfer));
@@ -105,7 +121,7 @@ public class TransferSchema {
      * @param builders
      * @return
      */
-    public static Sort orderBy(Schema.OrderBuilder<TransferSchema>... builders){
+    public static Sort orderBy(Schema.OrderBuilder<TransferSchema>... builders) {
         return orderBy(Arrays.asList(builders));
     }
 
@@ -115,8 +131,8 @@ public class TransferSchema {
      * @param builders
      * @return
      */
-    public static Sort orderBy(Collection<Schema.OrderBuilder<TransferSchema>> builders){
-        if(CollectionUtils.isEmpty(builders)){
+    public static Sort orderBy(Collection<Schema.OrderBuilder<TransferSchema>> builders) {
+        if(CollectionUtils.isEmpty(builders)) {
             return Sort.unsorted();
         }
         return Sort.by(builders.stream()

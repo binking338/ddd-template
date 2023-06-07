@@ -18,14 +18,14 @@ import java.util.stream.Collectors;
  */
 @RequiredArgsConstructor
 public class AccountSchema {
-    private final Root<Account> root;
+    private final Path<Account> root;
     private final CriteriaBuilder criteriaBuilder;
 
-    public CriteriaBuilder criteriaBuilder(){
+    public CriteriaBuilder criteriaBuilder() {
         return criteriaBuilder;
     }
 
-    public Schema.Field<Long> id(){
+    public Schema.Field<Long> id() {
         return root == null ? new Schema.Field<>("id") : new Schema.Field<>(root.get("id"));
     }
 
@@ -33,7 +33,7 @@ public class AccountSchema {
      * 账户名称
      * varchar(100)
      */
-    public Schema.Field<String> name(){
+    public Schema.Field<String> name() {
         return root == null ? new Schema.Field<>("name") : new Schema.Field<>(root.get("name"));
     }
 
@@ -41,7 +41,7 @@ public class AccountSchema {
      * 账户余额
      * int(11)
      */
-    public Schema.Field<Integer> amount(){
+    public Schema.Field<Integer> amount() {
         return root == null ? new Schema.Field<>("amount") : new Schema.Field<>(root.get("amount"));
     }
 
@@ -50,7 +50,7 @@ public class AccountSchema {
      * @param restrictions
      * @return
      */
-    public Predicate all(Predicate... restrictions){
+    public Predicate all(Predicate... restrictions) {
         return criteriaBuilder().and(restrictions);
     }
 
@@ -59,16 +59,32 @@ public class AccountSchema {
      * @param restrictions
      * @return
      */
-    public Predicate any(Predicate... restrictions){
+    public Predicate any(Predicate... restrictions) {
         return criteriaBuilder().or(restrictions);
     }
 
     /**
      * 构建查询条件
      * @param builder
+     * @param distinct
      * @return
      */
-    public static Specification<Account> specify(Schema.PredicateBuilder<AccountSchema> builder){
+    public static Specification<Account> specify(Schema.PredicateBuilder<AccountSchema> builder, boolean distinct) {
+        return (root, criteriaQuery, criteriaBuilder) -> {
+            AccountSchema account = new AccountSchema(root, criteriaBuilder);
+            criteriaQuery.where(builder.build(account));
+
+            criteriaQuery.distinct(distinct);
+            return null;
+        };
+    }
+    
+    /**
+     * 构建查询条件
+     * @param builder
+     * @return
+     */
+    public static Specification<Account> specify(Schema.PredicateBuilder<AccountSchema> builder) {
         return (root, criteriaQuery, criteriaBuilder) -> {
             AccountSchema account = new AccountSchema(root, criteriaBuilder);
             criteriaQuery.where(builder.build(account));
@@ -81,7 +97,7 @@ public class AccountSchema {
      * @param builders
      * @return
      */
-    public static Sort orderBy(Schema.OrderBuilder<AccountSchema>... builders){
+    public static Sort orderBy(Schema.OrderBuilder<AccountSchema>... builders) {
         return orderBy(Arrays.asList(builders));
     }
 
@@ -91,8 +107,8 @@ public class AccountSchema {
      * @param builders
      * @return
      */
-    public static Sort orderBy(Collection<Schema.OrderBuilder<AccountSchema>> builders){
-        if(CollectionUtils.isEmpty(builders)){
+    public static Sort orderBy(Collection<Schema.OrderBuilder<AccountSchema>> builders) {
+        if(CollectionUtils.isEmpty(builders)) {
             return Sort.unsorted();
         }
         return Sort.by(builders.stream()
