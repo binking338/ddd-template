@@ -18,21 +18,21 @@ import java.util.stream.Collectors;
  */
 @RequiredArgsConstructor
 public class BillSchema {
-    private final Root<Bill> root;
+    private final Path<Bill> root;
     private final CriteriaBuilder criteriaBuilder;
 
-    public CriteriaBuilder criteriaBuilder(){
+    public CriteriaBuilder criteriaBuilder() {
         return criteriaBuilder;
     }
 
-    public Schema.Field<Long> id(){
+    public Schema.Field<Long> id() {
         return root == null ? new Schema.Field<>("id") : new Schema.Field<>(root.get("id"));
     }
 
     /**
      * bigint(20)
      */
-    public Schema.Field<Long> orderId(){
+    public Schema.Field<Long> orderId() {
         return root == null ? new Schema.Field<>("orderId") : new Schema.Field<>(root.get("orderId"));
     }
 
@@ -40,7 +40,7 @@ public class BillSchema {
      * 账单名称
      * varchar(100)
      */
-    public Schema.Field<String> name(){
+    public Schema.Field<String> name() {
         return root == null ? new Schema.Field<>("name") : new Schema.Field<>(root.get("name"));
     }
 
@@ -48,7 +48,7 @@ public class BillSchema {
      * 支付人
      * varchar(100)
      */
-    public Schema.Field<String> owner(){
+    public Schema.Field<String> owner() {
         return root == null ? new Schema.Field<>("owner") : new Schema.Field<>(root.get("owner"));
     }
 
@@ -56,7 +56,7 @@ public class BillSchema {
      * 账单金额
      * int(11)
      */
-    public Schema.Field<Integer> amount(){
+    public Schema.Field<Integer> amount() {
         return root == null ? new Schema.Field<>("amount") : new Schema.Field<>(root.get("amount"));
     }
 
@@ -64,7 +64,7 @@ public class BillSchema {
      * 是否支付
      * bit(1)
      */
-    public Schema.Field<Boolean> payed(){
+    public Schema.Field<Boolean> payed() {
         return root == null ? new Schema.Field<>("payed") : new Schema.Field<>(root.get("payed"));
     }
 
@@ -72,7 +72,7 @@ public class BillSchema {
      * 是否关闭
      * bit(1)
      */
-    public Schema.Field<Boolean> closed(){
+    public Schema.Field<Boolean> closed() {
         return root == null ? new Schema.Field<>("closed") : new Schema.Field<>(root.get("closed"));
     }
 
@@ -81,7 +81,7 @@ public class BillSchema {
      * @param restrictions
      * @return
      */
-    public Predicate all(Predicate... restrictions){
+    public Predicate all(Predicate... restrictions) {
         return criteriaBuilder().and(restrictions);
     }
 
@@ -90,16 +90,32 @@ public class BillSchema {
      * @param restrictions
      * @return
      */
-    public Predicate any(Predicate... restrictions){
+    public Predicate any(Predicate... restrictions) {
         return criteriaBuilder().or(restrictions);
     }
 
     /**
      * 构建查询条件
      * @param builder
+     * @param distinct
      * @return
      */
-    public static Specification<Bill> specify(Schema.PredicateBuilder<BillSchema> builder){
+    public static Specification<Bill> specify(Schema.PredicateBuilder<BillSchema> builder, boolean distinct) {
+        return (root, criteriaQuery, criteriaBuilder) -> {
+            BillSchema bill = new BillSchema(root, criteriaBuilder);
+            criteriaQuery.where(builder.build(bill));
+
+            criteriaQuery.distinct(distinct);
+            return null;
+        };
+    }
+    
+    /**
+     * 构建查询条件
+     * @param builder
+     * @return
+     */
+    public static Specification<Bill> specify(Schema.PredicateBuilder<BillSchema> builder) {
         return (root, criteriaQuery, criteriaBuilder) -> {
             BillSchema bill = new BillSchema(root, criteriaBuilder);
             criteriaQuery.where(builder.build(bill));
@@ -112,7 +128,7 @@ public class BillSchema {
      * @param builders
      * @return
      */
-    public static Sort orderBy(Schema.OrderBuilder<BillSchema>... builders){
+    public static Sort orderBy(Schema.OrderBuilder<BillSchema>... builders) {
         return orderBy(Arrays.asList(builders));
     }
 
@@ -122,8 +138,8 @@ public class BillSchema {
      * @param builders
      * @return
      */
-    public static Sort orderBy(Collection<Schema.OrderBuilder<BillSchema>> builders){
-        if(CollectionUtils.isEmpty(builders)){
+    public static Sort orderBy(Collection<Schema.OrderBuilder<BillSchema>> builders) {
+        if(CollectionUtils.isEmpty(builders)) {
             return Sort.unsorted();
         }
         return Sort.by(builders.stream()

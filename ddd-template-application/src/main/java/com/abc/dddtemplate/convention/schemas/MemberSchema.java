@@ -18,14 +18,14 @@ import java.util.stream.Collectors;
  */
 @RequiredArgsConstructor
 public class MemberSchema {
-    private final Root<Member> root;
+    private final Path<Member> root;
     private final CriteriaBuilder criteriaBuilder;
 
-    public CriteriaBuilder criteriaBuilder(){
+    public CriteriaBuilder criteriaBuilder() {
         return criteriaBuilder;
     }
 
-    public Schema.Field<Long> id(){
+    public Schema.Field<Long> id() {
         return root == null ? new Schema.Field<>("id") : new Schema.Field<>(root.get("id"));
     }
 
@@ -33,7 +33,7 @@ public class MemberSchema {
      * 成员名称
      * varchar(100)
      */
-    public Schema.Field<String> name(){
+    public Schema.Field<String> name() {
         return root == null ? new Schema.Field<>("name") : new Schema.Field<>(root.get("name"));
     }
 
@@ -42,7 +42,7 @@ public class MemberSchema {
      * @param restrictions
      * @return
      */
-    public Predicate all(Predicate... restrictions){
+    public Predicate all(Predicate... restrictions) {
         return criteriaBuilder().and(restrictions);
     }
 
@@ -51,16 +51,32 @@ public class MemberSchema {
      * @param restrictions
      * @return
      */
-    public Predicate any(Predicate... restrictions){
+    public Predicate any(Predicate... restrictions) {
         return criteriaBuilder().or(restrictions);
     }
 
     /**
      * 构建查询条件
      * @param builder
+     * @param distinct
      * @return
      */
-    public static Specification<Member> specify(Schema.PredicateBuilder<MemberSchema> builder){
+    public static Specification<Member> specify(Schema.PredicateBuilder<MemberSchema> builder, boolean distinct) {
+        return (root, criteriaQuery, criteriaBuilder) -> {
+            MemberSchema member = new MemberSchema(root, criteriaBuilder);
+            criteriaQuery.where(builder.build(member));
+
+            criteriaQuery.distinct(distinct);
+            return null;
+        };
+    }
+    
+    /**
+     * 构建查询条件
+     * @param builder
+     * @return
+     */
+    public static Specification<Member> specify(Schema.PredicateBuilder<MemberSchema> builder) {
         return (root, criteriaQuery, criteriaBuilder) -> {
             MemberSchema member = new MemberSchema(root, criteriaBuilder);
             criteriaQuery.where(builder.build(member));
@@ -73,7 +89,7 @@ public class MemberSchema {
      * @param builders
      * @return
      */
-    public static Sort orderBy(Schema.OrderBuilder<MemberSchema>... builders){
+    public static Sort orderBy(Schema.OrderBuilder<MemberSchema>... builders) {
         return orderBy(Arrays.asList(builders));
     }
 
@@ -83,8 +99,8 @@ public class MemberSchema {
      * @param builders
      * @return
      */
-    public static Sort orderBy(Collection<Schema.OrderBuilder<MemberSchema>> builders){
-        if(CollectionUtils.isEmpty(builders)){
+    public static Sort orderBy(Collection<Schema.OrderBuilder<MemberSchema>> builders) {
+        if(CollectionUtils.isEmpty(builders)) {
             return Sort.unsorted();
         }
         return Sort.by(builders.stream()

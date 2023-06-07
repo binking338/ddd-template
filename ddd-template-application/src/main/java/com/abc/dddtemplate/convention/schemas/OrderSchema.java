@@ -18,14 +18,14 @@ import java.util.stream.Collectors;
  */
 @RequiredArgsConstructor
 public class OrderSchema {
-    private final Root<Order> root;
+    private final Path<Order> root;
     private final CriteriaBuilder criteriaBuilder;
 
-    public CriteriaBuilder criteriaBuilder(){
+    public CriteriaBuilder criteriaBuilder() {
         return criteriaBuilder;
     }
 
-    public Schema.Field<Long> id(){
+    public Schema.Field<Long> id() {
         return root == null ? new Schema.Field<>("id") : new Schema.Field<>(root.get("id"));
     }
 
@@ -33,7 +33,7 @@ public class OrderSchema {
      * 订单金额
      * int(11)
      */
-    public Schema.Field<Integer> amount(){
+    public Schema.Field<Integer> amount() {
         return root == null ? new Schema.Field<>("amount") : new Schema.Field<>(root.get("amount"));
     }
 
@@ -41,7 +41,7 @@ public class OrderSchema {
      * 订单标题
      * varchar(100)
      */
-    public Schema.Field<String> name(){
+    public Schema.Field<String> name() {
         return root == null ? new Schema.Field<>("name") : new Schema.Field<>(root.get("name"));
     }
 
@@ -49,7 +49,7 @@ public class OrderSchema {
      * 下单人
      * varchar(100)
      */
-    public Schema.Field<String> owner(){
+    public Schema.Field<String> owner() {
         return root == null ? new Schema.Field<>("owner") : new Schema.Field<>(root.get("owner"));
     }
 
@@ -57,7 +57,7 @@ public class OrderSchema {
      * 是否完成
      * bit(1)
      */
-    public Schema.Field<Boolean> finished(){
+    public Schema.Field<Boolean> finished() {
         return root == null ? new Schema.Field<>("finished") : new Schema.Field<>(root.get("finished"));
     }
 
@@ -65,14 +65,14 @@ public class OrderSchema {
      * 是否关闭
      * bit(1)
      */
-    public Schema.Field<Boolean> closed(){
+    public Schema.Field<Boolean> closed() {
         return root == null ? new Schema.Field<>("closed") : new Schema.Field<>(root.get("closed"));
     }
 
     /**
      * datetime
      */
-    public Schema.Field<java.util.Date> updateAt(){
+    public Schema.Field<java.util.Date> updateAt() {
         return root == null ? new Schema.Field<>("updateAt") : new Schema.Field<>(root.get("updateAt"));
     }
 
@@ -81,7 +81,7 @@ public class OrderSchema {
      * @param restrictions
      * @return
      */
-    public Predicate all(Predicate... restrictions){
+    public Predicate all(Predicate... restrictions) {
         return criteriaBuilder().and(restrictions);
     }
 
@@ -90,16 +90,57 @@ public class OrderSchema {
      * @param restrictions
      * @return
      */
-    public Predicate any(Predicate... restrictions){
+    public Predicate any(Predicate... restrictions) {
         return criteriaBuilder().or(restrictions);
+    }
+
+    /**
+     * OrderItem 关联查询条件定义
+     *
+     * @param builder
+     * @return
+     */
+    public Predicate joinOrderItem(Schema.JoinType joinType, Schema.PredicateBuilder<OrderItemSchema> builder) {
+        JoinType type = transformJoinType(joinType);
+        Join<Order, com.abc.dddtemplate.domain.aggregates.samples.OrderItem> join = ((Root<Order>) root).join("orderItems", type);
+        OrderItemSchema schema = new OrderItemSchema(join, criteriaBuilder);
+        return builder.build(schema);
+    }
+
+
+    private JoinType transformJoinType(Schema.JoinType joinType){
+        if(joinType == Schema.JoinType.INNER){
+            return JoinType.INNER;
+        } else if(joinType == Schema.JoinType.LEFT){
+            return JoinType.LEFT;
+        } else if(joinType == Schema.JoinType.RIGHT){
+            return JoinType.RIGHT;
+        }
+        return JoinType.LEFT;
     }
 
     /**
      * 构建查询条件
      * @param builder
+     * @param distinct
      * @return
      */
-    public static Specification<Order> specify(Schema.PredicateBuilder<OrderSchema> builder){
+    public static Specification<Order> specify(Schema.PredicateBuilder<OrderSchema> builder, boolean distinct) {
+        return (root, criteriaQuery, criteriaBuilder) -> {
+            OrderSchema order = new OrderSchema(root, criteriaBuilder);
+            criteriaQuery.where(builder.build(order));
+
+            criteriaQuery.distinct(distinct);
+            return null;
+        };
+    }
+    
+    /**
+     * 构建查询条件
+     * @param builder
+     * @return
+     */
+    public static Specification<Order> specify(Schema.PredicateBuilder<OrderSchema> builder) {
         return (root, criteriaQuery, criteriaBuilder) -> {
             OrderSchema order = new OrderSchema(root, criteriaBuilder);
             criteriaQuery.where(builder.build(order));
@@ -112,7 +153,7 @@ public class OrderSchema {
      * @param builders
      * @return
      */
-    public static Sort orderBy(Schema.OrderBuilder<OrderSchema>... builders){
+    public static Sort orderBy(Schema.OrderBuilder<OrderSchema>... builders) {
         return orderBy(Arrays.asList(builders));
     }
 
@@ -122,8 +163,8 @@ public class OrderSchema {
      * @param builders
      * @return
      */
-    public static Sort orderBy(Collection<Schema.OrderBuilder<OrderSchema>> builders){
-        if(CollectionUtils.isEmpty(builders)){
+    public static Sort orderBy(Collection<Schema.OrderBuilder<OrderSchema>> builders) {
+        if(CollectionUtils.isEmpty(builders)) {
             return Sort.unsorted();
         }
         return Sort.by(builders.stream()

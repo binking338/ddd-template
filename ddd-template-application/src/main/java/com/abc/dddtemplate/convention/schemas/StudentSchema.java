@@ -18,14 +18,14 @@ import java.util.stream.Collectors;
  */
 @RequiredArgsConstructor
 public class StudentSchema {
-    private final Root<Student> root;
+    private final Path<Student> root;
     private final CriteriaBuilder criteriaBuilder;
 
-    public CriteriaBuilder criteriaBuilder(){
+    public CriteriaBuilder criteriaBuilder() {
         return criteriaBuilder;
     }
 
-    public Schema.Field<Long> id(){
+    public Schema.Field<Long> id() {
         return root == null ? new Schema.Field<>("id") : new Schema.Field<>(root.get("id"));
     }
 
@@ -33,7 +33,7 @@ public class StudentSchema {
      * 学生名称
      * varchar(100)
      */
-    public Schema.Field<String> name(){
+    public Schema.Field<String> name() {
         return root == null ? new Schema.Field<>("name") : new Schema.Field<>(root.get("name"));
     }
 
@@ -42,7 +42,7 @@ public class StudentSchema {
      * @param restrictions
      * @return
      */
-    public Predicate all(Predicate... restrictions){
+    public Predicate all(Predicate... restrictions) {
         return criteriaBuilder().and(restrictions);
     }
 
@@ -51,16 +51,32 @@ public class StudentSchema {
      * @param restrictions
      * @return
      */
-    public Predicate any(Predicate... restrictions){
+    public Predicate any(Predicate... restrictions) {
         return criteriaBuilder().or(restrictions);
     }
 
     /**
      * 构建查询条件
      * @param builder
+     * @param distinct
      * @return
      */
-    public static Specification<Student> specify(Schema.PredicateBuilder<StudentSchema> builder){
+    public static Specification<Student> specify(Schema.PredicateBuilder<StudentSchema> builder, boolean distinct) {
+        return (root, criteriaQuery, criteriaBuilder) -> {
+            StudentSchema student = new StudentSchema(root, criteriaBuilder);
+            criteriaQuery.where(builder.build(student));
+
+            criteriaQuery.distinct(distinct);
+            return null;
+        };
+    }
+    
+    /**
+     * 构建查询条件
+     * @param builder
+     * @return
+     */
+    public static Specification<Student> specify(Schema.PredicateBuilder<StudentSchema> builder) {
         return (root, criteriaQuery, criteriaBuilder) -> {
             StudentSchema student = new StudentSchema(root, criteriaBuilder);
             criteriaQuery.where(builder.build(student));
@@ -73,7 +89,7 @@ public class StudentSchema {
      * @param builders
      * @return
      */
-    public static Sort orderBy(Schema.OrderBuilder<StudentSchema>... builders){
+    public static Sort orderBy(Schema.OrderBuilder<StudentSchema>... builders) {
         return orderBy(Arrays.asList(builders));
     }
 
@@ -83,8 +99,8 @@ public class StudentSchema {
      * @param builders
      * @return
      */
-    public static Sort orderBy(Collection<Schema.OrderBuilder<StudentSchema>> builders){
-        if(CollectionUtils.isEmpty(builders)){
+    public static Sort orderBy(Collection<Schema.OrderBuilder<StudentSchema>> builders) {
+        if(CollectionUtils.isEmpty(builders)) {
             return Sort.unsorted();
         }
         return Sort.by(builders.stream()
