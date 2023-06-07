@@ -156,24 +156,6 @@ public class UnitOfWork {
     }
 
     /**
-     * 事务删除
-     *
-     * @param entities
-     */
-    public void delete(Object... entities) {
-        delete(entities.length > 0 ? Arrays.stream(entities).collect(Collectors.toList()) : null);
-    }
-
-    /**
-     * 事务删除
-     *
-     * @param entities
-     */
-    public void delete(Collection<?> entities) {
-        save(null, entities);
-    }
-
-    /**
      * 事务保存，自动发送领域事件
      *
      * @param entities 待持久化的实体
@@ -468,24 +450,6 @@ public class UnitOfWork {
      */
     public static void removeEntities(Collection<?> entities) {
         instance.remove(entities);
-    }
-
-    /**
-     * 事务删除
-     *
-     * @param entities
-     */
-    public static void deleteEntities(Object... entities) {
-        instance.delete(entities);
-    }
-
-    /**
-     * 事务删除
-     *
-     * @param entities
-     */
-    public static void deleteEntities(Collection<?> entities) {
-        instance.delete(entities);
     }
 
     /**
