@@ -56,16 +56,25 @@ public class TeamSchema {
     }
 
     /**
-     * Member 关联查询条件定义
-     *
+     * 指定条件
      * @param builder
      * @return
      */
-    public Predicate joinMember(Schema.JoinType joinType, Schema.PredicateBuilder<MemberSchema> builder) {
+    public Predicate spec(Schema.PredicateBuilder<TeamSchema> builder){
+        return builder.build(this);
+    }
+
+    /**
+     * Member 关联查询条件定义
+     *
+     * @param joinType
+     * @return
+     */
+    public MemberSchema joinMember(Schema.JoinType joinType) {
         JoinType type = transformJoinType(joinType);
         Join<Team, com.abc.dddtemplate.domain.aggregates.relationsamples.one2many.Member> join = ((Root<Team>) root).join("members", type);
         MemberSchema schema = new MemberSchema(join, criteriaBuilder);
-        return builder.build(schema);
+        return schema;
     }
 
 
@@ -90,7 +99,6 @@ public class TeamSchema {
         return (root, criteriaQuery, criteriaBuilder) -> {
             TeamSchema team = new TeamSchema(root, criteriaBuilder);
             criteriaQuery.where(builder.build(team));
-
             criteriaQuery.distinct(distinct);
             return null;
         };

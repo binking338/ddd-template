@@ -12,6 +12,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
 import javax.persistence.criteria.Expression;
+import javax.persistence.criteria.Predicate;
 import java.util.Date;
 
 /**
@@ -33,7 +34,7 @@ public class ListTransferQry extends PageParam {
         @Override
         public PageData<ListTransferQryDto> exec(ListTransferQry listTransferQry) {
             Page<Transfer> page = transferRepository.findAll(TransferSchema.specify(transfer -> {
-                Expression<Boolean> predicate = null;
+                Predicate predicate = null;
                 predicate = transfer.accountId().equal(listTransferQry.accountId);
                 if (listTransferQry.begin != null) {
                     predicate = transfer.criteriaBuilder().and(predicate, transfer.time().greaterThan(listTransferQry.begin));

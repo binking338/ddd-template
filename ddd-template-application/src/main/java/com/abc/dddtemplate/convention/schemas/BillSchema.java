@@ -95,6 +95,15 @@ public class BillSchema {
     }
 
     /**
+     * 指定条件
+     * @param builder
+     * @return
+     */
+    public Predicate spec(Schema.PredicateBuilder<BillSchema> builder){
+        return builder.build(this);
+    }
+
+    /**
      * 构建查询条件
      * @param builder
      * @param distinct
@@ -104,7 +113,6 @@ public class BillSchema {
         return (root, criteriaQuery, criteriaBuilder) -> {
             BillSchema bill = new BillSchema(root, criteriaBuilder);
             criteriaQuery.where(builder.build(bill));
-
             criteriaQuery.distinct(distinct);
             return null;
         };

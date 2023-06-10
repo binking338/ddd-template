@@ -64,6 +64,15 @@ public class AccountSchema {
     }
 
     /**
+     * 指定条件
+     * @param builder
+     * @return
+     */
+    public Predicate spec(Schema.PredicateBuilder<AccountSchema> builder){
+        return builder.build(this);
+    }
+
+    /**
      * 构建查询条件
      * @param builder
      * @param distinct
@@ -73,7 +82,6 @@ public class AccountSchema {
         return (root, criteriaQuery, criteriaBuilder) -> {
             AccountSchema account = new AccountSchema(root, criteriaBuilder);
             criteriaQuery.where(builder.build(account));
-
             criteriaQuery.distinct(distinct);
             return null;
         };

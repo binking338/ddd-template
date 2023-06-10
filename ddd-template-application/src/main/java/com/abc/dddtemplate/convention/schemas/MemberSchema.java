@@ -56,6 +56,15 @@ public class MemberSchema {
     }
 
     /**
+     * 指定条件
+     * @param builder
+     * @return
+     */
+    public Predicate spec(Schema.PredicateBuilder<MemberSchema> builder){
+        return builder.build(this);
+    }
+
+    /**
      * 构建查询条件
      * @param builder
      * @param distinct
@@ -65,7 +74,6 @@ public class MemberSchema {
         return (root, criteriaQuery, criteriaBuilder) -> {
             MemberSchema member = new MemberSchema(root, criteriaBuilder);
             criteriaQuery.where(builder.build(member));
-
             criteriaQuery.distinct(distinct);
             return null;
         };

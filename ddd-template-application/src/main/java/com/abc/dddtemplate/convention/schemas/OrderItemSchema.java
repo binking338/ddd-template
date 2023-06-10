@@ -72,6 +72,15 @@ public class OrderItemSchema {
     }
 
     /**
+     * 指定条件
+     * @param builder
+     * @return
+     */
+    public Predicate spec(Schema.PredicateBuilder<OrderItemSchema> builder){
+        return builder.build(this);
+    }
+
+    /**
      * 构建查询条件
      * @param builder
      * @param distinct
@@ -81,7 +90,6 @@ public class OrderItemSchema {
         return (root, criteriaQuery, criteriaBuilder) -> {
             OrderItemSchema orderItem = new OrderItemSchema(root, criteriaBuilder);
             criteriaQuery.where(builder.build(orderItem));
-
             criteriaQuery.distinct(distinct);
             return null;
         };
