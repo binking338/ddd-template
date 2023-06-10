@@ -25,7 +25,6 @@ public class Schema {
         public Predicate build(S schema);
     }
 
-
     /**
      * 排序构建器
      */
@@ -59,6 +58,10 @@ public class Schema {
 
         protected CriteriaBuilder criteriaBuilder() {
             return path == null ? null : path.criteriaBuilder();
+        }
+
+        public Path<T> path(){
+            return path;
         }
 
         public Sort.Order asc() {
