@@ -17,6 +17,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
@@ -87,6 +90,48 @@ public class UnitOfWork {
         O exec(I input);
     }
 
+    public interface QueryBuilder<R, F> {
+        void build(CriteriaBuilder cb, CriteriaQuery<R> cq, Root<F> root);
+    }
+
+    /**
+     * 自定义查询
+     *
+     * @param resultClass
+     * @param fromEntityClass
+     * @param queryBuilder
+     * @param <R>
+     * @param <F>
+     * @return
+     */
+    public <R, F> R one(Class<R> resultClass, Class<F> fromEntityClass, QueryBuilder<R, F> queryBuilder) {
+        CriteriaBuilder criteriaBuilder = entityManager().getCriteriaBuilder();
+        CriteriaQuery<R> criteriaQuery = criteriaBuilder.createQuery(resultClass);
+        Root<F> root = criteriaQuery.from(fromEntityClass);
+        queryBuilder.build(criteriaBuilder, criteriaQuery, root);
+        R result = entityManager().createQuery(criteriaQuery).getSingleResult();
+        return result;
+    }
+
+    /**
+     * 自定义查询
+     *
+     * @param resultClass
+     * @param fromEntityClass
+     * @param queryBuilder
+     * @param <R>
+     * @param <F>
+     * @return
+     */
+    public <R, F> List<R> list(Class<R> resultClass, Class<F> fromEntityClass, QueryBuilder<R, F> queryBuilder) {
+        CriteriaBuilder criteriaBuilder = entityManager().getCriteriaBuilder();
+        CriteriaQuery<R> criteriaQuery = criteriaBuilder.createQuery(resultClass);
+        Root<F> root = criteriaQuery.from(fromEntityClass);
+        queryBuilder.build(criteriaBuilder, criteriaQuery, root);
+        List<R> results = entityManager().createQuery(criteriaQuery).getResultList();
+        return results;
+    }
+
     @Getter
     @PersistenceContext
     private EntityManager entityManager;
@@ -128,7 +173,7 @@ public class UnitOfWork {
      * @param entities
      */
     public void attach(Collection<?> entities) {
-        if(CollectionUtils.isNotEmpty(entities)) {
+        if (CollectionUtils.isNotEmpty(entities)) {
             Set<Object> attachedEntities = attachedEntitiesThreadLocal.get();
             attachedEntities.addAll(entities);
         }
@@ -149,7 +194,7 @@ public class UnitOfWork {
      * @param entities
      */
     public void remove(Collection<?> entities) {
-        if(CollectionUtils.isNotEmpty(entities)) {
+        if (CollectionUtils.isNotEmpty(entities)) {
             Set<Object> removedEntities = removedEntitiesThreadLocal.get();
             removedEntities.addAll(entities);
         }
@@ -190,8 +235,8 @@ public class UnitOfWork {
                 .collect(Collectors.toSet())
                 : removedEntitiesThreadLocal.get().stream().collect(Collectors.toSet());
         removedEntitiesThreadLocal.get().clear();
-        for (Object entity : persistenceContextEntities()){
-            if(!deleteEntityList.contains(entity)){
+        for (Object entity : persistenceContextEntities()) {
+            if (!deleteEntityList.contains(entity)) {
                 saveEntityList.add(entity);
             }
         }
@@ -414,6 +459,33 @@ public class UnitOfWork {
      */
     public static void clearContext() {
         instance.clear();
+    }
+
+    /**
+     * 自定义查询
+     *
+     * @param resultClass
+     * @param fromEntityClass
+     * @param builder
+     * @param <R>
+     * @return
+     */
+    public static <R, F> R queryOne(Class<R> resultClass, Class<F> fromEntityClass, QueryBuilder<R, F> builder) {
+        return instance.one(resultClass, fromEntityClass, builder);
+    }
+
+    /**
+     * 自定义查询
+     *
+     * @param resultClass
+     * @param fromEntityClass
+     * @param builder
+     * @param <R>
+     * @param <F>
+     * @return
+     */
+    public static <R, F> List<R> queryList(Class<R> resultClass, Class<F> fromEntityClass, QueryBuilder<R, F> builder) {
+        return instance.list(resultClass, fromEntityClass, builder);
     }
 
     /**
