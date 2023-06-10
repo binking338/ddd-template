@@ -12,6 +12,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
 import javax.persistence.criteria.Expression;
+import javax.persistence.criteria.Predicate;
 
 /**
  * 账单列表查询
@@ -31,7 +32,7 @@ public class ListBillQry extends PageParam {
         @Override
         public PageData<ListBillQryDto> exec(ListBillQry listBillQry) {
             Page<Bill> page = billRepository.findAll(BillSchema.specify(bill -> {
-                Expression<Boolean> predicate = null;
+                Predicate predicate = null;
                 predicate = bill.owner().equal(listBillQry.owner);
                 if (listBillQry.name != null) {
                     predicate = bill.name().like("%" + listBillQry.name + "%");

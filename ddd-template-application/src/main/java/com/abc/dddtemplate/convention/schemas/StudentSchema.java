@@ -56,6 +56,15 @@ public class StudentSchema {
     }
 
     /**
+     * 指定条件
+     * @param builder
+     * @return
+     */
+    public Predicate spec(Schema.PredicateBuilder<StudentSchema> builder){
+        return builder.build(this);
+    }
+
+    /**
      * 构建查询条件
      * @param builder
      * @param distinct
@@ -65,7 +74,6 @@ public class StudentSchema {
         return (root, criteriaQuery, criteriaBuilder) -> {
             StudentSchema student = new StudentSchema(root, criteriaBuilder);
             criteriaQuery.where(builder.build(student));
-
             criteriaQuery.distinct(distinct);
             return null;
         };

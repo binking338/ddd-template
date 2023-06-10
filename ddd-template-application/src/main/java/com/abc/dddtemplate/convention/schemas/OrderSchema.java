@@ -95,16 +95,25 @@ public class OrderSchema {
     }
 
     /**
-     * OrderItem 关联查询条件定义
-     *
+     * 指定条件
      * @param builder
      * @return
      */
-    public Predicate joinOrderItem(Schema.JoinType joinType, Schema.PredicateBuilder<OrderItemSchema> builder) {
+    public Predicate spec(Schema.PredicateBuilder<OrderSchema> builder){
+        return builder.build(this);
+    }
+
+    /**
+     * OrderItem 关联查询条件定义
+     *
+     * @param joinType
+     * @return
+     */
+    public OrderItemSchema joinOrderItem(Schema.JoinType joinType) {
         JoinType type = transformJoinType(joinType);
         Join<Order, com.abc.dddtemplate.domain.aggregates.samples.OrderItem> join = ((Root<Order>) root).join("orderItems", type);
         OrderItemSchema schema = new OrderItemSchema(join, criteriaBuilder);
-        return builder.build(schema);
+        return schema;
     }
 
 
@@ -129,7 +138,6 @@ public class OrderSchema {
         return (root, criteriaQuery, criteriaBuilder) -> {
             OrderSchema order = new OrderSchema(root, criteriaBuilder);
             criteriaQuery.where(builder.build(order));
-
             criteriaQuery.distinct(distinct);
             return null;
         };
