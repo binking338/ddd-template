@@ -5,8 +5,8 @@
 # This template uses one generic job with conditional builds
 # for the default branch and all other (MR) branches.
 variables:
-  IMAGE_REPOSITORY: "$DOCKER_REGISTRY_ENDPOINT/$DOCKER_REGISTRY_NAMESPACE/$CI_PROJECT_NAME"
-  IMAGE_TAG: $CI_PIPELINE_ID
+  IMAGE_REPOSITORY: "$DOCKER_REGISTRY_ENDPOINT/$DOCKER_REGISTRY_NAMESPACE/java-biz-svc"
+  IMAGE_TAG: "${CI_PROJECT_NAME}_${CI_PIPELINE_ID}"
   IMAGE_Pull_SECRET: docker-secret
   IMAGE_PULLPOLICY: Always
   # 修改应用名称
@@ -29,15 +29,15 @@ build:
     - shell
   script:
     - export BRANCH=${CI_COMMIT_BRANCH//\//-} && echo "BRANCH = $BRANCH"
-    - DOCKER_BUILDKIT=1 docker build -f $APP_DOCKERFILE -t "$IMAGE_REPOSITORY:$BRANCH" .
-    - docker push "$IMAGE_REPOSITORY:$BRANCH"
+    - DOCKER_BUILDKIT=1 docker build -f $APP_DOCKERFILE -t "$IMAGE_REPOSITORY:${CI_PROJECT_NAME}_$BRANCH" .
+    - docker push "$IMAGE_REPOSITORY:${CI_PROJECT_NAME}_$BRANCH"
     - |
       if [[ $CI_COMMIT_BRANCH == master* || $CI_COMMIT_BRANCH == main* || $CI_COMMIT_BRANCH == prod* ]]; then
-          docker tag "$IMAGE_REPOSITORY:$BRANCH" "$IMAGE_REPOSITORY:$IMAGE_TAG"
-          docker push "$IMAGE_REPOSITORY:$IMAGE_TAG"
-          docker rmi "$IMAGE_REPOSITORY:$IMAGE_TAG"
+          docker tag "$IMAGE_REPOSITORY:${CI_PROJECT_NAME}_$BRANCH" "$IMAGE_REPOSITORY:${CI_PROJECT_NAME}_$IMAGE_TAG"
+          docker push "$IMAGE_REPOSITORY:${CI_PROJECT_NAME}_$IMAGE_TAG"
+          docker rmi "$IMAGE_REPOSITORY:${CI_PROJECT_NAME}_$IMAGE_TAG"
       fi
-    - docker rmi "$IMAGE_REPOSITORY:$BRANCH"
+    - docker rmi "$IMAGE_REPOSITORY:${CI_PROJECT_NAME}_$BRANCH"
 
 code-scan:
   stage: test
@@ -49,8 +49,8 @@ code-scan:
   tags:
     - shell
   script:
-    - DOCKER_BUILDKIT=1 docker build -f $APP_DOCKERFILE-sonar -t "$IMAGE_REPOSITORY:$IMAGE_TAG-sonar" --build-arg SONAR_HOST=$SONAR_HOST --build-arg SONAR_LOGIN=$SONAR_LOGIN --build-arg CI_PROJECT_NAME=$CI_PROJECT_NAME --build-arg CI_COMMIT_REF_NAME=$CI_COMMIT_REF_NAME --build-arg CI_PROJECT_TITLE=$CI_PROJECT_TITLE --build-arg CI_PROJECT_URL=$CI_PROJECT_URL .
-    - docker rmi "$IMAGE_REPOSITORY:$IMAGE_TAG-sonar"
+    - DOCKER_BUILDKIT=1 docker build -f $APP_DOCKERFILE-sonar -t "$IMAGE_REPOSITORY:${CI_PROJECT_NAME}_$IMAGE_TAG-sonar" --build-arg SONAR_HOST=$SONAR_HOST --build-arg SONAR_LOGIN=$SONAR_LOGIN --build-arg CI_PROJECT_NAME=$CI_PROJECT_NAME --build-arg CI_COMMIT_REF_NAME=$CI_COMMIT_REF_NAME --build-arg CI_PROJECT_TITLE=$CI_PROJECT_TITLE --build-arg CI_PROJECT_URL=$CI_PROJECT_URL .
+    - docker rmi "$IMAGE_REPOSITORY:${CI_PROJECT_NAME}_$IMAGE_TAG-sonar"
 
 default:
   before_script:
@@ -79,23 +79,23 @@ default:
 
         if [[ $ENV == dev ]]; then
           echo  '开发环境配置'
-          export IMAGE_TAG=${CI_COMMIT_BRANCH//\//-}
+          export IMAGE_TAG=${CI_PROJECT_NAME}_${CI_COMMIT_BRANCH//\//-}
           export RAMPercentage=90.0
 
         elif [[ $ENV == test ]]; then
           echo  '测试环境配置'
-          export IMAGE_TAG=${CI_COMMIT_BRANCH//\//-}
+          export IMAGE_TAG=${CI_PROJECT_NAME}_${CI_COMMIT_BRANCH//\//-}
           export RAMPercentage=90.0
 
         elif [[ $ENV == pre ]]; then
           echo  '预发环境配置'
-          export IMAGE_TAG=${CI_COMMIT_BRANCH//\//-}
+          export IMAGE_TAG=${CI_PROJECT_NAME}_${CI_COMMIT_BRANCH//\//-}
           export RAMPercentage=90.0
 
         elif [[ $ENV == prod ]]; then
           echo  '生产环境配置'
           export RAMPercentage=70.0
-
+          export IMAGE_TAG=${CI_PROJECT_NAME}_${CI_PIPELINE_ID}
         fi
 
         export JAVA_OPTIONS="-server -Dserver.port=80 -Dserver.servlet.context-path=${APP_CONTEXT_PATH} -Djava.security.egd=file:/dev/./urandom -Drocketmq.client.logUseSlf4j=true \
@@ -177,7 +177,7 @@ deploy-test:
     - /^test([\/-].*)?$/
   tags:
     - k8s
-  when: manual
+  #  when: manual
   variables:
     APP_GRAY_ENV: "*"
     APP_NAME_EUREKA: "${APP_NAME}"
