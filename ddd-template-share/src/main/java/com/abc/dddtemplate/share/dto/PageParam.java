@@ -101,4 +101,12 @@ public class PageParam {
         }
         return pageRequest;
     }
+
+    public Pageable toSpringData(Sort sort) {
+        if (sort != null) {
+            return PageRequest.of(pageNum - 1, pageSize, sort);
+        } else {
+            return toSpringData();
+        }
+    }
 }
