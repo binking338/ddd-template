@@ -29,7 +29,7 @@ build:
     - shell
   script:
     - export BRANCH=${CI_COMMIT_BRANCH//\//-} && echo "BRANCH = $BRANCH"
-    - DOCKER_BUILDKIT=1 docker build -f $APP_DOCKERFILE -t "$IMAGE_REPOSITORY:${CI_PROJECT_NAME}_$BRANCH" .
+    - DOCKER_BUILDKIT=1 docker build -f $APP_DOCKERFILE --network host -t "$IMAGE_REPOSITORY:${CI_PROJECT_NAME}_$BRANCH" .
     - docker push "$IMAGE_REPOSITORY:${CI_PROJECT_NAME}_$BRANCH"
     - |
       if [[ $CI_COMMIT_BRANCH == master* || $CI_COMMIT_BRANCH == main* || $CI_COMMIT_BRANCH == prod* ]]; then
