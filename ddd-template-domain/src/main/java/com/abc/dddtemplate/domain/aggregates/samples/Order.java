@@ -138,7 +138,7 @@ public class Order extends BaseEntity {
     /**
      * datetime
      */
-    @Column(name = "`update_at`", insertable = false, updatable = true)
+    @Column(name = "`update_at`")
     private java.util.Date updateAt;
 
     @OneToMany(cascade = { CascadeType.ALL }, fetch = FetchType.EAGER, orphanRemoval = true) @Fetch(FetchMode.SUBSELECT)

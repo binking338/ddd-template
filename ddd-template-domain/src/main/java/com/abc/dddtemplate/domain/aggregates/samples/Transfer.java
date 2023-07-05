@@ -55,7 +55,7 @@ public class Transfer extends BaseEntity {
      * 时间
      * datetime
      */
-    @Column(name = "`time`", insertable = false, updatable = true)
+    @Column(name = "`time`")
     private java.util.Date time;
 
     /**
