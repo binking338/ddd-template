@@ -15,6 +15,7 @@ import java.util.stream.Collectors;
 /**
  * 成员 
  * 本文件由[gen-ddd-maven-plugin]生成
+ * 警告：请勿手工修改该文件，重新生成会覆盖该文件
  */
 @RequiredArgsConstructor
 public class MemberSchema {
