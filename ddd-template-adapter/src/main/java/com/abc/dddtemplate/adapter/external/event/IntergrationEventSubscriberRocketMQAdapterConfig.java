@@ -91,7 +91,7 @@ public class IntergrationEventSubscriberRocketMQAdapterConfig {
         }
         String target = domainEvent.value();
         target = beanFactory.resolveEmbeddedValue(target);
-        String topic = target.lastIndexOf(':') > 0 ? target.substring(0, target.lastIndexOf(':') - 1) : target;
+        String topic = target.lastIndexOf(':') > 0 ? target.substring(0, target.lastIndexOf(':')) : target;
         String tag = target.lastIndexOf(':') > 0 ? target.substring(target.lastIndexOf(':') + 1) : "";
 
         DefaultMQPushConsumer mqPushConsumer = new DefaultMQPushConsumer();
