@@ -277,6 +277,7 @@ public class UnitOfWork {
                         getEntityManager().remove(getEntityManager().merge(entity));
                     }
                 }
+                getEntityManager().flush();
             }
         });
         correlaedEntitiesThreadLocal.remove();
