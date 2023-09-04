@@ -247,11 +247,12 @@ public class UnitOfWork {
             correlaedEntitiesThreadLocal.get().addAll(deleteEntityList);
         }
         save(() -> {
+            boolean flush = false;
+            List<Object> refreshEntityList = null;
             if (CollectionUtils.isNotEmpty(saveEntityList)) {
+                flush = true;
                 for (Object entity : saveEntityList) {
-                    if (getEntityManager().contains(entity)) {
-                        getEntityManager().flush();
-                    } else {
+                    if (!getEntityManager().contains(entity)) {
                         Object id = null;
                         try {
                             id = entity.getClass().getMethod("getId").invoke(entity);
@@ -260,16 +261,18 @@ public class UnitOfWork {
                         }
                         if (id != null) {
                             getEntityManager().merge(entity);
-                            getEntityManager().flush();
                         } else {
                             getEntityManager().persist(entity);
-                            getEntityManager().flush();
-                            getEntityManager().refresh(entity);
+                            if (refreshEntityList == null) {
+                                refreshEntityList = new ArrayList<>();
+                            }
+                            refreshEntityList.add(entity);
                         }
                     }
                 }
             }
             if (CollectionUtils.isNotEmpty(deleteEntityList)) {
+                flush = true;
                 for (Object entity : deleteEntityList) {
                     if (getEntityManager().contains(entity)) {
                         getEntityManager().remove(entity);
@@ -277,7 +280,14 @@ public class UnitOfWork {
                         getEntityManager().remove(getEntityManager().merge(entity));
                     }
                 }
+            }
+            if (flush) {
                 getEntityManager().flush();
+                if (refreshEntityList != null && !refreshEntityList.isEmpty()) {
+                    for (Object entity : refreshEntityList) {
+                        getEntityManager().refresh(entity);
+                    }
+                }
             }
         });
         correlaedEntitiesThreadLocal.remove();
