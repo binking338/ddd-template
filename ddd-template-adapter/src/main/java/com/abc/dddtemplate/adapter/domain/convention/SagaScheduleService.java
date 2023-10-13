@@ -45,12 +45,15 @@ public class SagaScheduleService {
 
     private boolean compensationRunning = false;
     private boolean rollbackingRunning = false;
+    private int compensationDelay = 0;
+    private int rollbackingDelay = 0;
 
     @Scheduled(cron = "*/10 * * * * ?")
     public void compensation() {
         if (!enabled) {
             return;
         }
+        trySleep(compensationDelay);
         if (compensationRunning) {
             log.info("上次任务仍未结束，跳过本次任务");
             return;
@@ -59,14 +62,15 @@ public class SagaScheduleService {
         String pwd = RandomStringUtils.random(8, true, true);
         String locker = "saga_compensation[" + svcName + "]";
         try {
+            if (!lockerService.acquire(locker, pwd, Duration.ofMinutes(5))) {
+                compensationDelay += 3000;
+                return;
+            }
             boolean noneSaga = false;
             if (CollectionUtils.isEmpty(sagaSupervisor.getSupportedBizTypes())) {
                 return;
             }
             while (!noneSaga) {
-                if (!lockerService.acquire(locker, pwd, Duration.ofMinutes(5))) {
-                    return;
-                }
                 Date now = new Date();
                 Page<Saga> sagas = sagaRepository.findAll((root, cq, cb) -> {
                     cq.where(cb.or(
@@ -104,6 +108,7 @@ public class SagaScheduleService {
         if (!enabled) {
             return;
         }
+        trySleep(rollbackingDelay);
         if (rollbackingRunning) {
             log.info("上次任务仍未结束，跳过本次任务");
             return;
@@ -112,14 +117,15 @@ public class SagaScheduleService {
         String pwd = RandomStringUtils.random(8, true, true);
         String locker = "saga_rollbacking[" + svcName + "]";
         try {
+            if (!lockerService.acquire(locker, pwd, Duration.ofMinutes(5))) {
+                rollbackingDelay += 3000;
+                return;
+            }
             boolean noneSaga = false;
             if (CollectionUtils.isEmpty(sagaSupervisor.getSupportedBizTypes())) {
                 return;
             }
             while (!noneSaga) {
-                if (!lockerService.acquire(locker, pwd, Duration.ofMinutes(5))) {
-                    return;
-                }
                 Date now = new Date();
                 Page<Saga> sagas = sagaRepository.findAll((root, cq, cb) -> {
                     cq.where(
@@ -148,6 +154,16 @@ public class SagaScheduleService {
         }
     }
 
+    private void trySleep(long mills) {
+        try {
+            if (mills > 0) {
+                Thread.sleep(mills * 1000);
+            }
+        } catch (InterruptedException e) {
+            /* ignore */
+        }
+    }
+
     /**
      * 本地事件库归档
      */
@@ -158,13 +174,13 @@ public class SagaScheduleService {
         }
         String pwd = RandomStringUtils.random(8, true, true);
         String locker = "event_archiving";
+        if (!lockerService.acquire(locker, pwd, Duration.ofHours(1))) {
+            return;
+        }
 
         Date now = new Date();
         while (true) {
             try {
-                if (!lockerService.acquire(locker, pwd, Duration.ofHours(1))) {
-                    return;
-                }
                 Page<Saga> sagas = sagaRepository.findAll((root, cq, cb) -> {
                     cq.where(
                             cb.and(

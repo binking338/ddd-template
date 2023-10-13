@@ -36,16 +36,22 @@ public class LockerService {
                         .pwd("")
                         .build();
             } catch (ParseException e) {
-                e.printStackTrace();
+                // we don't care
             }
             return null;
         });
-        boolean result = locker.acquire(pwd, lockDuration, now);
-        if (result) {
-            try {
-                UnitOfWork.saveEntities(locker);
-            } catch (Exception ex) {
-                result = false;
+        boolean result;
+        if (locker == null) {
+            result = false;
+        } else {
+            result = locker.acquire(pwd, lockDuration, now);
+            if (result) {
+                try {
+                    UnitOfWork.saveEntities(locker);
+                } catch (Exception ex) {
+                    result = false;
+                    log.warn(String.format("获取锁-失败 name=%s pwd=%s duration=%d acquired=%s", name, pwd, lockDuration.getSeconds(), result), ex);
+                }
             }
         }
         log.info(String.format("获取锁 name=%s pwd=%s duration=%d acquired=%s", name, pwd, lockDuration.getSeconds(), result));
