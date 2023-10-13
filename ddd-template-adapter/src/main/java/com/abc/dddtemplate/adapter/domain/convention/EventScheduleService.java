@@ -41,6 +41,7 @@ public class EventScheduleService {
     private final LockerService lockerService;
 
     private boolean compensationRunning = false;
+    private int compensationDelay = 0;
 
     /**
      * 本地事件库补偿发送
@@ -50,6 +51,7 @@ public class EventScheduleService {
         if (!enabled) {
             return;
         }
+        trySleep(compensationDelay);
         if (compensationRunning) {
             log.info("上次任务仍未结束，跳过本次任务");
             return;
@@ -60,12 +62,13 @@ public class EventScheduleService {
         String locker = "event_compensation";
         Duration lockDuration = Duration.ofSeconds(30);
         try {
+            if (!lockerService.acquire(locker, pwd, lockDuration)) {
+                compensationDelay += 1000;
+                return;
+            }
             boolean noneEvent = false;
             while (!noneEvent) {
                 try {
-                    if (!lockerService.acquire(locker, pwd, lockDuration)) {
-                        return;
-                    }
                     Page<Event> events = eventRepository.findAll((root, cq, cb) -> {
                         Date now = new Date();
                         cq.where(cb.or(
@@ -98,6 +101,16 @@ public class EventScheduleService {
         }
     }
 
+    private void trySleep(long mills) {
+        try {
+            if (mills > 0) {
+                Thread.sleep(mills * 1000);
+            }
+        } catch (InterruptedException e) {
+            /* ignore */
+        }
+    }
+
     /**
      * 本地事件库归档
      */
@@ -109,15 +122,15 @@ public class EventScheduleService {
         String pwd = RandomStringUtils.random(8, true, true);
         String locker = "event_archiving";
         Duration lockDuration = Duration.ofHours(3);
+        if (!lockerService.acquire(locker, pwd, lockDuration)) {
+            return;
+        }
 
         Date now = new Date();
         boolean noneEvent = false;
         int failCount = 0;
         while (!noneEvent) {
             try {
-                if (!lockerService.acquire(locker, pwd, lockDuration)) {
-                    return;
-                }
                 Page<Event> events = eventRepository.findAll((root, cq, cb) -> {
                     cq.where(
                             cb.and(
