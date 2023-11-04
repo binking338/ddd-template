@@ -11,7 +11,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.env.Environment;
+import org.springframework.util.SystemPropertyUtils;
 
 import javax.annotation.PostConstruct;
 import java.lang.reflect.Method;
@@ -27,15 +27,13 @@ import java.util.stream.Collectors;
 public abstract class SagaStateMachine<Context> {
     @Autowired
     protected AggregateRepository<Saga, Long> sagaRepository;
-    @Autowired
-    Environment environment;
 
     protected String svcName;
     protected Process<Context> process;
 
     @PostConstruct
     public void init() {
-        this.svcName = environment.getProperty("app.id", "[default]");
+        this.svcName = SystemPropertyUtils.resolvePlaceholders("${app.id:[default]}");
         this.process = config();
     }
 
