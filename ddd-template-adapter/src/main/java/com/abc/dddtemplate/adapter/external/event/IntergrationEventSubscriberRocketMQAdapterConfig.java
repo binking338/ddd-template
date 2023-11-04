@@ -21,7 +21,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.context.event.EventListener;
-import org.springframework.core.env.Environment;
+import org.springframework.util.SystemPropertyUtils;
 
 import javax.annotation.PostConstruct;
 import java.util.ArrayList;
@@ -47,8 +47,6 @@ public class IntergrationEventSubscriberRocketMQAdapterConfig {
     @Value("${rocketmq.name-server:}")
     String defaultNameSrv;
     @Autowired
-    Environment environment;
-    @Autowired
     DomainEventSupervisor domainEventSupervisor;
     @Autowired
     ConfigurableBeanFactory beanFactory;
@@ -60,7 +58,8 @@ public class IntergrationEventSubscriberRocketMQAdapterConfig {
         Set<Class<?>> classes = ScanUtils.scanClass("com.abc.dddtemplate.external", true);
         classes.stream().filter(cls -> {
             DomainEvent domainEvent = cls.getAnnotation(DomainEvent.class);
-            if (!Objects.isNull(domainEvent) && StringUtils.isNotEmpty(domainEvent.value())) {
+            if (!Objects.isNull(domainEvent) && StringUtils.isNotEmpty(domainEvent.value()) &&
+                    !"none".equalsIgnoreCase(domainEvent.subscriber())) {
                 return true;
             } else {
                 return false;
@@ -96,11 +95,11 @@ public class IntergrationEventSubscriberRocketMQAdapterConfig {
 
         DefaultMQPushConsumer mqPushConsumer = new DefaultMQPushConsumer();
         try {
-            mqPushConsumer.setConsumerGroup(getTopicConsumerGroup(topic));
+            mqPushConsumer.setConsumerGroup(getTopicConsumerGroup(topic, domainEvent.subscriber()));
             mqPushConsumer.setConsumeFromWhere(ConsumeFromWhere.CONSUME_FROM_FIRST_OFFSET);
             mqPushConsumer.setInstanceName(applicationName);
             mqPushConsumer.subscribe(topic, tag);
-            String nameServerAddr = getTopicNamesrvAddr(topic);
+            String nameServerAddr = getTopicNamesrvAddr(topic, defaultNameSrv);
             mqPushConsumer.setNamesrvAddr(nameServerAddr);
             mqPushConsumer.setUnitName(domainEventClass.getSimpleName());
             mqPushConsumer.registerMessageListener((List<MessageExt> msgs, ConsumeConcurrentlyContext context) -> {
@@ -124,13 +123,16 @@ public class IntergrationEventSubscriberRocketMQAdapterConfig {
         return mqPushConsumer;
     }
 
-    private String getTopicConsumerGroup(String topic) {
-        String group = environment.getProperty("rocketmq." + topic + ".consumer.group", topic + "-4-" + applicationName);
+    private String getTopicConsumerGroup(String topic, String defaultVal) {
+        if (StringUtils.isBlank(defaultVal)) {
+            defaultVal = topic + "-4-" + applicationName;
+        }
+        String group = SystemPropertyUtils.resolvePlaceholders("${rocketmq." + topic + ".consumer.group:" + defaultVal + "}");
         return group;
     }
 
-    private String getTopicNamesrvAddr(String topic) {
-        String nameServer = environment.getProperty("rocketmq." + topic + ".name-server", defaultNameSrv);
+    private String getTopicNamesrvAddr(String topic, String defaultVal) {
+        String nameServer = SystemPropertyUtils.resolvePlaceholders("${rocketmq." + topic + ".name-server:" + defaultVal + "}");
         return nameServer;
     }
 }

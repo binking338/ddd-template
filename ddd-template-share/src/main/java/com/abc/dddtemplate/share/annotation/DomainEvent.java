@@ -41,4 +41,11 @@ public @interface DomainEvent {
      * @return
      */
     int expireAfter() default 86400;
+
+    /**
+     * 订阅方
+     *  RocketMq: 可填写消费组 consumer-group
+     * @return
+     */
+    String subscriber() default "";
 }
