@@ -40,6 +40,13 @@ public class ArchivedEvent {
     private Long id;
 
     /**
+     * 服务
+     * varchar
+     */
+    @Column(name = "`svc_name`")
+    private String svcName;
+
+    /**
      * 事件类型
      * varchar(100)
      */
