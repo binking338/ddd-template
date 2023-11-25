@@ -10,7 +10,6 @@
     <version>1.0-SNAPSHOT</version>
 
     <modules>
-        <module>ddd-template-external</module> <!-- 防腐层 -->
         <module>ddd-template-adapter</module> <!-- 适配层 -->
         <module>ddd-template-application</module> <!-- 应用功能层 -->
         <module>ddd-template-domain</module> <!-- 领域模型层 -->

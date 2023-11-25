@@ -1,7 +1,7 @@
 package com.abc.dddtemplate.adapter.external.clients;
 
 import com.abc.dddtemplate.adapter.external.clients.rest.ServiceMockRest;
-import com.abc.dddtemplate.external.clients.InventoryClient;
+import com.abc.dddtemplate.application.clients.InventoryClient;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

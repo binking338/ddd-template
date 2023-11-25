@@ -3,7 +3,7 @@ package com.abc.dddtemplate.adapter.external.clients;
 import com.alibaba.fastjson.JSON;
 import com.abc.dddtemplate.share.dto.ResponseData;
 import com.abc.dddtemplate.adapter.external.clients.rest.ServiceMockRest;
-import com.abc.dddtemplate.external.clients.SysTime;
+import com.abc.dddtemplate.application.clients.SysTime;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

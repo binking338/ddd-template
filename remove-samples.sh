@@ -13,6 +13,7 @@ rm -f ./*-adapter/src/main/java/com/*/*/adapter/portal/api/controller/OrderContr
 rm -f ./*-application/src/main/java/com/*/*/convention/schemas/*.java
 rm -f ./*-application/src/main/java/com/*/*/application/**/*.java
 rm -f ./*-application/src/main/java/com/*/*/application/subscribers/**/*.java
+rm -f ./*-application/src/main/java/com/*/*/application/clients/*.java
 rm -rf ./*-application/src/main/java/com/*/*/application/commands/account
 rm -rf ./*-application/src/main/java/com/*/*/application/commands/bill
 rm -rf ./*-application/src/main/java/com/*/*/application/commands/order
@@ -21,7 +22,5 @@ rm -rf ./*-domain/src/main/java/com/*/*/domain/aggregates/relationsamples
 rm -rf ./*-domain/src/main/java/com/*/*/domain/aggregates/samples
 rm -f ./*-domain/src/main/java/com/*/*/domain/events/**/*.java
 rm -f ./*-domain/src/main/java/com/*/*/domain/services/*.java
-
-rm -f ./*-external/src/main/java/com/*/*/external/**/*.java
 
 rm -f ./ddl.sql

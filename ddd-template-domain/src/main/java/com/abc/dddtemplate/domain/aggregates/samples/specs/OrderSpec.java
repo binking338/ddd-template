@@ -1,4 +1,4 @@
-package com.abc.dddtemplate.application.specifications;
+package com.abc.dddtemplate.domain.aggregates.samples.specs;
 
 import com.abc.dddtemplate.convention.Specification;
 import com.abc.dddtemplate.domain.aggregates.samples.Order;

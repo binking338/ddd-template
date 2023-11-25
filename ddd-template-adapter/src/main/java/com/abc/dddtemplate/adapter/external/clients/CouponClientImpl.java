@@ -1,7 +1,7 @@
 package com.abc.dddtemplate.adapter.external.clients;
 
 import com.abc.dddtemplate.adapter.external.clients.rest.ServiceMockRest;
-import com.abc.dddtemplate.external.clients.CouponClient;
+import com.abc.dddtemplate.application.clients.CouponClient;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
