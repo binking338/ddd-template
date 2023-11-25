@@ -2,7 +2,7 @@ package com.abc.dddtemplate.application.sagas;
 
 import com.abc.dddtemplate.application.commands.order.PlaceOrderCmd;
 import com.abc.dddtemplate.convention.SagaStateMachine;
-import com.abc.dddtemplate.external.clients.InventoryClient;
+import com.abc.dddtemplate.application.clients.InventoryClient;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

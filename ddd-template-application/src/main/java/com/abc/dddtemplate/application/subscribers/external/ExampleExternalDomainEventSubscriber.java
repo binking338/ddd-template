@@ -1,7 +1,7 @@
 package com.abc.dddtemplate.application.subscribers.external;
 
 import com.abc.dddtemplate.convention.DomainEventSubscriber;
-import com.abc.dddtemplate.external.events.ExampleExternalDomainEvent;
+import com.abc.dddtemplate.domain.events.external.ExampleExternalDomainEvent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;

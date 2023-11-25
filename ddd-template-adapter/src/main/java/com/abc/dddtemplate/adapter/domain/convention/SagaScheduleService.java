@@ -78,12 +78,14 @@ public class SagaScheduleService {
                                     // 【初始状态】
                                     cb.equal(root.get("sagaState"), Saga.SagaState.INIT),
                                     cb.lessThan(root.get("nextTryTime"), now),
-                                    root.get("bizType").in(sagaSupervisor.getSupportedBizTypes())
+                                    root.get("bizType").in(sagaSupervisor.getSupportedBizTypes()),
+                                    cb.equal(root.get("svcName"), svcName)
                             ), cb.and(
                                     // 【未知状态】
                                     cb.equal(root.get("sagaState"), Saga.SagaState.RUNNING),
                                     cb.lessThan(root.get("nextTryTime"), now),
-                                    root.get("bizType").in(sagaSupervisor.getSupportedBizTypes())
+                                    root.get("bizType").in(sagaSupervisor.getSupportedBizTypes()),
+                                    cb.equal(root.get("svcName"), svcName)
                             )));
                     return null;
                 }, PageRequest.of(0, 10, Sort.by(Sort.Direction.ASC, "createAt")));
@@ -132,8 +134,9 @@ public class SagaScheduleService {
                             cb.and(
                                     // 【回滚状态】
                                     cb.equal(root.get("sagaState"), Saga.SagaState.ROLLBACKING),
-                                    root.get("bizType").in(sagaSupervisor.getSupportedBizTypes())
-
+                                    root.get("bizType").in(sagaSupervisor.getSupportedBizTypes()),
+                                    cb.lessThan(root.get("nextTryTime"), now),
+                                    cb.equal(root.get("svcName"), svcName)
                             ));
                     return null;
                 }, PageRequest.of(0, 10, Sort.by(Sort.Direction.ASC, "createAt")));

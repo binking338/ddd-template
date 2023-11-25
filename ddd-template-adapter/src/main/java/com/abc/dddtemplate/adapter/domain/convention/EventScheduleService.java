@@ -35,6 +35,8 @@ public class EventScheduleService {
 
     @Value("${schedule.event.enabled:false}")
     private boolean enabled;
+    @Value("${app.id:default}")
+    private String svcName;
 
     private final AggregateRepository<Event, Long> eventRepository;
     private final DomainEventSupervisor domainEventSupervisor;
@@ -59,7 +61,7 @@ public class EventScheduleService {
         compensationRunning = true;
 
         String pwd = RandomStringUtils.random(8, true, true);
-        String locker = "event_compensation";
+        String locker = "event_compensation[" + svcName + "]";
         Duration lockDuration = Duration.ofSeconds(30);
         try {
             if (!lockerService.acquire(locker, pwd, lockDuration)) {
@@ -75,11 +77,13 @@ public class EventScheduleService {
                                 cb.and(
                                         // 【初始状态】
                                         cb.equal(root.get("eventState"), Event.EventState.INIT),
-                                        cb.lessThan(root.get("nextTryTime"), now)
+                                        cb.lessThan(root.get("nextTryTime"), now),
+                                        cb.equal(root.get("svcName"), svcName)
                                 ), cb.and(
                                         // 【未知状态】
                                         cb.equal(root.get("eventState"), Event.EventState.COMFIRMING),
-                                        cb.lessThan(root.get("nextTryTime"), now)
+                                        cb.lessThan(root.get("nextTryTime"), now),
+                                        cb.equal(root.get("svcName"), svcName)
                                 )));
                         return null;
                     }, PageRequest.of(0, 10, Sort.by(Sort.Direction.ASC, "createAt")));
@@ -120,7 +124,7 @@ public class EventScheduleService {
             return;
         }
         String pwd = RandomStringUtils.random(8, true, true);
-        String locker = "event_archiving";
+        String locker = "event_archiving[" + svcName + "]";
         Duration lockDuration = Duration.ofHours(3);
         if (!lockerService.acquire(locker, pwd, lockDuration)) {
             return;

@@ -9,6 +9,7 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
+import org.springframework.util.SystemPropertyUtils;
 
 import java.time.Duration;
 import java.util.*;
@@ -22,6 +23,8 @@ import java.util.function.Function;
 @Slf4j
 public class DomainEventSupervisor {
 
+    protected String svcName;
+
     public DomainEventSupervisor(
             AggregateRepository<Event, Long> eventRepository,
             ApplicationEventPublisher applicationEventPublisher,
@@ -31,6 +34,7 @@ public class DomainEventSupervisor {
         setSubscribers(subscribers);
         DomainEventPublisher.Factory.setFactoryMethord(entity -> new DefaultDomainEventPublisher(entity));
         instance = this;
+        svcName = SystemPropertyUtils.resolvePlaceholders("${app.id:[default]}");
     }
 
     private final ApplicationEventPublisher applicationEventPublisher;
@@ -138,7 +142,7 @@ public class DomainEventSupervisor {
     private void dispatch2RemoteSubscriber(Object event) {
         Date now = new Date();
         Event intergrationEvent = new Event();
-        intergrationEvent.init(event, now, Duration.ofDays(1), 100);
+        intergrationEvent.init(now, svcName, event, Duration.ofDays(1), 100);
 
         intergrationEvent = eventPersistanceHandler.apply(intergrationEvent);
 

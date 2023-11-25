@@ -1,4 +1,4 @@
-package com.abc.dddtemplate.external.clients;
+package com.abc.dddtemplate.application.clients;
 
 /**
  * 优惠券客户端

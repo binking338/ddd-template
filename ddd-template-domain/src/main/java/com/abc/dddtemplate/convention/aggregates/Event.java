@@ -34,7 +34,7 @@ import java.util.Objects;
 @Slf4j
 public class Event {
 
-    public void init(Object payload, Date now, Duration expireAfter, int retryTimes) {
+    public void init(Date now, String svcName, Object payload, Duration expireAfter, int retryTimes) {
         this.createAt = now;
         this.expireAt = DateUtils.addSeconds(now, (int) expireAfter.getSeconds());
         this.eventState = Event.EventState.INIT;
@@ -49,7 +49,7 @@ public class Event {
     private Object payload = null;
 
     public Object restorePayload() {
-        if(this.payload != null){
+        if (this.payload != null) {
             return this.payload;
         }
         Class dataClass = null;
@@ -138,6 +138,13 @@ public class Event {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "`id`")
     private Long id;
+
+    /**
+     * 服务
+     * varchar
+     */
+    @Column(name = "`svc_name`")
+    private String svcName;
 
     /**
      * 事件类型
