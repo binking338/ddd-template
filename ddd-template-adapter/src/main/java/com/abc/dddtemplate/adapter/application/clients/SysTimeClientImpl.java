@@ -1,9 +1,9 @@
-package com.abc.dddtemplate.adapter.external.clients;
+package com.abc.dddtemplate.adapter.application.clients;
 
 import com.alibaba.fastjson.JSON;
 import com.abc.dddtemplate.share.dto.ResponseData;
-import com.abc.dddtemplate.adapter.external.clients.rest.ServiceMockRest;
-import com.abc.dddtemplate.application.clients.TimeServiceClient;
+import com.abc.dddtemplate.adapter.application.clients.rest.ServiceMockRest;
+import com.abc.dddtemplate.application.clients.SysTime;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -14,17 +14,17 @@ import org.springframework.stereotype.Service;
  */
 @Service
 @RequiredArgsConstructor
-public class TimeServiceClientImpl implements TimeServiceClient {
+public class SysTimeClientImpl implements SysTime.Client {
 
     private final ServiceMockRest serviceMockRest;
 
     @Override
-    public SysTimeDto getSysTime() {
+    public SysTime get() {
         // 使用feign实现
         ResponseData<Object> data = serviceMockRest.mock(0);
-        SysTimeDto sysTimeDto = SysTimeDto.builder()
-                .timestamp(JSON.toJSONString(data.getData()))
+        SysTime sysTime = SysTime.builder()
+                .data(JSON.toJSONString(data.getData()))
                 .build();
-        return sysTimeDto;
+        return sysTime;
     }
 }

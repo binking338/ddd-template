@@ -1,4 +1,4 @@
-package com.abc.dddtemplate.adapter.external.clients.rest;
+package com.abc.dddtemplate.adapter.application.clients.rest;
 
 import com.abc.dddtemplate.share.dto.ResponseData;
 import org.springframework.cloud.openfeign.FeignAutoConfiguration;
