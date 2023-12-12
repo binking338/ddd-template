@@ -114,7 +114,9 @@ CREATE TABLE `__event` (
   `version` int(11) NOT NULL DEFAULT '0',
   `db_created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   `db_updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-  PRIMARY KEY (`id`, `db_created_at`),
+  PRIMARY KEY (`id`
+#   , `db_created_at`
+              ),
   KEY `idx_db_created_at` (`db_created_at`),
   KEY `idx_db_updated_at` (`db_updated_at`),
   KEY `idx_event_type` (`event_type`,`svc_name`),
@@ -122,8 +124,9 @@ CREATE TABLE `__event` (
   KEY `idx_expire_at` (`expire_at`),
   KEY `idx_next_try_time` (`next_try_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='集成事件\n@I;'
-partition by range(to_days(db_created_at))
-(partition p202201 values less than (to_days('2022-02-01')) ENGINE=InnoDB);
+# partition by range(to_days(db_created_at))
+# (partition p202201 values less than (to_days('2022-02-01')) ENGINE=InnoDB)
+;
 
 -- Create syntax for TABLE '__saga'
 CREATE TABLE `__saga` (
@@ -142,7 +145,9 @@ CREATE TABLE `__saga` (
   `version` int(11) NOT NULL DEFAULT '0',
   `db_created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   `db_updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-  PRIMARY KEY (`id`, `db_created_at`),
+  PRIMARY KEY (`id`
+#   , `db_created_at`
+              ),
   KEY `idx_db_created_at` (`db_created_at`),
   KEY `idx_db_updated_at` (`db_updated_at`),
   KEY `idx_biz_type` (`biz_type`,`svc_name`),
@@ -150,8 +155,9 @@ CREATE TABLE `__saga` (
   KEY `idx_expire_at` (`expire_at`),
   KEY `idx_next_try_time` (`next_try_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='SAGA事务\n@I;'
-partition by range(to_days(db_created_at))
-(partition p202201 values less than (to_days('2022-02-01')) ENGINE=InnoDB);
+# partition by range(to_days(db_created_at))
+# (partition p202201 values less than (to_days('2022-02-01')) ENGINE=InnoDB)
+;
 
 -- Create syntax for TABLE '__saga_process'
 CREATE TABLE `__saga_process` (
@@ -168,13 +174,16 @@ CREATE TABLE `__saga_process` (
   `exception` varchar(255) NOT NULL DEFAULT '',
   `db_created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   `db_updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-  PRIMARY KEY (`id`, `db_created_at`),
+  PRIMARY KEY (`id`
+#   , `db_created_at`
+              ),
   KEY `idx_db_created_at` (`db_created_at`),
   KEY `idx_db_updated_at` (`db_updated_at`),
   KEY `idx_saga_id` (`saga_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='SAGA事务-子环节\n@I;'
-partition by range(to_days(db_created_at))
-(partition p202201 values less than (to_days('2022-02-01')) ENGINE=InnoDB);
+# partition by range(to_days(db_created_at))
+# (partition p202201 values less than (to_days('2022-02-01')) ENGINE=InnoDB)
+;
 
 CREATE TABLE `__archived_event` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -192,7 +201,9 @@ CREATE TABLE `__archived_event` (
   `version` int(11) NOT NULL DEFAULT '0',
   `db_created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   `db_updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '更新时间',
-  PRIMARY KEY (`id`, `db_created_at`),
+  PRIMARY KEY (`id`
+#   , `db_created_at`
+              ),
   KEY `idx_db_created_at` (`db_created_at`),
   KEY `idx_db_updated_at` (`db_updated_at`),
   KEY `idx_event_type` (`event_type`,`svc_name`),
@@ -200,8 +211,9 @@ CREATE TABLE `__archived_event` (
   KEY `idx_expire_at` (`expire_at`),
   KEY `idx_next_try_time` (`next_try_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='集成事件存档\n@I;'
-partition by range(to_days(db_created_at))
-(partition p202201 values less than (to_days('2022-02-01')) ENGINE=InnoDB);
+# partition by range(to_days(db_created_at))
+# (partition p202201 values less than (to_days('2022-02-01')) ENGINE=InnoDB)
+;
 
 CREATE TABLE `__archived_saga` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -219,7 +231,9 @@ CREATE TABLE `__archived_saga` (
   `version` int(11) NOT NULL DEFAULT '0',
   `db_created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   `db_updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '更新时间',
-  PRIMARY KEY (`id`, `db_created_at`),
+  PRIMARY KEY (`id`
+#   , `db_created_at`
+              ),
   KEY `idx_db_created_at` (`db_created_at`),
   KEY `idx_db_updated_at` (`db_updated_at`),
   KEY `idx_biz_type` (`biz_type`,`svc_name`),
@@ -227,8 +241,9 @@ CREATE TABLE `__archived_saga` (
   KEY `idx_expire_at` (`expire_at`),
   KEY `idx_next_try_time` (`next_try_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='SAGA事务存档\n@I;'
-partition by range(to_days(db_created_at))
-(partition p202201 values less than (to_days('2022-02-01')) ENGINE=InnoDB);
+# partition by range(to_days(db_created_at))
+# (partition p202201 values less than (to_days('2022-02-01')) ENGINE=InnoDB)
+;
 
 CREATE TABLE `__archived_saga_process` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -244,13 +259,17 @@ CREATE TABLE `__archived_saga_process` (
   `exception` varchar(255) NOT NULL DEFAULT '',
   `db_created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   `db_updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '更新时间',
-  PRIMARY KEY (`id`, `db_created_at`),
+  PRIMARY KEY (`id`
+#    , `db_created_at`
+              ),
   KEY `idx_db_created_at` (`db_created_at`),
   KEY `idx_db_updated_at` (`db_updated_at`),
   KEY `idx_saga_id` (`saga_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='SAGA事务存档-子环节\n@I;'
-partition by range(to_days(db_created_at))
-(partition p202201 values less than (to_days('2022-02-01')) ENGINE=InnoDB);
+# partition by range(to_days(db_created_at))
+# (partition p202201 values less than (to_days('2022-02-01'))
+#     ENGINE=InnoDB)
+;
 
 CREATE TABLE `__locker` (
   `id` int(11) unsigned NOT NULL AUTO_INCREMENT,
