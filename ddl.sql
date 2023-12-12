@@ -264,5 +264,5 @@ CREATE TABLE `__locker` (
   PRIMARY KEY (`id`),
   KEY `idx_db_created_at` (`db_created_at`),
   KEY `idx_db_updated_at` (`db_updated_at`),
-  KEY `idx_unlock_at` (`unlock_at`)
+  UNIQUE `uniq_name` (`name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='锁\n@I;';
