@@ -181,8 +181,8 @@ public class EventScheduleService {
         lockerService.release(locker, pwd);
     }
 
-    @Scheduled(cron = "0 0 0 * * ?")
-    @PostConstruct
+//    @Scheduled(cron = "0 0 0 * * ?")
+//    @PostConstruct
     public void addPartition() {
         if(!enabled){
             return;
