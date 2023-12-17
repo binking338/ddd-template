@@ -5,11 +5,11 @@ import com.abc.dddtemplate.share.annotation.DomainEvent;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
-import org.springframework.util.SystemPropertyUtils;
 
 import java.time.Duration;
 import java.util.*;
@@ -22,7 +22,7 @@ import java.util.function.Function;
 @Service
 @Slf4j
 public class DomainEventSupervisor {
-
+    @Value("${app.id:[default]}")
     protected String svcName;
 
     public DomainEventSupervisor(
@@ -34,7 +34,6 @@ public class DomainEventSupervisor {
         setSubscribers(subscribers);
         DomainEventPublisher.Factory.setFactoryMethord(entity -> new DefaultDomainEventPublisher(entity));
         instance = this;
-        svcName = SystemPropertyUtils.resolvePlaceholders("${app.id:[default]}");
     }
 
     private final ApplicationEventPublisher applicationEventPublisher;
@@ -63,7 +62,7 @@ public class DomainEventSupervisor {
         }
     }
 
-    public static void clearDispatchedIntergrationEvents(){
+    public static void clearDispatchedIntergrationEvents() {
         threadLocalDispatchedIntergrationEvents.remove();
     }
 
@@ -91,11 +90,12 @@ public class DomainEventSupervisor {
 
     /**
      * 立即发送传入的 event 领域事件
+     *
      * @param event
      * @param forceLocal
      * @param <T>
      */
-    public <T> void dispatchRawImmediately(T event, boolean forceLocal){
+    public <T> void dispatchRawImmediately(T event, boolean forceLocal) {
         if (Objects.isNull(event)) {
             throw new NullPointerException("param event is null");
         }
@@ -111,6 +111,7 @@ public class DomainEventSupervisor {
 
     /**
      * 立即发送传入的集成事件
+     *
      * @param events
      * @return
      */
@@ -129,7 +130,7 @@ public class DomainEventSupervisor {
                 }
             } catch (Exception ex) {
                 // 数据库并发异常
-                failedCount ++;
+                failedCount++;
                 log.error("集成事件补偿发送-持久化失败", ex);
             }
         }
