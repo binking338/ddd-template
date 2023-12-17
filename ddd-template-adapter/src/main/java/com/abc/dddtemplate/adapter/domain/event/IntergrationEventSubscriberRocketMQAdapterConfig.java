@@ -21,7 +21,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.context.event.EventListener;
-import org.springframework.util.SystemPropertyUtils;
+import org.springframework.core.env.Environment;
 
 import javax.annotation.PostConstruct;
 import java.util.ArrayList;
@@ -50,12 +50,14 @@ public class IntergrationEventSubscriberRocketMQAdapterConfig {
     DomainEventSupervisor domainEventSupervisor;
     @Autowired
     ConfigurableBeanFactory beanFactory;
+    @Autowired
+    Environment environment;
 
     List<MQPushConsumer> mqPushConsumers = new ArrayList<>();
 
     @PostConstruct
     public void init() {
-        Set<Class<?>> classes = ScanUtils.scanClass("com.abc.dddtemplate.external", true);
+        Set<Class<?>> classes = ScanUtils.scanClass("com.abc.dddtemplate.subscribers", true);
         classes.stream().filter(cls -> {
             DomainEvent domainEvent = cls.getAnnotation(DomainEvent.class);
             if (!Objects.isNull(domainEvent) && StringUtils.isNotEmpty(domainEvent.value()) &&
@@ -128,12 +130,12 @@ public class IntergrationEventSubscriberRocketMQAdapterConfig {
         if (StringUtils.isBlank(defaultVal)) {
             defaultVal = topic + "-4-" + applicationName;
         }
-        String group = SystemPropertyUtils.resolvePlaceholders("${rocketmq." + topic + ".consumer.group:" + defaultVal + "}");
+        String group = environment.resolvePlaceholders("${rocketmq." + topic + ".consumer.group:" + defaultVal + "}");
         return group;
     }
 
     private String getTopicNamesrvAddr(String topic, String defaultVal) {
-        String nameServer = SystemPropertyUtils.resolvePlaceholders("${rocketmq." + topic + ".name-server:" + defaultVal + "}");
+        String nameServer = environment.resolvePlaceholders("${rocketmq." + topic + ".name-server:" + defaultVal + "}");
         return nameServer;
     }
 }

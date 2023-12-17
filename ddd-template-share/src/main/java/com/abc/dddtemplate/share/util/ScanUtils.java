@@ -9,7 +9,6 @@ import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
 import org.springframework.core.type.classreading.SimpleMetadataReaderFactory;
 import org.springframework.util.ClassUtils;
-import org.springframework.util.SystemPropertyUtils;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -33,7 +32,7 @@ public class ScanUtils {
      * @return 扫描到的类
      */
     public static Set<Class<?>> scanClass(String scanPath, boolean concrete) {
-        String path = ClassUtils.convertClassNameToResourcePath(SystemPropertyUtils.resolvePlaceholders(scanPath));
+        String path = ClassUtils.convertClassNameToResourcePath(scanPath);
         String packageSearchPath = ResourcePatternResolver.CLASSPATH_ALL_URL_PREFIX + path + "/**/*.class";
 
         Set<Class<?>> classes = new HashSet<>();
