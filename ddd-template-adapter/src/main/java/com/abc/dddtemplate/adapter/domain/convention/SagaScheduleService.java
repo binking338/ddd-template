@@ -168,7 +168,7 @@ public class SagaScheduleService {
     }
 
     /**
-     * 本地事件库归档
+     * SAGA事务归档
      */
     @Scheduled(cron = "0 0 2 * * ?")
     public void archiving() {

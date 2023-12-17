@@ -16,6 +16,7 @@ import javax.persistence.*;
 import java.time.Duration;
 import java.util.Date;
 import java.util.Objects;
+import java.util.UUID;
 
 /**
  * @author <template/>
@@ -35,6 +36,8 @@ import java.util.Objects;
 public class Event {
 
     public void init(Date now, String svcName, Object payload, Duration expireAfter, int retryTimes) {
+        this.eventUuid = UUID.randomUUID().toString();
+        this.svcName = svcName;
         this.createAt = now;
         this.expireAt = DateUtils.addSeconds(now, (int) expireAfter.getSeconds());
         this.eventState = Event.EventState.INIT;
@@ -138,6 +141,13 @@ public class Event {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "`id`")
     private Long id;
+
+    /**
+     * 事件uuid
+     * varchar(64)
+     */
+    @Column(name = "`event_uuid`")
+    private String eventUuid;
 
     /**
      * 服务

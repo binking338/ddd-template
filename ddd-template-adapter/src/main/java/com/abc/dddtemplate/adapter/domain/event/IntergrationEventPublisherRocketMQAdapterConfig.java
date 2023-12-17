@@ -26,10 +26,10 @@ import java.util.List;
  */
 @Slf4j
 @Configuration
-//@ConditionalOnProperty(
-//        prefix = "rocketmq",
-//        value = {"name-server", "producer.group"}
-//)
+@ConditionalOnProperty(
+        prefix = "rocketmq",
+        value = {"name-server", "producer.group"}
+)
 public class IntergrationEventPublisherRocketMQAdapterConfig {
     private final RocketMQTemplate rocketMQTemplate;
     private final AggregateRepository<Event, Long> eventRepository;

@@ -100,6 +100,7 @@ CREATE TABLE `bill` (
 -- Create syntax for TABLE '__event'
 CREATE TABLE `__event` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `event_uuid` varchar(64) NOT NULL DEFAULT '',
   `svc_name` varchar(255) NOT NULL DEFAULT '',
   `data` text,
   `data_type` varchar(255) NOT NULL DEFAULT '',
@@ -119,6 +120,7 @@ CREATE TABLE `__event` (
               ),
   KEY `idx_db_created_at` (`db_created_at`),
   KEY `idx_db_updated_at` (`db_updated_at`),
+  KEY `idx_event_uuid` (`event_uuid`),
   KEY `idx_event_type` (`event_type`,`svc_name`),
   KEY `idx_create_at` (`create_at`),
   KEY `idx_expire_at` (`expire_at`),
@@ -131,6 +133,7 @@ CREATE TABLE `__event` (
 -- Create syntax for TABLE '__saga'
 CREATE TABLE `__saga` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `saga_uuid` varchar(64) NOT NULL DEFAULT '',
   `biz_type` int(11) NOT NULL DEFAULT '0',
   `svc_name` varchar(255) NOT NULL DEFAULT '',
   `context_data` text,
@@ -150,6 +153,7 @@ CREATE TABLE `__saga` (
               ),
   KEY `idx_db_created_at` (`db_created_at`),
   KEY `idx_db_updated_at` (`db_updated_at`),
+  KEY `idx_saga_uuid` (`saga_uuid`),
   KEY `idx_biz_type` (`biz_type`,`svc_name`),
   KEY `idx_create_at` (`create_at`),
   KEY `idx_expire_at` (`expire_at`),
@@ -187,6 +191,7 @@ CREATE TABLE `__saga_process` (
 
 CREATE TABLE `__archived_event` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `event_uuid` varchar(64) NOT NULL DEFAULT '',
   `svc_name` varchar(255) NOT NULL DEFAULT '',
   `data` text,
   `data_type` varchar(255) NOT NULL DEFAULT '',
@@ -206,6 +211,7 @@ CREATE TABLE `__archived_event` (
               ),
   KEY `idx_db_created_at` (`db_created_at`),
   KEY `idx_db_updated_at` (`db_updated_at`),
+  KEY `idx_event_uuid` (`event_uuid`),
   KEY `idx_event_type` (`event_type`,`svc_name`),
   KEY `idx_create_at` (`create_at`),
   KEY `idx_expire_at` (`expire_at`),
@@ -217,6 +223,7 @@ CREATE TABLE `__archived_event` (
 
 CREATE TABLE `__archived_saga` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `saga_uuid` varchar(64) NOT NULL DEFAULT '',
   `biz_type` int(11) NOT NULL DEFAULT '0',
   `svc_name` varchar(255) NOT NULL DEFAULT '',
   `context_data` text,
@@ -236,6 +243,7 @@ CREATE TABLE `__archived_saga` (
               ),
   KEY `idx_db_created_at` (`db_created_at`),
   KEY `idx_db_updated_at` (`db_updated_at`),
+  KEY `idx_saga_uuid` (`saga_uuid`),
   KEY `idx_biz_type` (`biz_type`,`svc_name`),
   KEY `idx_create_at` (`create_at`),
   KEY `idx_expire_at` (`expire_at`),

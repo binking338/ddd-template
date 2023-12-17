@@ -110,7 +110,7 @@ public abstract class SagaStateMachine<Context> {
             startSagaProcessMethods.sort(this::sagaCompare);
             Process<Context> currentProcess = null;
             for (Method m : startSagaProcessMethods) {
-                if(currentProcess == null){
+                if (currentProcess == null) {
                     currentProcess = transformProcess(m, sagaProcessMethods, sagaStateMachine);
                     process = currentProcess;
                 } else {
@@ -156,7 +156,7 @@ public abstract class SagaStateMachine<Context> {
         return process;
     }
 
-    protected Integer sagaCompare(Method a, Method b){
+    protected Integer sagaCompare(Method a, Method b) {
         SagaProcess annoA = a.getAnnotation(SagaProcess.class);
         SagaProcess annoB = b.getAnnotation(SagaProcess.class);
         int codeComp = Integer.compare(annoA.code(), annoB.code());
@@ -169,24 +169,45 @@ public abstract class SagaStateMachine<Context> {
         }
     }
 
+    protected Optional<Saga> getByUuid(String uuid) {
+        Optional<Saga> saga = sagaRepository.findOne(((root, query, cb) -> {
+            query.where(cb.and(
+                    cb.equal(root.get("sagaUuid"), uuid),
+                    cb.equal(root.get("bizType"), getBizType()),
+                    cb.equal(root.get("svcName"), svcName)
+            ));
+            return null;
+        }));
+        return saga;
+    }
+
     /**
      * 创建saga流程
      *
      * @param context
-     * @return saga id
+     * @return saga
      */
     public Saga run(Context context) {
-        return run(context, true);
+        return run(context, true, null);
     }
 
     /**
      * 创建并执行saga流程
      *
      * @param context
+     * @param runImmediately
+     * @param uuid
      * @return
      */
-    public Saga run(Context context, boolean runImmediately) {
-        Saga saga = build(context, runImmediately);
+    public Saga run(Context context, boolean runImmediately, String uuid) {
+        if (StringUtils.isNotBlank(uuid)) {
+            Saga existSaga = getByUuid(uuid).orElse(null);
+            if (existSaga != null) {
+                log.warn("Saga已提交，勿重复提交: " + uuid);
+                return existSaga;
+            }
+        }
+        Saga saga = build(context, runImmediately, uuid);
         if (runImmediately) {
             saga = resume(saga);
         } else {
@@ -246,9 +267,10 @@ public abstract class SagaStateMachine<Context> {
     /**
      * @param context
      * @param runningState
+     * @param uuid
      * @return
      */
-    protected Saga build(Context context, boolean runningState) {
+    protected Saga build(Context context, boolean runningState, String uuid) {
         // 持久化
         Date now = new Date();
         List<Saga.SagaProcess> sagaProcesses = process.flattenProcessList().stream().map(p -> {
@@ -258,7 +280,7 @@ public abstract class SagaStateMachine<Context> {
         }).collect(Collectors.toList());
         Saga saga = new Saga();
         Date nextTryTime = runningState ? DateUtils.addSeconds(now, getNextTryIdleInSeconds(0)) : now;
-        saga.init(now, svcName, getBizType(), context, getContextClass(), nextTryTime, expireInSeconds(), retryTimes(), sagaProcesses);
+        saga.init(now, svcName, getBizType(), context, uuid, nextTryTime, expireInSeconds(), retryTimes(), sagaProcesses);
         return saga;
     }
 
