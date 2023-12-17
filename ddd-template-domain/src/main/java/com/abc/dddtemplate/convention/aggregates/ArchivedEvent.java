@@ -40,6 +40,13 @@ public class ArchivedEvent {
     private Long id;
 
     /**
+     * 事件uuid
+     * varchar(64)
+     */
+    @Column(name = "`event_uuid`")
+    private String eventUuid;
+
+    /**
      * 服务
      * varchar
      */

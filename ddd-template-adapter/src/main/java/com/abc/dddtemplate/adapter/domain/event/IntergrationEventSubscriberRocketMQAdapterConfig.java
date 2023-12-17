@@ -112,7 +112,7 @@ public class IntergrationEventSubscriberRocketMQAdapterConfig {
                             }
                             return ConsumeConcurrentlyStatus.CONSUME_SUCCESS;
                         } catch (Exception ex) {
-                            log.error("领域事件消息消费失败");
+                            log.error("领域事件消息消费失败", ex);
                             return ConsumeConcurrentlyStatus.RECONSUME_LATER;
                         }
                     }

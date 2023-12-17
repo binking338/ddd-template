@@ -15,6 +15,7 @@ import javax.persistence.*;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 
 /**
  * @author <template/>
@@ -32,11 +33,12 @@ import java.util.Objects;
 @Getter
 public class Saga {
 
-    public void init(Date now, String svcName, Integer bizType, Object context, Class contextClass, Date nextTryTime, int expireInSeconds, int retryTimes, List<SagaProcess> sagaProcesses) {
+    public void init(Date now, String svcName, Integer bizType, Object context, String uuid, Date nextTryTime, int expireInSeconds, int retryTimes, List<SagaProcess> sagaProcesses) {
+        this.sagaUuid = StringUtils.isNotBlank(uuid) ? uuid : UUID.randomUUID().toString();
         this.svcName = svcName;
         this.bizType = bizType;
         this.contextData = (JSON.toJSONString(context));
-        this.contextDataType = contextClass.getName();
+        this.contextDataType = context == null ? Object.class.getName() : context.getClass().getName();;
         this.sagaState = Saga.SagaState.INIT;
         this.createAt = now;
         this.expireAt = DateUtils.addSeconds(now, expireInSeconds);
@@ -112,6 +114,13 @@ public class Saga {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "`id`")
     private Long id;
+
+    /**
+     * uuid
+     * varchar(64)
+     */
+    @Column(name = "`saga_uuid`")
+    private String sagaUuid;
 
     /**
      * 业务类型

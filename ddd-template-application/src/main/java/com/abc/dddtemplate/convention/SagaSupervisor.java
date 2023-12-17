@@ -19,12 +19,12 @@ import java.util.stream.Collectors;
 @Service
 @Slf4j
 public class SagaSupervisor {
-    private Map<Class, SagaStateMachine> sagaStateMachineContextClassMap;
+    private Map<Class, List<SagaStateMachine>> sagaStateMachineContextClassMap;
     private Map<Integer, SagaStateMachine> sagaStateMachineBizTypeMap;
 
     public SagaSupervisor(List<SagaStateMachine> sagaStateMachineContextClassMap) {
         if (CollectionUtils.isNotEmpty(sagaStateMachineContextClassMap)) {
-            this.sagaStateMachineContextClassMap = sagaStateMachineContextClassMap.stream().collect(Collectors.toMap(ssm -> ssm.getContextClass(), ssm -> ssm));
+            this.sagaStateMachineContextClassMap = sagaStateMachineContextClassMap.stream().collect(Collectors.groupingBy(ssm -> ssm.getContextClass()));
             this.sagaStateMachineBizTypeMap = sagaStateMachineContextClassMap.stream().collect(Collectors.toMap(ssm -> ssm.getBizType(), ssm -> ssm));
         } else {
             this.sagaStateMachineContextClassMap = Collections.emptyMap();
@@ -58,7 +58,7 @@ public class SagaSupervisor {
      * @return
      */
     public <Context> Saga run(Context context) {
-        return run(context, true);
+        return run(context, true, null);
     }
 
     /**
@@ -69,13 +69,46 @@ public class SagaSupervisor {
      * @param <Context>
      * @return
      */
-    public <Context> Saga run(Context context, boolean runImmediately) {
+    public <Context> Saga run(Context context, boolean runImmediately, String uuid) {
         Assert.notNull(context, "coontext 参数不得为空");
         if (!this.sagaStateMachineContextClassMap.containsKey(context.getClass())) {
-            throw new IllegalArgumentException("context 传入参数类型不支持");
+            throw new IllegalArgumentException("context 传入参数类型不支持: " + context.getClass().getName());
         }
-        SagaStateMachine<Context> sagaStateMachine = sagaStateMachineContextClassMap.get(context.getClass());
-        Saga saga = sagaStateMachine.run(context, runImmediately);
+        if(this.sagaStateMachineContextClassMap.get(context.getClass()).size() != 1){
+            throw new IllegalArgumentException("存在多个saga流程支持该context类型: " + context.getClass().getName());
+        }
+        SagaStateMachine<Context> sagaStateMachine = sagaStateMachineContextClassMap.get(context.getClass()).get(0);
+        Saga saga = sagaStateMachine.run(context, runImmediately, uuid);
+        return saga;
+    }
+
+    /**
+     * 执行Saga流程
+     *
+     * @param bizType
+     * @param context
+     * @return
+     */
+    public Saga run(String bizType, Object context){
+        return run(bizType, context, true, null);
+    }
+
+    /**
+     * 执行Saga流程
+     *
+     * @param bizType
+     * @param context
+     * @param runImmediately
+     * @param uuid
+     * @return
+     */
+    public Saga run(String bizType, Object context, boolean runImmediately, String uuid) {
+        Assert.notNull(context, "context 参数不得为空");
+        if(!this.sagaStateMachineBizTypeMap.containsKey(bizType)){
+            throw new IllegalArgumentException("bizType 传入参数不支持: "+ bizType);
+        }
+        SagaStateMachine sagaStateMachine = sagaStateMachineBizTypeMap.get(bizType);
+        Saga saga = sagaStateMachine.run(context, runImmediately, uuid);
         return saga;
     }
 
@@ -89,9 +122,12 @@ public class SagaSupervisor {
      */
     public <Context> Saga resume(Class<Context> contextClass, Long sagaId) {
         if (!this.sagaStateMachineContextClassMap.containsKey(contextClass)) {
-            throw new IllegalArgumentException("contextClass 传入参数类型不支持");
+            throw new IllegalArgumentException("contextClass 传入类型不支持: " + contextClass.getName());
         }
-        SagaStateMachine<Context> sagaStateMachine = sagaStateMachineContextClassMap.get(contextClass);
+        if(this.sagaStateMachineContextClassMap.get(contextClass).size() != 1){
+            throw new IllegalArgumentException("存在多个saga流程支持该context类型: " + contextClass.getName());
+        }
+        SagaStateMachine<Context> sagaStateMachine = sagaStateMachineContextClassMap.get(contextClass).get(0);
         Saga saga = sagaStateMachine.resume(sagaId);
         return saga;
     }
@@ -123,9 +159,12 @@ public class SagaSupervisor {
      */
     public <Context> Saga rollback(Class<Context> contextClass, Long sagaId) {
         if (!this.sagaStateMachineContextClassMap.containsKey(contextClass)) {
-            throw new IllegalArgumentException("contextClass 传入参数类型不支持");
+            throw new IllegalArgumentException("contextClass 传入类型不支持: " + contextClass.getName());
         }
-        SagaStateMachine<Context> sagaStateMachine = sagaStateMachineContextClassMap.get(contextClass);
+        if(this.sagaStateMachineContextClassMap.get(contextClass).size() != 1){
+            throw new IllegalArgumentException("存在多个saga流程支持该context类型: " + contextClass.getName());
+        }
+        SagaStateMachine<Context> sagaStateMachine = sagaStateMachineContextClassMap.get(contextClass).get(0);
         Saga saga = sagaStateMachine.rollback(sagaId);
         return saga;
     }
