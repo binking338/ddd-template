@@ -3,15 +3,13 @@ package com.abc.dddtemplate.domain.aggregates.samples;
 import com.abc.dddtemplate.convention.BaseEntity;
 import com.abc.dddtemplate.share.annotation.AggregateRoot;
 import com.abc.dddtemplate.share.exception.ErrorException;
-import com.abc.dddtemplate.domain.events.internal.AccountTransferDomainEvent;
+import com.abc.dddtemplate.domain.aggregates.events.internal.AccountTransferDomainEvent;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.DynamicInsert;
 import org.hibernate.annotations.DynamicUpdate;
-import org.hibernate.annotations.Fetch;
-import org.hibernate.annotations.FetchMode;
 import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.Where;
 

@@ -1,4 +1,4 @@
-package com.abc.dddtemplate.domain.events.internal;
+package com.abc.dddtemplate.domain.aggregates.events.internal;
 
 import com.abc.dddtemplate.share.annotation.DomainEvent;
 import lombok.*;

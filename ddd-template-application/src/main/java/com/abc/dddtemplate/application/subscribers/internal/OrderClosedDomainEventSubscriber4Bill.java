@@ -1,7 +1,7 @@
 package com.abc.dddtemplate.application.subscribers.internal;
 
 import com.abc.dddtemplate.application.commands.bill.CloseBillCmd;
-import com.abc.dddtemplate.domain.events.internal.OrderClosedDomainEvent;
+import com.abc.dddtemplate.domain.aggregates.events.internal.OrderClosedDomainEvent;
 import com.abc.dddtemplate.convention.DomainEventSubscriber;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

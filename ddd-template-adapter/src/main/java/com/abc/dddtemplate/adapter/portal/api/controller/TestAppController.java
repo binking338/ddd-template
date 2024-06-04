@@ -1,16 +1,16 @@
 package com.abc.dddtemplate.adapter.portal.api.controller;
 
-import com.abc.dddtemplate.adapter.configure.orika.DemoCustomMapper;
-import com.abc.dddtemplate.adapter.configure.orika.DemoCustomMapperBuilder;
-import com.abc.dddtemplate.adapter.configure.orika.DemoDefault;
+import com.abc.dddtemplate.adapter._share.configure.orika.DemoCustomMapper;
+import com.abc.dddtemplate.adapter._share.configure.orika.DemoCustomMapperBuilder;
+import com.abc.dddtemplate.adapter._share.configure.orika.DemoDefault;
 import com.abc.dddtemplate.application.sagas.DemoAnnotationSaga;
 import com.abc.dddtemplate.application.sagas.DemoSagaService;
 import com.abc.dddtemplate.convention.DomainEventSupervisor;
 import com.abc.dddtemplate.convention.SagaSupervisor;
-import com.abc.dddtemplate.domain.events.external.ExampleExternalDomainEvent;
+import com.abc.dddtemplate.domain.aggregates.events.external.ExampleExternalDomainEvent;
 import com.abc.dddtemplate.share.dto.ResponseData;
-import com.abc.dddtemplate.application.clients.SysTime;
-import com.abc.dddtemplate.application.clients.TimeServiceClient;
+import com.abc.dddtemplate.application._share.clients.SysTime;
+import com.abc.dddtemplate.application._share.clients.TimeServiceClient;
 import com.abc.dddtemplate.share.util.MapperUtil;
 import com.alibaba.fastjson.JSON;
 import io.swagger.v3.oas.annotations.tags.Tag;
