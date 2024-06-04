@@ -1,6 +1,6 @@
-package com.abc.dddtemplate.adapter.configure;
+package com.abc.dddtemplate.adapter._share.configure;
 
-import com.abc.dddtemplate.adapter.configure.orika.OrikaMapper;
+import com.abc.dddtemplate.adapter._share.configure.orika.OrikaMapper;
 import com.abc.dddtemplate.share.util.MapperUtil;
 import ma.glasnost.orika.MapperFacade;
 import org.springframework.beans.factory.annotation.Autowired;

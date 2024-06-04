@@ -1,4 +1,4 @@
-package com.abc.dddtemplate.adapter.configure;
+package com.abc.dddtemplate.adapter._share.configure;
 
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Info;

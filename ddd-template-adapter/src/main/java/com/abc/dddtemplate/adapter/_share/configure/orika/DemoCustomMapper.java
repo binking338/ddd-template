@@ -1,4 +1,4 @@
-package com.abc.dddtemplate.adapter.configure.orika;
+package com.abc.dddtemplate.adapter._share.configure.orika;
 
 import lombok.Data;
 import ma.glasnost.orika.MappingContext;

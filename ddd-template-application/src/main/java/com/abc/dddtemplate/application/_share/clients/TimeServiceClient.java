@@ -1,4 +1,4 @@
-package com.abc.dddtemplate.application.clients;
+package com.abc.dddtemplate.application._share.clients;
 
 import lombok.Builder;
 import lombok.Data;

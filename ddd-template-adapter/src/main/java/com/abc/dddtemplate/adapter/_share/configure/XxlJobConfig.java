@@ -1,4 +1,4 @@
-package com.abc.dddtemplate.adapter.configure;
+package com.abc.dddtemplate.adapter._share.configure;
 
 import com.xxl.job.core.executor.impl.XxlJobSpringExecutor;
 import lombok.extern.slf4j.Slf4j;

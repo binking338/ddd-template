@@ -2,8 +2,8 @@ package com.abc.dddtemplate.domain.aggregates.samples;
 
 import com.abc.dddtemplate.convention.BaseEntity;
 import com.abc.dddtemplate.share.annotation.AggregateRoot;
-import com.abc.dddtemplate.domain.events.internal.OrderClosedDomainEvent;
-import com.abc.dddtemplate.domain.events.internal.OrderPlacedDomainEvent;
+import com.abc.dddtemplate.domain.aggregates.events.internal.OrderClosedDomainEvent;
+import com.abc.dddtemplate.domain.aggregates.events.internal.OrderPlacedDomainEvent;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;

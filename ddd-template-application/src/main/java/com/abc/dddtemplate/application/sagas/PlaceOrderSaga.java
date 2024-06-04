@@ -1,6 +1,6 @@
 package com.abc.dddtemplate.application.sagas;
 
-import com.abc.dddtemplate.application.clients.InventoryClient;
+import com.abc.dddtemplate.application._share.clients.InventoryClient;
 import com.abc.dddtemplate.application.commands.order.PlaceOrderCmd;
 import com.abc.dddtemplate.convention.SagaStateMachine;
 import lombok.AllArgsConstructor;

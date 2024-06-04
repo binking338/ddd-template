@@ -1,4 +1,4 @@
-package com.abc.dddtemplate.application.clients;
+package com.abc.dddtemplate.application._share.clients;
 
 /**
  * 优惠券客户端
