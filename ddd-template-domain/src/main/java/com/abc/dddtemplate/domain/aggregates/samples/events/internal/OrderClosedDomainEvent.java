@@ -1,4 +1,4 @@
-package com.abc.dddtemplate.domain.aggregates.events.internal;
+package com.abc.dddtemplate.domain.aggregates.samples.events.internal;
 
 import com.abc.dddtemplate.domain.aggregates.samples.Order;
 import com.abc.dddtemplate.share.annotation.DomainEvent;

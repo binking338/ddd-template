@@ -49,7 +49,7 @@ public class ArchivedSaga {
      * int
      */
     @Column(name = "`biz_type`")
-    private Integer bizType;
+    private String bizType;
 
     /**
      * 服务

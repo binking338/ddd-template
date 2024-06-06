@@ -1,6 +1,5 @@
 package com.abc.dddtemplate.domain.aggregates.samples;
 
-import com.abc.dddtemplate.convention.BaseEntity;
 import com.abc.dddtemplate.share.annotation.AggregateRoot;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -31,14 +30,14 @@ import javax.persistence.*;
 @NoArgsConstructor
 @Builder
 @Getter
-public class OrderItem extends BaseEntity {
+public class OrderItem extends com.abc.dddtemplate.convention.BaseEntity {
 
     // 【字段映射开始】本段落由[gen-ddd-maven-plugin]维护，请不要手工改动
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "`id`")
-    private Long id;
+    Long id;
 
 
     /**
@@ -46,21 +45,21 @@ public class OrderItem extends BaseEntity {
      * varchar(100)
      */
     @Column(name = "`name`")
-    private String name;
+    String name;
 
     /**
      * 单价
      * int(11)
      */
     @Column(name = "`price`")
-    private Integer price;
+    Integer price;
 
     /**
      * 数量
      * int(11)
      */
     @Column(name = "`num`")
-    private Integer num;
+    Integer num;
 
     // 【字段映射结束】本段落由[gen-ddd-maven-plugin]维护，请不要手工改动
 }

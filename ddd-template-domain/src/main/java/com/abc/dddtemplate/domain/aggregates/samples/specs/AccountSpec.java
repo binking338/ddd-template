@@ -24,15 +24,10 @@ public class AccountSpec implements Specification<Account> {
     }
 
     @Override
-    public boolean valid(Account account) {
+    public Result valid(Account account) {
         if (account.getId() == null && StringUtils.isBlank(account.getName())) {
-            return false;
+            return Result.fail("账户名缺失");
         }
-        return true;
-    }
-
-    @Override
-    public String failMsg(Account account) {
-        return "存在同名账户";
+        return Result.pass();
     }
 }

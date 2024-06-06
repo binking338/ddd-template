@@ -1,14 +1,11 @@
 package com.abc.dddtemplate.adapter.portal.api.controller;
 
 import com.abc.dddtemplate.application.commands.order.ModifyOrderCmd;
-import com.abc.dddtemplate.application.sagas.PlaceOrderSaga;
-import com.abc.dddtemplate.convention.aggregates.Saga;
 import com.abc.dddtemplate.share.dto.ResponseData;
 import com.abc.dddtemplate.application.commands.order.CloseOrderCmd;
 import com.abc.dddtemplate.application.commands.order.PlaceOrderCmd;
 import com.abc.dddtemplate.application.queries.SearchOrderQry;
 import com.abc.dddtemplate.share.dto.PageData;
-import com.abc.dddtemplate.share.util.MapperUtil;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.extern.slf4j.Slf4j;
 import lombok.var;
@@ -26,22 +23,21 @@ import org.springframework.web.bind.annotation.*;
 public class OrderController {
 
     @Autowired
-    SearchOrderQry.Handler searchOrderQry;
+    SearchOrderQry.Handler searchOrderQryHandler;
 
     @PostMapping("search")
-    public ResponseData<PageData<SearchOrderQry.OrderReport>> search(@RequestBody SearchOrderQry param) {
-        var query = searchOrderQry.exec(param);
+    public ResponseData<PageData<SearchOrderQry.SearchOrderQryDto>> search(@RequestBody SearchOrderQry param) {
+        var query = searchOrderQryHandler.exec(param);
         return ResponseData.success(query);
     }
 
+
     @Autowired
-    PlaceOrderSaga.Handler placeOrderSagaHandler;
+    PlaceOrderCmd.Handler placeOrderCmdHandler;
 
-    @PostMapping("place")
-    public ResponseData<Long> create(@RequestBody PlaceOrderCmd.CreateOrderDTO orderDTO) {
-        Saga saga = placeOrderSagaHandler.run(MapperUtil.map(orderDTO, PlaceOrderSaga.class));
-
-        var result = saga.getContext(PlaceOrderSaga.class).getOrderId();
+    @PostMapping("/place")
+    public ResponseData<Long> placeOrderCmd(@RequestBody PlaceOrderCmd cmd) {
+        Long result = placeOrderCmdHandler.exec(cmd);
         return ResponseData.success(result);
     }
 

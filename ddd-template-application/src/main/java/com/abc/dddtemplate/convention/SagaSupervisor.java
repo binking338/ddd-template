@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class SagaSupervisor {
     private Map<Class, List<SagaStateMachine>> sagaStateMachineContextClassMap;
-    private Map<Integer, SagaStateMachine> sagaStateMachineBizTypeMap;
+    private Map<String, SagaStateMachine> sagaStateMachineBizTypeMap;
 
     public SagaSupervisor(List<SagaStateMachine> sagaStateMachineContextClassMap) {
         if (CollectionUtils.isNotEmpty(sagaStateMachineContextClassMap)) {
@@ -37,7 +37,7 @@ public class SagaSupervisor {
      *
      * @return
      */
-    public Set<Integer> getSupportedBizTypes() {
+    public Set<String> getSupportedBizTypes() {
         return this.sagaStateMachineBizTypeMap.keySet();
     }
 

@@ -26,13 +26,13 @@ public class OrderSpec implements Specification<Order> {
     }
 
     @Override
-    public boolean valid(Order order) {
-        return order.getOrderItems().size() > 0
+    public Result valid(Order order) {
+        boolean passed = order.getOrderItems().size() > 0
                 && order.getOrderItems().stream().mapToInt(i -> i.getPrice() * i.getNum()).sum() == order.getAmount();
-    }
-
-    @Override
-    public String failMsg(Order order) {
-        return "订单不符合要求";
+        if(passed){
+            return Result.pass();
+        } else {
+            return Result.fail("订单不符合要求");
+        }
     }
 }

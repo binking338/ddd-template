@@ -1,6 +1,5 @@
 package com.abc.dddtemplate.domain.aggregates.samples;
 
-import com.abc.dddtemplate.convention.BaseEntity;
 import com.abc.dddtemplate.share.annotation.AggregateRoot;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -32,7 +31,7 @@ import javax.persistence.*;
 @NoArgsConstructor
 @Builder
 @Getter
-public class Transfer extends BaseEntity {
+public class Transfer extends com.abc.dddtemplate.convention.BaseEntity {
     public static final Integer CHARGE = 0;
     public static final Integer BILL = 1;
 
@@ -41,7 +40,7 @@ public class Transfer extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "`id`")
-    private Long id;
+    Long id;
 
 
     /**
@@ -49,42 +48,42 @@ public class Transfer extends BaseEntity {
      * bigint(100)
      */
     @Column(name = "`account_id`")
-    private Long accountId;
+    Long accountId;
 
     /**
      * 时间
      * datetime
      */
     @Column(name = "`time`")
-    private java.util.Date time;
+    java.util.Date time;
 
     /**
      * 业务类型
      * int(11)
      */
     @Column(name = "`biz_type`")
-    private Integer bizType;
+    Integer bizType;
 
     /**
      * 业务编码
      * varchar(20)
      */
     @Column(name = "`biz_id`")
-    private String bizId;
+    String bizId;
 
     /**
      * 转账金额
      * int(11)
      */
     @Column(name = "`amount`")
-    private Integer amount;
+    Integer amount;
 
     /**
      * 数据版本（支持乐观锁）
      */
     @Version
     @Column(name = "`version`")
-    private Integer version;
+    Integer version;
 
     // 【字段映射结束】本段落由[gen-ddd-maven-plugin]维护，请不要手工改动
 }

@@ -31,7 +31,7 @@ import java.util.ArrayList;
 @NoArgsConstructor
 @Builder
 @Getter
-public class Course extends BaseEntity {
+public class Course extends com.abc.dddtemplate.convention.BaseEntity {
 
     public void attach(Student student) {
         if (students == null) {
@@ -45,7 +45,7 @@ public class Course extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "`id`")
-    private Long id;
+    Long id;
 
 
     /**
@@ -53,7 +53,7 @@ public class Course extends BaseEntity {
      * varchar(100)
      */
     @Column(name = "`name`")
-    private String name;
+    String name;
 
     @ManyToMany(cascade = { CascadeType.ALL }, fetch = FetchType.EAGER) @Fetch(FetchMode.SUBSELECT)
     @JoinTable(name = "`m2m_student_course_rel`", joinColumns = {@JoinColumn(name = "`course_id`")}, inverseJoinColumns = {@JoinColumn(name = "`student_id`")})

@@ -15,7 +15,7 @@ public class CouponClientImpl implements CouponClient {
     private final ServiceMockRest serviceMockRest;
 
     @Override
-    public Boolean deduct(String name, Integer amount) {
+    public Boolean deduct(DeductParam param) {
         serviceMockRest.mock(500);
         return true;
     }

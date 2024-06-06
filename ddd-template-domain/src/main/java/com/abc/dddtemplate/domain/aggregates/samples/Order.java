@@ -1,9 +1,9 @@
 package com.abc.dddtemplate.domain.aggregates.samples;
 
-import com.abc.dddtemplate.convention.BaseEntity;
+import com.abc.dddtemplate.domain.aggregates.samples.enums.OrderStatus;
 import com.abc.dddtemplate.share.annotation.AggregateRoot;
-import com.abc.dddtemplate.domain.aggregates.events.internal.OrderClosedDomainEvent;
-import com.abc.dddtemplate.domain.aggregates.events.internal.OrderPlacedDomainEvent;
+import com.abc.dddtemplate.domain.aggregates.samples.events.internal.OrderClosedDomainEvent;
+import com.abc.dddtemplate.domain.aggregates.samples.events.internal.OrderPlacedDomainEvent;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -37,7 +37,7 @@ import java.util.List;
 @NoArgsConstructor
 @Builder
 @Getter
-public class Order extends BaseEntity {
+public class Order extends com.abc.dddtemplate.convention.BaseEntity {
 
     /**
      * 下单
@@ -82,12 +82,14 @@ public class Order extends BaseEntity {
     public void finish() {
         if (!finished) {
             finished = true;
+            this.status = OrderStatus.FINISH;
         }
     }
 
     public void close() {
         if (!finished) {
             closed = true;
+            this.status = OrderStatus.CLOSE;
             publisher().attachEvent(OrderClosedDomainEvent.builder().order(this).build());
         }
     }
@@ -97,7 +99,7 @@ public class Order extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "`id`")
-    private Long id;
+    Long id;
 
 
     /**
@@ -105,41 +107,50 @@ public class Order extends BaseEntity {
      * int(11)
      */
     @Column(name = "`amount`")
-    private Integer amount;
+    Integer amount;
 
     /**
      * 订单标题
      * varchar(100)
      */
     @Column(name = "`name`")
-    private String name;
+    String name;
 
     /**
      * 下单人
      * varchar(100)
      */
     @Column(name = "`owner`")
-    private String owner;
+    String owner;
+
+    /**
+     * 订单状态
+     * 0:INIT:待支付;-1:CLOSE:已关闭;1:FINISH:已完成
+     * int(11)
+     */
+    @Convert(converter = com.abc.dddtemplate.domain.aggregates.samples.enums.OrderStatus.Converter.class)
+    @Column(name = "`status`")
+    com.abc.dddtemplate.domain.aggregates.samples.enums.OrderStatus status;
 
     /**
      * 是否完成
      * bit(1)
      */
     @Column(name = "`finished`")
-    private Boolean finished;
+    Boolean finished;
 
     /**
      * 是否关闭
      * bit(1)
      */
     @Column(name = "`closed`")
-    private Boolean closed;
+    Boolean closed;
 
     /**
      * datetime
      */
     @Column(name = "`update_at`")
-    private java.util.Date updateAt;
+    java.util.Date updateAt;
 
     @OneToMany(cascade = { CascadeType.ALL }, fetch = FetchType.EAGER, orphanRemoval = true) @Fetch(FetchMode.SUBSELECT)
     @JoinColumn(name = "`order_id`", nullable = false)
@@ -150,7 +161,7 @@ public class Order extends BaseEntity {
      */
     @Version
     @Column(name = "`version`")
-    private Integer version;
+    Integer version;
 
     // 【字段映射结束】本段落由[gen-ddd-maven-plugin]维护，请不要手工改动
 }

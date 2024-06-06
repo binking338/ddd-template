@@ -435,8 +435,9 @@ public class UnitOfWork {
             if (CollectionUtils.isNotEmpty(specs)) {
                 for (Specification spec : specs) {
                     if (!spec.inTransaction()) {
-                        if (!spec.valid(entity)) {
-                            throw new KnownException(CodeEnum.SPECIFICATION_UNSATISFIED.getCode(), spec.failMsg(entity));
+                        Specification.Result valid = spec.valid(entity);
+                        if (!valid.isPassed()) {
+                            throw new KnownException(CodeEnum.SPECIFICATION_UNSATISFIED.getCode(), valid.getMessage());
                         }
                     }
                 }
@@ -455,8 +456,9 @@ public class UnitOfWork {
             if (CollectionUtils.isNotEmpty(specs)) {
                 for (Specification spec : specs) {
                     if (spec.inTransaction()) {
-                        if (!spec.valid(entity)) {
-                            throw new KnownException(CodeEnum.SPECIFICATION_UNSATISFIED.getCode(), spec.failMsg(entity));
+                        Specification.Result valid = spec.valid(entity);
+                        if (!valid.isPassed()) {
+                            throw new KnownException(CodeEnum.SPECIFICATION_UNSATISFIED.getCode(), valid.getMessage());
                         }
                     }
                 }

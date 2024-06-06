@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.abc.dddtemplate.adapter.infra.mapper.OrderMapper">
+    <select id="search" resultType="com.abc.dddtemplate.application.queries.SearchOrderQry$SearchOrderQryDto">
+        select * from `order` o
+            join bill b on b.order_id=o.id and b.db_deleted=false
+            where o.db_deleted=false and o.owner = #{owner} and o.name like concat('%', #{key},'%')
+    </select>
+</mapper>

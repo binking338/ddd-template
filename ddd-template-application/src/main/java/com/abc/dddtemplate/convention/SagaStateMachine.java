@@ -20,6 +20,62 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 /**
+ * saga状态机定义
+ *
+ * 例子1
+ * @Data
+ * public class DemoAnnotationSaga {
+ *
+ *     String input;
+ *
+ *     String output;
+ *
+ *     @Service
+ *     @Slf4j
+ *     public static class Handler extends SagaStateMachine<DemoAnnotationSaga> {
+ *         @Override
+ *         protected Integer getBizType() {
+ *             return 2;
+ *         }
+ *
+ *         @Override
+ *         protected Class<DemoAnnotationSaga> getContextClass() {
+ *             return DemoAnnotationSaga.class;
+ *         }
+ *
+ *         @SagaProcess
+ *         public void step1(DemoAnnotationSaga context){
+ *             context.output += "step1 finished!";
+ *         }
+ *
+ *         @SagaProcess(parent = "step1")
+ *         public void step1_1(DemoAnnotationSaga context) {
+ *             context.output += "step1_1 finished!";
+ *         }
+ *
+ *         @SagaProcess(parent = "step1")
+ *         public void step1_2(DemoAnnotationSaga context) {
+ *             context.output += "step1_2 finished!";
+ *         }
+ *
+ *         @SagaProcess(preview = "step1")
+ *         public void step2(DemoAnnotationSaga context) {
+ *             context.output += "step2 finished!";
+ *         }
+ *
+ *         @SagaProcess(parent = "step2")
+ *         public void step2_1(DemoAnnotationSaga context) {
+ *             context.output += "step2_1 finished!";
+ *         }
+ *
+ *         @SagaProcess(preview = "step2")
+ *         public void step3(DemoAnnotationSaga context) {
+ *             context.output += "step3 finished!";
+ *         }
+ *     }
+ * }
+ *
+ *
  * @author <template/>
  * @date
  */
@@ -42,7 +98,7 @@ public abstract class SagaStateMachine<Context> {
      *
      * @return
      */
-    protected abstract Integer getBizType();
+    protected abstract String getBizType();
 
     /**
      * 上下文类型
