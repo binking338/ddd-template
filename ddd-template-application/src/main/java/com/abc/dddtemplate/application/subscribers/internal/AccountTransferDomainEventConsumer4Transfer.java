@@ -1,7 +1,7 @@
 package com.abc.dddtemplate.application.subscribers.internal;
 
 import com.abc.dddtemplate.application.commands.account.RecordTransferCmd;
-import com.abc.dddtemplate.domain.aggregates.events.internal.AccountTransferDomainEvent;
+import com.abc.dddtemplate.domain.aggregates.samples.events.internal.AccountTransferDomainEvent;
 import com.abc.dddtemplate.convention.DomainEventSubscriber;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

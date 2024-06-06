@@ -30,14 +30,14 @@ import javax.persistence.*;
 @NoArgsConstructor
 @Builder
 @Getter
-public class Team extends BaseEntity {
+public class Team extends com.abc.dddtemplate.convention.BaseEntity {
 
     // 【字段映射开始】本段落由[gen-ddd-maven-plugin]维护，请不要手工改动
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "`id`")
-    private Long id;
+    Long id;
 
 
     /**
@@ -45,7 +45,7 @@ public class Team extends BaseEntity {
      * varchar(100)
      */
     @Column(name = "`name`")
-    private String name;
+    String name;
 
     @OneToMany(cascade = { CascadeType.ALL }, fetch = FetchType.EAGER, orphanRemoval = true) @Fetch(FetchMode.SUBSELECT)
     @JoinColumn(name = "`team_id`", nullable = false)

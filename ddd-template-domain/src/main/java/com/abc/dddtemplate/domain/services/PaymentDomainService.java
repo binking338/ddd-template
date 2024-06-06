@@ -24,7 +24,7 @@ public class PaymentDomainService {
      * @param bill
      */
     public void pay(Account account, Bill bill) {
-        account.spend(Transfer.BILL, bill.getId(), bill.getAmount());
+        account.deduct(Transfer.BILL, bill.getId(), bill.getAmount());
         bill.pay(bill.getAmount());
     }
 

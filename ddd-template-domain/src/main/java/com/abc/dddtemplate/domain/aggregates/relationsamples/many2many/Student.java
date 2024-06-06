@@ -30,14 +30,14 @@ import javax.persistence.*;
 @NoArgsConstructor
 @Builder
 @Getter
-public class Student extends BaseEntity {
+public class Student extends com.abc.dddtemplate.convention.BaseEntity {
 
     // 【字段映射开始】本段落由[gen-ddd-maven-plugin]维护，请不要手工改动
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "`id`")
-    private Long id;
+    Long id;
 
 
     /**
@@ -45,7 +45,7 @@ public class Student extends BaseEntity {
      * varchar(100)
      */
     @Column(name = "`name`")
-    private String name;
+    String name;
 
     @ManyToMany(mappedBy = "students", cascade = { CascadeType.ALL }, fetch = FetchType.EAGER) @Fetch(FetchMode.SUBSELECT)
     private java.util.List<com.abc.dddtemplate.domain.aggregates.relationsamples.many2many.Course> courses;

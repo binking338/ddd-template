@@ -1,5 +1,7 @@
 package com.abc.dddtemplate.convention;
 
+import lombok.Getter;
+
 /**
  * 业务约束
  * @author <template/>
@@ -25,12 +27,34 @@ public interface Specification<Root> {
      * 约束校验
      * @return
      */
-    boolean valid(Root root);
+    Result valid(Root root);
+
 
     /**
-     * 约束校验失败提示
-     * @param root
-     * @return
+     * 规格校验结果
      */
-    String failMsg(Root root);
+    @Getter
+    public static class Result {
+        /**
+         * 是否通过规格校验
+         */
+        private boolean passed;
+        /**
+         * 规格校验反馈消息
+         */
+        private String message;
+
+        public Result(boolean passed, String message) {
+            this.passed = passed;
+            this.message = message;
+        }
+
+        public static Result pass() {
+            return new Result(true, null);
+        }
+
+        public static Result fail(String message) {
+            return new Result(false, message);
+        }
+    }
 }

@@ -49,7 +49,7 @@ public class Schema {
 
         public Field(Path<T> path) {
             this.path = new SingularAttributePath<>(((SingularAttributePath<T>) path).criteriaBuilder(), ((SingularAttributePath<T>) path).getJavaType(), ((SingularAttributePath<T>) path).getPathSource(), ((SingularAttributePath<T>) path).getAttribute());
-            this.name = name;
+            this.name = this.path.getAttribute().getName();
         }
 
         public Field(String name) {

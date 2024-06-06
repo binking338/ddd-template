@@ -47,5 +47,5 @@ public @interface DomainEvent {
      *  RocketMq: 可填写消费组 consumer-group
      * @return
      */
-    String subscriber() default "";
+    String subscriber() default "none";
 }

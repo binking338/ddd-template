@@ -1,4 +1,4 @@
-package com.abc.dddtemplate.domain.aggregates.events.external;
+package com.abc.dddtemplate.domain.aggregates.samples.events.external;
 
 import com.abc.dddtemplate.domain.aggregates.samples.Bill;
 import com.abc.dddtemplate.share.Constants;

@@ -12,8 +12,6 @@ import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
-
 /**
  * 花费账户
  * @author <template/>
@@ -21,23 +19,23 @@ import java.util.Optional;
  */
 @Data
 @Builder
-public class SpendAccountCmd {
+public class DeductAccountCmd {
     String accountName;
     Long billId;
     Integer amount;
 
     @Service
     @RequiredArgsConstructor
-    public static class Handler implements Command<SpendAccountCmd, Boolean>{
+    public static class Handler implements Command<DeductAccountCmd, Boolean>{
         private final AggregateRepository<Account, Long> accountRepository;
 
         @Override
-        public Boolean exec(SpendAccountCmd cmd) {
+        public Boolean exec(DeductAccountCmd cmd) {
             Account account = accountRepository
                     .findOne(AccountSchema.specify(root -> root.name().eq(cmd.accountName)))
                     .orElseThrow(()->new ErrorException(cmd.accountName + " 的账户不存在"));
 
-            account.spend(Transfer.BILL, cmd.billId, cmd.amount);
+            account.deduct(Transfer.BILL, cmd.billId, cmd.amount);
             UnitOfWork.saveEntities(account);
             return true;
         }

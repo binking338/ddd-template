@@ -1,5 +1,6 @@
 package com.abc.dddtemplate.application.commands.bill;
 
+import com.abc.dddtemplate.application._share.clients.CouponClient;
 import com.abc.dddtemplate.convention.UnitOfWork;
 import com.abc.dddtemplate.convention.schemas.AccountSchema;
 import com.abc.dddtemplate.domain.aggregates.samples.Account;
@@ -25,7 +26,7 @@ import org.springframework.stereotype.Service;
 public class PayBillCmd {
     String owner;
     Long billId;
-    Integer amount;
+    Integer couponAmount;
 
     @Service
     @RequiredArgsConstructor
@@ -33,9 +34,15 @@ public class PayBillCmd {
         private final PaymentDomainService paymentDomainService;
         private final AggregateRepository<Account, Long> accountRepository;
         private final AggregateRepository<Bill, Long> billRepository;
+        private final CouponClient couponClient;
 
         @Override
         public Boolean exec(PayBillCmd cmd) {
+            couponClient.deduct(CouponClient.DeductParam.builder()
+                    .name(cmd.owner)
+                    .amount(cmd.couponAmount)
+                    .build());
+
             Bill bill = billRepository.findById(cmd.getBillId())
                     .orElseThrow(()->new ErrorException(cmd.getBillId() + " 账单不存在"));
             Account account = accountRepository

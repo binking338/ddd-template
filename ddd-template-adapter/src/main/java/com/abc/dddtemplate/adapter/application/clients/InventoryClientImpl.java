@@ -15,7 +15,7 @@ public class InventoryClientImpl implements InventoryClient {
     private final ServiceMockRest serviceMockRest;
 
     @Override
-    public Boolean reduce(String productName, Integer num) {
+    public Boolean reduce(ReduceParam param) {
         serviceMockRest.mock(500);
         return true;
     }

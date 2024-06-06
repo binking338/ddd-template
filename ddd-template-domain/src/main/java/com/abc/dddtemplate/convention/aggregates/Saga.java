@@ -33,7 +33,7 @@ import java.util.UUID;
 @Getter
 public class Saga {
 
-    public void init(Date now, String svcName, Integer bizType, Object context, String uuid, Date nextTryTime, int expireInSeconds, int retryTimes, List<SagaProcess> sagaProcesses) {
+    public void init(Date now, String svcName, String bizType, Object context, String uuid, Date nextTryTime, int expireInSeconds, int retryTimes, List<SagaProcess> sagaProcesses) {
         this.sagaUuid = StringUtils.isNotBlank(uuid) ? uuid : UUID.randomUUID().toString();
         this.svcName = svcName;
         this.bizType = bizType;
@@ -127,7 +127,7 @@ public class Saga {
      * int
      */
     @Column(name = "`biz_type`")
-    private Integer bizType;
+    private String bizType;
 
     /**
      * 服务

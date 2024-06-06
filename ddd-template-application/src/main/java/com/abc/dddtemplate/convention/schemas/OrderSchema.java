@@ -55,6 +55,15 @@ public class OrderSchema {
     }
 
     /**
+     * 订单状态
+     * 0:INIT:待支付;-1:CLOSE:已关闭;1:FINISH:已完成
+     * int(11)
+     */
+    public Schema.Field<com.abc.dddtemplate.domain.aggregates.samples.enums.OrderStatus> status() {
+        return root == null ? new Schema.Field<>("status") : new Schema.Field<>(root.get("status"));
+    }
+
+    /**
      * 是否完成
      * bit(1)
      */

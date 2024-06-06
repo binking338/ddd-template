@@ -1,9 +1,8 @@
 package com.abc.dddtemplate.domain.aggregates.samples;
 
-import com.abc.dddtemplate.convention.BaseEntity;
 import com.abc.dddtemplate.share.annotation.AggregateRoot;
 import com.abc.dddtemplate.share.exception.ErrorException;
-import com.abc.dddtemplate.domain.aggregates.events.internal.AccountTransferDomainEvent;
+import com.abc.dddtemplate.domain.aggregates.samples.events.internal.AccountTransferDomainEvent;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -32,7 +31,7 @@ import javax.persistence.*;
 @NoArgsConstructor
 @Builder
 @Getter
-public class Account extends BaseEntity {
+public class Account extends com.abc.dddtemplate.convention.BaseEntity {
 
     /**
      * 开户
@@ -47,7 +46,7 @@ public class Account extends BaseEntity {
                 .build();
     }
 
-    public void spend(Integer bizType, Long bizId, int amount){
+    public void deduct(Integer bizType, Long bizId, int amount){
         if(amount > this.amount){
             throw new ErrorException("账户余额不够");
         }
@@ -77,7 +76,7 @@ public class Account extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "`id`")
-    private Long id;
+    Long id;
 
 
     /**
@@ -85,21 +84,21 @@ public class Account extends BaseEntity {
      * varchar(100)
      */
     @Column(name = "`name`")
-    private String name;
+    String name;
 
     /**
      * 账户余额
      * int(11)
      */
     @Column(name = "`amount`")
-    private Integer amount;
+    Integer amount;
 
     /**
      * 数据版本（支持乐观锁）
      */
     @Version
     @Column(name = "`version`")
-    private Integer version;
+    Integer version;
 
     // 【字段映射结束】本段落由[gen-ddd-maven-plugin]维护，请不要手工改动
 }

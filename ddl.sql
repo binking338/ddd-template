@@ -60,16 +60,17 @@ CREATE TABLE `transfer` (
 
 -- Create syntax for TABLE 'order'
 CREATE TABLE `order` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `amount` int(11) NOT NULL DEFAULT '0' COMMENT '订单金额',
-  `name` varchar(100) NOT NULL DEFAULT '' COMMENT '订单标题',
-  `owner` varchar(100) NOT NULL DEFAULT '' COMMENT '下单人',
-  `finished` bit(1) NOT NULL DEFAULT b'0' COMMENT '是否完成',
-  `closed` bit(1) NOT NULL DEFAULT b'0' COMMENT '是否关闭',
-  `update_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `version` int(11) NOT NULL DEFAULT '0',
-  `db_deleted` tinyint(1) NOT NULL DEFAULT '0',
-  PRIMARY KEY (`id`)
+   `id` bigint(20) NOT NULL AUTO_INCREMENT,
+   `amount` int(11) NOT NULL DEFAULT '0' COMMENT '订单金额',
+   `name` varchar(100) NOT NULL DEFAULT '' COMMENT '订单标题',
+   `owner` varchar(100) NOT NULL DEFAULT '' COMMENT '下单人',
+   `status` int(11) NOT NULL DEFAULT '0' COMMENT '订单状态\n@E=\n  0:INIT:待支付|\n  1:FINISH:已完成|\n  -1:CLOSE:已关闭;\n@T=OrderStatus;',
+   `finished` bit(1) NOT NULL DEFAULT b'0' COMMENT '是否完成',
+   `closed` bit(1) NOT NULL DEFAULT b'0' COMMENT '是否关闭',
+   `update_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+   `version` int(11) NOT NULL DEFAULT '0',
+   `db_deleted` tinyint(1) NOT NULL DEFAULT '0',
+   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='订单\n@R;@M=samples;';
 
 -- Create syntax for TABLE 'order_item'
@@ -134,7 +135,7 @@ CREATE TABLE `__event` (
 CREATE TABLE `__saga` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `saga_uuid` varchar(64) NOT NULL DEFAULT '',
-  `biz_type` int(11) NOT NULL DEFAULT '0',
+  `biz_type` varchar(64) NOT NULL DEFAULT '',
   `svc_name` varchar(255) NOT NULL DEFAULT '',
   `context_data` text,
   `context_data_type` varchar(255) NOT NULL DEFAULT '',
@@ -224,7 +225,7 @@ CREATE TABLE `__archived_event` (
 CREATE TABLE `__archived_saga` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `saga_uuid` varchar(64) NOT NULL DEFAULT '',
-  `biz_type` int(11) NOT NULL DEFAULT '0',
+  `biz_type` varchar(64) NOT NULL DEFAULT '',
   `svc_name` varchar(255) NOT NULL DEFAULT '',
   `context_data` text,
   `context_data_type` varchar(255) NOT NULL,
