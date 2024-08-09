@@ -4,6 +4,7 @@ import com.abc.dddtemplate.convention.DomainEventSupervisor;
 import com.abc.dddtemplate.share.annotation.DomainEvent;
 import com.abc.dddtemplate.share.util.ScanUtils;
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.parser.Feature;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -16,7 +17,6 @@ import org.apache.rocketmq.common.consumer.ConsumeFromWhere;
 import org.apache.rocketmq.common.message.MessageExt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.event.ContextClosedEvent;
@@ -46,10 +46,12 @@ public class IntergrationEventSubscriberRocketMQAdapterConfig {
     String applicationName;
     @Value("${rocketmq.name-server:}")
     String defaultNameSrv;
+    @Value("${rocketmq.msg-charset:UTF-8}")
+    String msgCharset = null;
+    @Value("${ddd.domain.event.subscriber.scanPackage:com.abc.dddtemplate.subscribers}")
+    String scanPath = null;
     @Autowired
     DomainEventSupervisor domainEventSupervisor;
-    @Autowired
-    ConfigurableBeanFactory beanFactory;
     @Autowired
     Environment environment;
 
@@ -57,11 +59,11 @@ public class IntergrationEventSubscriberRocketMQAdapterConfig {
 
     @PostConstruct
     public void init() {
-        Set<Class<?>> classes = ScanUtils.scanClass("com.abc.dddtemplate.subscribers", true);
+        Set<Class<?>> classes = ScanUtils.scanClass(scanPath, true);
         classes.stream().filter(cls -> {
             DomainEvent domainEvent = cls.getAnnotation(DomainEvent.class);
             if (!Objects.isNull(domainEvent) && StringUtils.isNotEmpty(domainEvent.value()) &&
-                    !"none".equalsIgnoreCase(domainEvent.subscriber())) {
+                    !DomainEvent.NONE_SUBSCRIBER.equalsIgnoreCase(domainEvent.subscriber())) {
                 return true;
             } else {
                 return false;
@@ -91,7 +93,7 @@ public class IntergrationEventSubscriberRocketMQAdapterConfig {
             return null;
         }
         String target = domainEvent.value();
-        target = beanFactory.resolveEmbeddedValue(target);
+        target = environment.resolvePlaceholders(target);
         String topic = target.lastIndexOf(':') > 0 ? target.substring(0, target.lastIndexOf(':')) : target;
         String tag = target.lastIndexOf(':') > 0 ? target.substring(target.lastIndexOf(':') + 1) : "";
 
@@ -108,8 +110,8 @@ public class IntergrationEventSubscriberRocketMQAdapterConfig {
                         try {
                             for (MessageExt msg :
                                     msgs) {
-                                String strMsg = new String(msg.getBody(), "UTF-8");
-                                Object event = JSON.parseObject(strMsg, domainEventClass);
+                                String strMsg = new String(msg.getBody(), msgCharset);
+                                Object event = JSON.parseObject(strMsg, domainEventClass, Feature.SupportNonPublicField);
                                 domainEventSupervisor.dispatchRawImmediately(event, true);
                             }
                             return ConsumeConcurrentlyStatus.CONSUME_SUCCESS;
