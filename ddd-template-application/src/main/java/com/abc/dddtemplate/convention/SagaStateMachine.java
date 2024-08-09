@@ -3,6 +3,7 @@ package com.abc.dddtemplate.convention;
 import com.abc.dddtemplate.convention.aggregates.Saga;
 import com.abc.dddtemplate.share.annotation.SagaProcess;
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.parser.Feature;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -310,7 +311,7 @@ public abstract class SagaStateMachine<Context> {
             }
         }
         saga = sagaRepository.save(saga);
-        Context context = JSON.parseObject(saga.getContextData(), getContextClass());
+        Context context = JSON.parseObject(saga.getContextData(), getContextClass(), Feature.SupportNonPublicField);
         saga = internalRun(saga, context, process);
         if (saga.getProcesses().stream().anyMatch(p -> !Saga.SagaState.DONE.equals(p.getProcessState()))) {
             return saga;
@@ -417,7 +418,7 @@ public abstract class SagaStateMachine<Context> {
             log.error("bizType不匹配 sagaId=" + saga.getId());
             return null;
         }
-        Context context = JSON.parseObject(saga.getContextData(), getContextClass());
+        Context context = JSON.parseObject(saga.getContextData(), getContextClass(), Feature.SupportNonPublicField);
         saga = internalRollback(saga, context, process);
         if (!saga.getProcesses().stream().allMatch(p -> Saga.SagaState.ROLLBACKED.equals(p.getProcessState()) || Saga.SagaState.INIT.equals(p.getProcessState()))) {
             saga.fail(context);

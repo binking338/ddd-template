@@ -2,6 +2,7 @@ package com.abc.dddtemplate.convention.aggregates;
 
 import com.abc.dddtemplate.share.annotation.AggregateRoot;
 import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.parser.Feature;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -102,7 +103,7 @@ public class Saga {
     }
 
     public <Ctx> Ctx getContext(Class<Ctx> ctxClass) {
-        return JSON.parseObject(contextData, ctxClass);
+        return JSON.parseObject(contextData, ctxClass, Feature.SupportNonPublicField);
     }
 
     @Override
@@ -289,7 +290,7 @@ public class Saga {
         }
 
         public <Ctx> Ctx getContext(Class<Ctx> ctxClass) {
-            return JSON.parseObject(contextData, ctxClass);
+            return JSON.parseObject(contextData, ctxClass, Feature.SupportNonPublicField);
         }
 
         @Override

@@ -14,6 +14,8 @@ import java.lang.annotation.Target;
 @Target({ElementType.TYPE})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface DomainEvent {
+    public static final String NONE_SUBSCRIBER = "[none]";
+
     /**
      * 领域事件名称
      * 只有集成事件需要定义领域事件名称，集成事件将使用mq向外部系统发出
@@ -47,5 +49,5 @@ public @interface DomainEvent {
      *  RocketMq: 可填写消费组 consumer-group
      * @return
      */
-    String subscriber() default "none";
+    String subscriber() default NONE_SUBSCRIBER;
 }
